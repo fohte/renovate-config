@@ -11,4 +11,11 @@
     schedule: 'before 5am on Saturday',
     automerge: true,
   },
+
+  packageRules: [
+    {
+      matchManagers: ['github-actions'],
+      automerge: true,
+    },
+  ],
 }
