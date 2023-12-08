@@ -6,10 +6,6 @@ on:
       - .github/workflows/validate.yml
       - '*.json5'
 
-  # every 5:00 AM Saturday (JST)
-  schedule:
-    - cron: '0 20 * * 5'
-
 jobs:
   validate:
     runs-on: ubuntu-latest
