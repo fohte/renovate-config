@@ -1,0 +1,30 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+
+  extends: ['config:recommended'],
+
+  configMigration: true,
+  timezone: 'Asia/Tokyo',
+
+  // set this to unlimited to ensure that a new PR is created so
+  // we can notice when a version upgrade is available,
+  // even if the previous PR hasn't been merged.
+  // default: 2 (config:recommended)
+  prHourlyLimit: 0,
+
+  // `prHoulyLimit: 1` may cause GitHub API rate limit, so limit parallel
+  prConcurrentLimit: 5,
+
+  lockFileMaintenance: {
+    enabled: true,
+    schedule: 'before 5am on Saturday',
+    automerge: true,
+  },
+
+  packageRules: [
+    {
+      matchManagers: ['github-actions'],
+      automerge: true,
+    },
+  ],
+}
