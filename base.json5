@@ -24,6 +24,7 @@
   packageRules: [
     {
       matchManagers: ['github-actions'],
+      matchUpdateTypes: ['patch'],
       automerge: true,
     },
   ],
