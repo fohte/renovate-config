@@ -3,12 +3,14 @@
 
   packageRules: [
     {
+      matchManagers: ['npm'],
       matchDepTypes: ['devDependencies'],
       matchUpdateTypes: ['patch'],
       groupName: 'devDependencies (non-major)',
       automerge: true,
     },
     {
+      matchManagers: ['npm'],
       matchUpdateTypes: ['patch', 'pin', 'digest'],
       automerge: true,
     },
