@@ -27,5 +27,17 @@
       matchUpdateTypes: ['patch'],
       automerge: true,
     },
+    {
+      matchUpdateTypes: ['major'],
+      addLabels: ['renovate/major'],
+    },
+    {
+      matchUpdateTypes: ['minor'],
+      addLabels: ['renovate/minor'],
+    },
+    {
+      matchUpdateTypes: ['patch'],
+      addLabels: ['renovate/patch'],
+    },
   ],
 }
