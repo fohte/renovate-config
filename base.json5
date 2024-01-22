@@ -21,6 +21,11 @@
     automerge: true,
   },
 
+  // use exact version instead of range
+  // e.g. "typescript": "^3.9.7" -> "typescript": "3.9.7"
+  // ref: https://docs.renovatebot.com/dependency-pinning
+  rangeStrategy: 'pin',
+
   packageRules: [
     {
       matchManagers: ['github-actions'],
