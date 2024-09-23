@@ -44,5 +44,14 @@
       matchUpdateTypes: ['patch'],
       addLabels: ['renovate/patch'],
     },
+    {
+      matchManagers: ['pre-commit'],
+      schedule: 'after 9am on Saturday',
+    },
+    {
+      matchManagers: ['pre-commit'],
+      matchUpdateTypes: ['minor', 'patch'],
+      automerge: true,
+    },
   ],
 }
