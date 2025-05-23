@@ -15,6 +15,13 @@
   // `prHoulyLimit: 1` may cause GitHub API rate limit, so limit parallel
   prConcurrentLimit: 5,
 
+  // prevent Renovate from blocking automatic rebases when these authors commit.
+  // without this, Renovate shows "Edited/Blocked Notification" and won't auto-rebase
+  // if it detects commits from unrecognized authors, requiring manual intervention.
+  gitIgnoredAuthors: [
+    '139195068+fohte-bot[bot]@users.noreply.github.com', // Fohte bot (https://github.com/apps/fohte-bot)
+  ],
+
   lockFileMaintenance: {
     enabled: true,
     schedule: 'before 5am on Saturday',
