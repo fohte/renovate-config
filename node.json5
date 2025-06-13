@@ -14,5 +14,15 @@
       matchUpdateTypes: ['patch', 'pin', 'digest'],
       automerge: true,
     },
+    {
+      matchManagers: ['mise'],
+      matchPackageNames: ['bun'],
+      groupName: 'bun',
+    },
+    {
+      matchManagers: ['npm', 'bun'],
+      matchPackageNames: ['@types/bun'],
+      groupName: 'bun',
+    },
   ],
 }
