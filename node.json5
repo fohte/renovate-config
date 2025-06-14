@@ -33,5 +33,12 @@
       matchUpdateTypes: ['minor', 'patch'],
       automerge: true,
     },
+    {
+      // Keep peerDependencies range specifications (e.g., ^6.0.0 || ^7.0.0)
+      // to maintain flexibility for consuming projects
+      matchManagers: ['npm', 'bun'],
+      matchDepTypes: ['peerDependencies'],
+      rangeStrategy: 'auto',
+    },
   ],
 }
