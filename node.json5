@@ -21,7 +21,7 @@
     },
     {
       matchManagers: ['npm', 'bun'],
-      matchPackageNames: ['@types/bun'],
+      matchPackageNames: ['@types/bun', 'bun-types'],
       groupName: 'bun',
     },
     {
