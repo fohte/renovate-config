@@ -24,5 +24,12 @@
       matchPackageNames: ['@types/bun'],
       groupName: 'bun',
     },
+    {
+      // @cloudflare/workers-types uses date-based versioning (<major>.<YYYYMMDD>.<patch>),
+      // but we can safely automerge since CI type checking ensures compatibility
+      matchPackageNames: ['@cloudflare/workers-types'],
+      matchUpdateTypes: ['minor', 'patch'],
+      automerge: true,
+    },
   ],
 }
