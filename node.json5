@@ -14,6 +14,8 @@
       matchUpdateTypes: ['patch', 'pin', 'digest'],
       automerge: true,
     },
+    // Group Bun runtime and its type definitions together
+    // to ensure compatibility between runtime and types
     {
       matchManagers: ['mise'],
       matchPackageNames: ['bun'],
