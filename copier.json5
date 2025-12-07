@@ -1,0 +1,18 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+
+  // Enable Copier manager to keep Copier templates up-to-date.
+  // ref: https://docs.renovatebot.com/modules/manager/copier/
+  copier: {
+    enabled: true,
+  },
+
+  // Add .jinja file patterns to allow managers to detect dependencies
+  // in Copier template files (e.g., package.json.jinja).
+  npm: {
+    managerFilePatterns: ['(^|/)package\\.json\\.jinja$'],
+  },
+  'pre-commit': {
+    managerFilePatterns: ['(^|/)\\.pre-commit-config\\.yaml\\.jinja$'],
+  },
+}
