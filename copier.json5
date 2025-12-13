@@ -6,4 +6,12 @@
   copier: {
     enabled: true,
   },
+
+  packageRules: [
+    {
+      matchManagers: ['copier'],
+      matchUpdateTypes: ['patch'],
+      automerge: true,
+    },
+  ],
 }
