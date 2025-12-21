@@ -37,7 +37,6 @@
     {
       // Update lefthook remotes ref (semver tag only)
       // Note: lefthook remotes only support branch/tag names, not commit hashes
-      // (see: https://github.com/evilmartians/lefthook/blob/master/internal/git/remote.go)
       // Usage: ref: v0.1.3 # renovate: datasource=github-tags depName=fohte/lefthook-config
       customType: 'regex',
       fileMatch: ['(^|/)lefthook\\.ya?ml$'],
