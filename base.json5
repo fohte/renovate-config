@@ -52,7 +52,7 @@
       customType: 'regex',
       fileMatch: ['(^|/)lefthook\\.ya?ml$'],
       matchStrings: [
-        'ref:\\s*(?<currentValue>v?[\\d][^\\s#]*)\\s*#\\s*renovate:\\s*datasource=(?<datasource>[^\\s]+)\\s+depName=(?<depName>[^\\s]+)',
+        'ref:\\s*(?<currentValue>v?[\\d][^\\s,#]*)\\s*#\\s*renovate:\\s*datasource=(?<datasource>[^\\s]+)\\s+depName=(?<depName>[^\\s]+)',
       ],
       autoReplaceStringTemplate:
         'ref: {{{newDigest}}} # {{{newValue}}}, renovate: datasource={{{datasource}}} depName={{{depName}}}',
