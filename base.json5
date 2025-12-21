@@ -62,6 +62,12 @@
 
   packageRules: [
     {
+      // Enable digest pinning for lefthook remotes
+      matchManagers: ['regex'],
+      matchFileNames: ['**/lefthook.yml', '**/lefthook.yaml'],
+      pinDigests: true,
+    },
+    {
       matchManagers: ['github-actions'],
       matchUpdateTypes: ['patch'],
       automerge: true,
