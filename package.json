@@ -3,15 +3,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "typecheck": "tsc --noEmit"
+    "test": "conc -g 'bun:test:typecheck' 'bun:test:vitest'",
+    "test:typecheck": "tsc --noEmit",
+    "test:vitest": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
-    "@tsconfig/bun": "^1.0.10",
-    "json5": "^2.2.3",
-    "renovate": "^39.0.0",
-    "typescript": "^5.9.3",
-    "vitest": "^3.0.0"
+    "@tsconfig/bun": "1.0.10",
+    "concurrently": "9.2.1",
+    "json5": "2.2.3",
+    "renovate": "39.264.1",
+    "typescript": "5.9.3",
+    "vitest": "3.2.4"
   }
 }
