@@ -43,8 +43,7 @@
       matchStrings: [
         'ref:\\s*(?<currentValue>v?\\d[^\\s#]*)\\s*#\\s*renovate:\\s*datasource=(?<datasource>[^\\s]+)\\s+depName=(?<depName>[^\\s]+)',
       ],
-      autoReplaceStringTemplate:
-        'ref: {{{newValue}}} # renovate: datasource={{{datasource}}} depName={{{depName}}}',
+      autoReplaceStringTemplate: 'ref: {{{newValue}}} # renovate: datasource={{{datasource}}} depName={{{depName}}}',
       versioningTemplate: 'semver',
     },
   ],
