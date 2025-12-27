@@ -58,10 +58,15 @@
     {
       matchUpdateTypes: ['major'],
       addLabels: ['renovate/major'],
+      // For release-please integration: major updates trigger major version bump via breaking change
+      semanticCommitType: 'feat',
+      commitMessagePrefix: 'feat!:',
     },
     {
       matchUpdateTypes: ['minor'],
       addLabels: ['renovate/minor'],
+      // For release-please integration: minor updates trigger minor version bump
+      semanticCommitType: 'feat',
     },
     {
       matchUpdateTypes: ['patch'],
