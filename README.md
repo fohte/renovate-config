@@ -11,9 +11,7 @@ Create a `renovate.json5` file in your repository with the following content:
 ```json5
 {
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
-  extends: [
-    'github>fohte/renovate-config:base.json5',
-  ],
+  extends: ['github>fohte/renovate-config:base.json5'],
 }
 ```
 
