@@ -1,0 +1,17 @@
+{
+  "name": "renovate-config",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@tsconfig/bun": "^1.0.10",
+    "json5": "^2.2.3",
+    "renovate": "^39.0.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.0.0"
+  }
+}

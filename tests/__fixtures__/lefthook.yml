@@ -1,0 +1,11 @@
+# Test fixture for lefthook customManager
+remotes:
+  - git: https://github.com/fohte/lefthook-config
+    ref: v0.1.0 # renovate: datasource=github-tags depName=fohte/lefthook-config
+    configs:
+      - .lefthook/commitlint.yml
+
+pre-commit:
+  commands:
+    lint:
+      run: npm run lint
