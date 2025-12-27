@@ -35,7 +35,7 @@ function runRenovateDryRun(workDir: string): Report {
 
   // Run renovate with dry-run and report output
   try {
-    const output = execSync(
+    execSync(
       [
         'npx',
         'renovate',
