@@ -59,8 +59,8 @@
       matchUpdateTypes: ['major'],
       addLabels: ['renovate/major'],
       // For release-please integration: major updates trigger major version bump via breaking change
-      semanticCommitType: 'feat',
-      commitMessagePrefix: 'feat!:',
+      // Note: commitMessagePrefix takes priority over semanticCommitType, so only set commitMessagePrefix
+      commitMessagePrefix: 'feat(deps)!:',
     },
     {
       matchUpdateTypes: ['minor'],
