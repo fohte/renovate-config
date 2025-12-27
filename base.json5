@@ -79,9 +79,11 @@
     {
       // For copier templates with GitHub URL package names,
       // use only the repository name in commit messages instead of the full URL
+      // Handles both https://github.com/owner/repo and https://github.com/owner/repo.git
       matchManagers: ['copier'],
       matchPackageNames: ['/^https:\\/\\/github\\.com\\//'],
-      commitMessageTopic: '{{{replace "https://github\\.com/[^/]+/" "" packageName}}}',
+      commitMessageTopic:
+        '{{{replace "\\.git$" "" (replace "https://github\\.com/[^/]+/" "" packageName)}}}',
     },
   ],
 }
