@@ -81,8 +81,7 @@
       // Handles both https://github.com/owner/repo and https://github.com/owner/repo.git
       matchManagers: ['copier'],
       matchPackageNames: ['/^https:\\/\\/github\\.com\\//'],
-      commitMessageTopic:
-        '{{{replace "\\.git$" "" (replace "https://github\\.com/[^/]+/" "" packageName)}}}',
+      commitMessageTopic: '{{{replace "\\.git$" "" (replace "https://github\\.com/[^/]+/" "" packageName)}}}',
     },
   ],
 }
