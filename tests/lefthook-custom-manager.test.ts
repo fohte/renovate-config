@@ -1,27 +1,27 @@
 import { expect, it } from 'vitest'
 import { describeWithRenovate } from './helpers/with-renovate'
 
-describeWithRenovate('lefthook customManager', ['lefthook.yml'], (ctx) => {
-  it('should detect lefthook.yml as a package file', () => {
-    const lefthookFile = ctx.getPackageFile('regex', 'lefthook.yml')
-    expect(lefthookFile.packageFile).toBe('lefthook.yml')
-  })
+describeWithRenovate(
+  'lefthook customManager',
+  {
+    fixtures: ['lefthook.yml'],
+    mockRepos: [{ name: 'config', tags: ['v1.0.0', 'v1.0.1', 'v1.1.0'] }],
+  },
+  (ctx) => {
+    it('should detect available updates', () => {
+      const lefthookFile = ctx.getPackageFile('regex', 'lefthook.yml')
+      const dep = lefthookFile.deps[0]
 
-  it('should extract dependency from lefthook.yml', () => {
-    const lefthookFile = ctx.getPackageFile('regex', 'lefthook.yml')
-    expect(lefthookFile.deps).toMatchObject([
-      {
-        depName: 'fohte/lefthook-config',
-        currentValue: 'v0.1.0',
-        datasource: 'github-tags',
-      },
-    ])
-  })
-
-  it('should have correct autoReplaceStringTemplate', () => {
-    const lefthookFile = ctx.getPackageFile('regex', 'lefthook.yml')
-    expect(lefthookFile.autoReplaceStringTemplate).toBe(
-      'ref: {{{newValue}}} # renovate: datasource={{{datasource}}} depName={{{depName}}}'
-    )
-  })
-})
+      expect(dep).toMatchObject({
+        currentValue: 'v1.0.0',
+        datasource: 'git-tags',
+        updates: expect.arrayContaining([
+          expect.objectContaining({
+            newValue: 'v1.1.0',
+            updateType: 'minor',
+          }),
+        ]),
+      })
+    })
+  }
+)

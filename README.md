@@ -38,3 +38,11 @@ Create a `renovate.json5` file in your repository with the following content:
   ],
 }
 ```
+
+## Development
+
+### Running tests
+
+```bash
+bun run test
+```

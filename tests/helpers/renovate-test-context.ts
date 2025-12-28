@@ -1,6 +1,6 @@
 import { execSync, type ExecException } from 'node:child_process'
 import {
-  cpSync,
+  mkdirSync,
   mkdtempSync,
   readFileSync,
   rmSync,
@@ -14,32 +14,76 @@ import type { PackageFile } from 'renovate/dist/modules/manager/types'
 
 const FIXTURES_DIR = join(import.meta.dirname, '..', '__fixtures__')
 const BASE_CONFIG_PATH = join(import.meta.dirname, '..', '..', 'base.json5')
+const RENOVATE_BIN = join(
+  import.meta.dirname,
+  '..',
+  '..',
+  'node_modules',
+  '.bin',
+  'renovate'
+)
+
+function initGitRepo(dir: string): void {
+  execSync('git init', { cwd: dir, stdio: 'pipe' })
+  execSync('git config user.email "test@test.com"', { cwd: dir, stdio: 'pipe' })
+  execSync('git config user.name "Test"', { cwd: dir, stdio: 'pipe' })
+}
+
+export interface MockRepo {
+  name: string
+  tags: string[]
+}
+
+export interface SetupOptions {
+  fixtures: string[]
+  mockRepos?: MockRepo[]
+}
 
 export class RenovateTestContext {
   workDir: string | null = null
   report: Report | null = null
+  private mockRepoPaths: Map<string, string> = new Map()
 
   /**
    * Set up a temporary git repository with the specified fixture files.
    */
-  setup(fixtures: string[]): void {
+  setup(fixturesOrOptions: string[] | SetupOptions): void {
+    const options: SetupOptions = Array.isArray(fixturesOrOptions)
+      ? { fixtures: fixturesOrOptions }
+      : fixturesOrOptions
+
+    const { fixtures, mockRepos = [] } = options
+
     // Create a temporary working directory
     this.workDir = mkdtempSync(join(tmpdir(), 'renovate-test-'))
 
-    // Initialize git repo (required for renovate --platform=local)
-    execSync('git init', { cwd: this.workDir, stdio: 'pipe' })
-    execSync('git config user.email "test@test.com"', {
-      cwd: this.workDir,
-      stdio: 'pipe',
-    })
-    execSync('git config user.name "Test"', {
-      cwd: this.workDir,
-      stdio: 'pipe',
-    })
+    // Create mock repos first (so we can replace placeholders in fixtures)
+    for (const mockRepo of mockRepos) {
+      const repoPath = this.createMockGitRepo(mockRepo.name, mockRepo.tags)
+      this.mockRepoPaths.set(mockRepo.name, repoPath)
+    }
 
-    // Copy test fixtures
+    // Initialize git repo (required for renovate --platform=local)
+    initGitRepo(this.workDir)
+
+    // Copy test fixtures and replace placeholders
     for (const fixture of fixtures) {
-      cpSync(join(FIXTURES_DIR, fixture), join(this.workDir, fixture))
+      const srcPath = join(FIXTURES_DIR, fixture)
+      const destPath = join(this.workDir, fixture)
+
+      // Create parent directories if needed
+      mkdirSync(dirname(destPath), { recursive: true })
+
+      let content = readFileSync(srcPath, 'utf-8')
+      // Replace {{MOCK_REPO:name}} placeholders with actual paths
+      content = content.replace(/\{\{MOCK_REPO:(\w+)\}\}/g, (_, name) => {
+        const repoPath = this.mockRepoPaths.get(name)
+        if (!repoPath) {
+          throw new Error(`Mock repo '${name}' not found`)
+        }
+        return repoPath
+      })
+      writeFileSync(destPath, content)
     }
 
     // Create initial commit
@@ -49,17 +93,51 @@ export class RenovateTestContext {
     })
 
     // Run renovate and get report
-    this.report = this.runDryRun()
+    this.report = this.dryRun()
   }
 
   /**
-   * Clean up the temporary directory.
+   * Create a mock git repository with the specified tags.
+   */
+  private createMockGitRepo(name: string, tags: string[]): string {
+    const repoPath = mkdtempSync(join(tmpdir(), `renovate-mock-${name}-`))
+    initGitRepo(repoPath)
+
+    // Create initial commit
+    writeFileSync(join(repoPath, 'README.md'), `# ${name}\n`)
+    execSync('git add -A && git commit -m "initial"', {
+      cwd: repoPath,
+      stdio: 'pipe',
+    })
+
+    // Create tags
+    for (const tag of tags) {
+      execSync(`git tag ${tag}`, { cwd: repoPath, stdio: 'pipe' })
+    }
+
+    return repoPath
+  }
+
+  /**
+   * Clean up the temporary directory and mock repos.
    */
   cleanup(): void {
     if (this.workDir) {
-      rmSync(this.workDir, { recursive: true, force: true })
+      try {
+        rmSync(this.workDir, { recursive: true, force: true })
+      } catch (error) {
+        console.error(`Failed to clean up workDir at ${this.workDir}:`, error)
+      }
       this.workDir = null
     }
+    for (const repoPath of this.mockRepoPaths.values()) {
+      try {
+        rmSync(repoPath, { recursive: true, force: true })
+      } catch (error) {
+        console.error(`Failed to clean up mock repo at ${repoPath}:`, error)
+      }
+    }
+    this.mockRepoPaths.clear()
     this.report = null
   }
 
@@ -94,7 +172,7 @@ export class RenovateTestContext {
     return packageFile
   }
 
-  private runDryRun(): Report {
+  private dryRun(): Report {
     if (!this.workDir) {
       throw new Error('Work directory not set. Did you call setup()?')
     }
@@ -119,11 +197,10 @@ export class RenovateTestContext {
     try {
       execSync(
         [
-          'npx',
-          'renovate',
+          RENOVATE_BIN,
           '--platform=local',
           '--require-config=ignored',
-          '--dry-run=extract',
+          '--dry-run=lookup',
           '--report-type=file',
           `--report-path=${reportPath}`,
         ].join(' '),
