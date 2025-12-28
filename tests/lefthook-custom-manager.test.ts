@@ -1,5 +1,11 @@
 import { execSync } from 'node:child_process'
-import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  cpSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
@@ -71,8 +77,7 @@ describe('lefthook customManager', () => {
 
   beforeAll(() => {
     // Create a temporary working directory
-    ctx.workDir = join(tmpdir(), `renovate-test-${Date.now()}`)
-    mkdirSync(ctx.workDir, { recursive: true })
+    ctx.workDir = mkdtempSync(join(tmpdir(), 'renovate-test-'))
 
     // Initialize git repo (required for renovate --platform=local)
     execSync('git init', { cwd: ctx.workDir, stdio: 'pipe' })
