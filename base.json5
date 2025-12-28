@@ -71,12 +71,12 @@
       matchUpdateTypes: ['patch'],
       addLabels: ['renovate/patch'],
     },
-    // devDependencies major updates should not trigger breaking change
+    // devDependencies updates should not trigger version bumps
     // since they don't affect consumers of the package
     {
       matchDepTypes: ['devDependencies'],
-      matchUpdateTypes: ['major'],
-      commitMessagePrefix: 'chore(deps):',
+      matchUpdateTypes: ['major', 'minor'],
+      semanticCommitType: 'chore',
     },
     // github-actions updates should use ci: semantic type
     {
