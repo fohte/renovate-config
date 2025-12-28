@@ -1,9 +1,0 @@
-# Test fixture for lefthook customManager with local mock repo
-remotes:
-  - git: '{{MOCK_REPO:config}}'
-    ref: v1.0.0 # renovate: datasource=git-tags depName={{MOCK_REPO:config}}
-
-pre-commit:
-  commands:
-    lint:
-      run: npm run lint
