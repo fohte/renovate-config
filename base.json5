@@ -68,7 +68,9 @@
       matchUpdateTypes: ['patch'],
       addLabels: ['renovate/patch'],
     },
-    // ---- release-please integration ----
+    // ==========================================================================
+    // release-please integration
+    // ==========================================================================
     // Semantic commit types for release-please version bumps.
     // release-please treats these commit types as:
     //   - feat  -> minor bump
@@ -102,8 +104,12 @@
       semanticCommitType: 'ci',
       semanticCommitScope: null,
     },
-    // ---- end release-please integration ----
 
+    // ==========================================================================
+    // pre-commit
+    // ==========================================================================
+    // Schedule updates on Saturday to batch with lockFileMaintenance.
+    // Automerge minor/patch since pre-commit hooks rarely have breaking changes.
     {
       matchManagers: ['pre-commit'],
       schedule: 'after 9am on Saturday',
@@ -113,10 +119,14 @@
       matchUpdateTypes: ['minor', 'patch'],
       automerge: true,
     },
+
+    // ==========================================================================
+    // copier
+    // ==========================================================================
+    // For copier templates with GitHub URL package names,
+    // use only the repository name in commit messages instead of the full URL.
+    // Handles both https://github.com/owner/repo and https://github.com/owner/repo.git
     {
-      // For copier templates with GitHub URL package names,
-      // use only the repository name in commit messages instead of the full URL
-      // Handles both https://github.com/owner/repo and https://github.com/owner/repo.git
       matchManagers: ['copier'],
       matchPackageNames: ['/^https:\\/\\/github\\.com\\//'],
       commitMessageTopic: '{{{replace "\\.git$" "" (replace "https://github\\.com/[^/]+/" "" packageName)}}}',
