@@ -48,46 +48,62 @@
     },
   ],
 
+  // Semantic commit types for release-please integration.
+  // release-please treats these commit types as:
+  //   - feat  -> minor bump
+  //   - fix   -> patch bump
+  //   - deps  -> patch bump (shown in "Dependencies" section)
+  //   - chore -> no bump
+  //   - ci    -> no bump
+  //   - !     -> major bump (breaking change)
+  //
+  // Resulting semantic commit types:
+  //   | Target          | major    | minor  | patch  |
+  //   |-----------------|----------|--------|--------|
+  //   | dependencies    | deps!:   | deps:  | deps:  |
+  //   | devDependencies | chore:   | chore: | chore: |
+  //   | github-actions  | ci:      | ci:    | ci:    |
+  //
+  // Note: packageRules are evaluated in order and later rules override earlier ones.
   packageRules: [
     {
       matchManagers: ['github-actions'],
       matchUpdateTypes: ['patch'],
       automerge: true,
     },
+    // Labels for update types
     {
       matchUpdateTypes: ['major'],
       addLabels: ['renovate/major'],
-      // For release-please integration: major updates trigger major version bump via breaking change
-      // Note: commitMessagePrefix takes priority over semanticCommitType, so only set commitMessagePrefix
-      commitMessagePrefix: 'feat(deps)!:',
     },
     {
       matchUpdateTypes: ['minor'],
       addLabels: ['renovate/minor'],
-      // For release-please integration: minor updates trigger minor version bump
-      semanticCommitType: 'feat',
     },
     {
       matchUpdateTypes: ['patch'],
       addLabels: ['renovate/patch'],
     },
-    // devDependencies updates should not trigger version bumps
-    // since they don't affect consumers of the package
+    // dependencies: use deps type for release-please "Dependencies" section
+    {
+      matchUpdateTypes: ['major'],
+      commitMessagePrefix: 'deps!:',
+    },
+    {
+      matchUpdateTypes: ['minor', 'patch'],
+      semanticCommitType: 'deps',
+      semanticCommitScope: null,
+    },
+    // devDependencies: no version bump (doesn't affect consumers)
     {
       matchDepTypes: ['devDependencies'],
-      matchUpdateTypes: ['major', 'minor'],
       semanticCommitType: 'chore',
     },
-    // github-actions updates should use ci: semantic type
+    // github-actions: use ci type (CI infrastructure, not features)
     {
       matchManagers: ['github-actions'],
-      matchUpdateTypes: ['major'],
-      commitMessagePrefix: 'ci(deps):',
-    },
-    {
-      matchManagers: ['github-actions'],
-      matchUpdateTypes: ['minor'],
       semanticCommitType: 'ci',
+      semanticCommitScope: null,
     },
     {
       matchManagers: ['pre-commit'],
