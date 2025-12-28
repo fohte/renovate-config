@@ -68,7 +68,8 @@
       matchUpdateTypes: ['patch'],
       addLabels: ['renovate/patch'],
     },
-    // Semantic commit types for release-please integration.
+    // ---- release-please integration ----
+    // Semantic commit types for release-please version bumps.
     // release-please treats these commit types as:
     //   - feat  -> minor bump
     //   - fix   -> patch bump
@@ -101,6 +102,8 @@
       semanticCommitType: 'ci',
       semanticCommitScope: null,
     },
+    // ---- end release-please integration ----
+
     {
       matchManagers: ['pre-commit'],
       schedule: 'after 9am on Saturday',
