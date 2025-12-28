@@ -37,7 +37,6 @@ export interface MockRepo {
 export interface SetupOptions {
   fixtures: string[]
   mockRepos?: MockRepo[]
-  dryRunMode?: 'extract' | 'lookup'
 }
 
 export class RenovateTestContext {
@@ -53,7 +52,7 @@ export class RenovateTestContext {
       ? { fixtures: fixturesOrOptions }
       : fixturesOrOptions
 
-    const { fixtures, mockRepos = [], dryRunMode = 'extract' } = options
+    const { fixtures, mockRepos = [] } = options
 
     // Create a temporary working directory
     this.workDir = mkdtempSync(join(tmpdir(), 'renovate-test-'))
@@ -94,7 +93,7 @@ export class RenovateTestContext {
     })
 
     // Run renovate and get report
-    this.report = this.runDryRun(dryRunMode)
+    this.report = this.dryRun()
   }
 
   /**
@@ -165,7 +164,7 @@ export class RenovateTestContext {
     return packageFile
   }
 
-  private runDryRun(mode: 'extract' | 'lookup'): Report {
+  private dryRun(): Report {
     if (!this.workDir) {
       throw new Error('Work directory not set. Did you call setup()?')
     }
@@ -193,7 +192,7 @@ export class RenovateTestContext {
           RENOVATE_BIN,
           '--platform=local',
           '--require-config=ignored',
-          `--dry-run=${mode}`,
+          '--dry-run=lookup',
           '--report-type=file',
           `--report-path=${reportPath}`,
         ].join(' '),

@@ -6,7 +6,6 @@ describeWithRenovate(
   {
     fixtures: ['lefthook.yml'],
     mockRepos: [{ name: 'config', tags: ['v1.0.0', 'v1.0.1', 'v1.1.0'] }],
-    dryRunMode: 'lookup',
   },
   (ctx) => {
     it('should detect available updates', () => {
