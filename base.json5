@@ -50,12 +50,20 @@
 
   // Note: packageRules are evaluated in order and later rules override earlier ones.
   packageRules: [
+    // ==========================================================================
+    // automerge
+    // ==========================================================================
+    // Automerge low-risk updates to reduce PR noise.
     {
       matchManagers: ['github-actions'],
       matchUpdateTypes: ['patch'],
       automerge: true,
     },
-    // Labels for update types
+
+    // ==========================================================================
+    // labels
+    // ==========================================================================
+    // Add labels based on update type for easier PR filtering.
     {
       matchUpdateTypes: ['major'],
       addLabels: ['renovate/major'],
@@ -68,6 +76,7 @@
       matchUpdateTypes: ['patch'],
       addLabels: ['renovate/patch'],
     },
+
     // ==========================================================================
     // release-please integration
     // ==========================================================================
