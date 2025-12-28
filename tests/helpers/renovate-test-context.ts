@@ -1,4 +1,4 @@
-import { execSync } from 'node:child_process'
+import { execSync, type ExecException } from 'node:child_process'
 import {
   cpSync,
   mkdtempSync,
@@ -138,10 +138,13 @@ export class RenovateTestContext {
           timeout: 60000,
         }
       )
-    } catch (error: unknown) {
+    } catch (error) {
       // renovate may exit with non-zero even on dry-run, but report should still be generated
-      const err = error as { stdout?: string; stderr?: string }
-      console.warn('Renovate exited with error:', err.stderr?.slice(-2000))
+      const execError = error as ExecException
+      console.warn(
+        'Renovate exited with error:',
+        execError.stderr?.slice(-2000) ?? execError.message
+      )
     }
 
     const reportContent = readFileSync(reportPath, 'utf-8')
