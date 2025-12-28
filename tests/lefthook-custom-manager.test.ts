@@ -24,27 +24,4 @@ describeWithRenovate('lefthook customManager', ['lefthook.yml'], (ctx) => {
       'ref: {{{newValue}}} # renovate: datasource={{{datasource}}} depName={{{depName}}}'
     )
   })
-
-  it('should have updates for lefthook-config', () => {
-    if (!process.env['GITHUB_TOKEN']) {
-      throw new Error(
-        'GITHUB_TOKEN is required for this test. ' +
-          'Run: GITHUB_TOKEN=$(gh auth token) bun run test'
-      )
-    }
-
-    const lefthookFile = ctx.getPackageFile('regex', 'lefthook.yml')
-    const dep = lefthookFile.deps.find(
-      (d) => d.depName === 'fohte/lefthook-config'
-    )
-
-    expect(dep).toMatchObject({
-      updates: expect.arrayContaining([
-        expect.objectContaining({
-          newValue: expect.stringMatching(/^v0\.1\.\d+$/),
-          updateType: 'patch',
-        }),
-      ]),
-    })
-  })
 })

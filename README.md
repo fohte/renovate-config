@@ -44,7 +44,5 @@ Create a `renovate.json5` file in your repository with the following content:
 ### Running tests
 
 ```bash
-GITHUB_TOKEN=$(gh auth token) bun run test
+bun run test
 ```
-
-`GITHUB_TOKEN` is required for tests that verify version lookup via the GitHub API.
