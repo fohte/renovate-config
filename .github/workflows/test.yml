@@ -55,3 +55,12 @@ jobs:
       - name: Fail if lefthook failed
         if: steps.lefthook.outcome == 'failure'
         run: exit 1
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
+
+      - run: bun install --frozen-lockfile
+      - run: bun run test
