@@ -23,6 +23,12 @@ const RENOVATE_BIN = join(
   'renovate'
 )
 
+function initGitRepo(dir: string): void {
+  execSync('git init', { cwd: dir, stdio: 'pipe' })
+  execSync('git config user.email "test@test.com"', { cwd: dir, stdio: 'pipe' })
+  execSync('git config user.name "Test"', { cwd: dir, stdio: 'pipe' })
+}
+
 export interface MockRepo {
   name: string
   tags: string[]
@@ -59,15 +65,7 @@ export class RenovateTestContext {
     }
 
     // Initialize git repo (required for renovate --platform=local)
-    execSync('git init', { cwd: this.workDir, stdio: 'pipe' })
-    execSync('git config user.email "test@test.com"', {
-      cwd: this.workDir,
-      stdio: 'pipe',
-    })
-    execSync('git config user.name "Test"', {
-      cwd: this.workDir,
-      stdio: 'pipe',
-    })
+    initGitRepo(this.workDir)
 
     // Copy test fixtures and replace placeholders
     for (const fixture of fixtures) {
@@ -104,16 +102,7 @@ export class RenovateTestContext {
    */
   private createMockGitRepo(name: string, tags: string[]): string {
     const repoPath = mkdtempSync(join(tmpdir(), `renovate-mock-${name}-`))
-
-    execSync('git init', { cwd: repoPath, stdio: 'pipe' })
-    execSync('git config user.email "test@test.com"', {
-      cwd: repoPath,
-      stdio: 'pipe',
-    })
-    execSync('git config user.name "Test"', {
-      cwd: repoPath,
-      stdio: 'pipe',
-    })
+    initGitRepo(repoPath)
 
     // Create initial commit
     writeFileSync(join(repoPath, 'README.md'), `# ${name}\n`)
