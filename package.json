@@ -12,7 +12,7 @@
     "@tsconfig/bun": "1.0.10",
     "concurrently": "9.2.1",
     "json5": "2.2.3",
-    "renovate": "^39.0.0",
+    "renovate": "39.x",
     "typescript": "5.9.3",
     "vitest": "3.2.4"
   }
