@@ -48,29 +48,80 @@
     },
   ],
 
+  // Note: packageRules are evaluated in order and later rules override earlier ones.
   packageRules: [
+    // ==========================================================================
+    // automerge
+    // ==========================================================================
+    // Automerge low-risk updates to reduce PR noise.
     {
       matchManagers: ['github-actions'],
       matchUpdateTypes: ['patch'],
       automerge: true,
     },
+
+    // ==========================================================================
+    // labels
+    // ==========================================================================
+    // Add labels based on update type for easier PR filtering.
     {
       matchUpdateTypes: ['major'],
       addLabels: ['renovate/major'],
-      // For release-please integration: major updates trigger major version bump via breaking change
-      // Note: commitMessagePrefix takes priority over semanticCommitType, so only set commitMessagePrefix
-      commitMessagePrefix: 'feat(deps)!:',
     },
     {
       matchUpdateTypes: ['minor'],
       addLabels: ['renovate/minor'],
-      // For release-please integration: minor updates trigger minor version bump
-      semanticCommitType: 'feat',
     },
     {
       matchUpdateTypes: ['patch'],
       addLabels: ['renovate/patch'],
     },
+
+    // ==========================================================================
+    // release-please integration
+    // ==========================================================================
+    // Semantic commit types for release-please version bumps.
+    // release-please treats these commit types as:
+    //   - feat  -> minor bump
+    //   - fix   -> patch bump
+    //   - deps  -> patch bump (shown in "Dependencies" section)
+    //   - chore -> no bump
+    //   - ci    -> no bump
+    //   - !     -> major bump (breaking change)
+    //
+    // Resulting semantic commit types:
+    //   | Target          | major    | minor  | patch  |
+    //   |-----------------|----------|--------|--------|
+    //   | dependencies    | deps!:   | deps:  | deps:  |
+    //   | devDependencies | chore:   | chore: | chore: |
+    //   | github-actions  | ci:      | ci:    | ci:    |
+    {
+      matchUpdateTypes: ['major'],
+      commitMessagePrefix: 'deps!:',
+    },
+    {
+      matchUpdateTypes: ['minor', 'patch'],
+      semanticCommitType: 'deps',
+      semanticCommitScope: null,
+    },
+    {
+      matchDepTypes: ['devDependencies'],
+      // Use commitMessagePrefix (not semanticCommitType) to override the
+      // 'deps!:' prefix set above for major updates.
+      commitMessagePrefix: 'chore:',
+      semanticCommitScope: null,
+    },
+    {
+      matchManagers: ['github-actions'],
+      commitMessagePrefix: 'ci:',
+      semanticCommitScope: null,
+    },
+
+    // ==========================================================================
+    // pre-commit
+    // ==========================================================================
+    // Schedule updates on Saturday to batch with lockFileMaintenance.
+    // Automerge minor/patch since pre-commit hooks rarely have breaking changes.
     {
       matchManagers: ['pre-commit'],
       schedule: 'after 9am on Saturday',
@@ -80,10 +131,14 @@
       matchUpdateTypes: ['minor', 'patch'],
       automerge: true,
     },
+
+    // ==========================================================================
+    // copier
+    // ==========================================================================
+    // For copier templates with GitHub URL package names,
+    // use only the repository name in commit messages instead of the full URL.
+    // Handles both https://github.com/owner/repo and https://github.com/owner/repo.git
     {
-      // For copier templates with GitHub URL package names,
-      // use only the repository name in commit messages instead of the full URL
-      // Handles both https://github.com/owner/repo and https://github.com/owner/repo.git
       matchManagers: ['copier'],
       matchPackageNames: ['/^https:\\/\\/github\\.com\\//'],
       commitMessageTopic: '{{{replace "\\.git$" "" (replace "https://github\\.com/[^/]+/" "" packageName)}}}',

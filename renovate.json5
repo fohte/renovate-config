@@ -3,9 +3,10 @@
 
   packageRules: [
     {
-      // Keep renovate unpinned to always get the latest version for E2E tests
+      // Use "latest" tag in package.json to always get the latest version for E2E tests.
+      // Only update lockfile when new versions are released, keeping package.json unchanged.
       matchPackageNames: ['renovate'],
-      rangeStrategy: 'replace',
+      rangeStrategy: 'update-lockfile',
     },
   ],
 }
