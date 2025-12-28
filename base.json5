@@ -48,22 +48,6 @@
     },
   ],
 
-  // Semantic commit types for release-please integration.
-  // release-please treats these commit types as:
-  //   - feat  -> minor bump
-  //   - fix   -> patch bump
-  //   - deps  -> patch bump (shown in "Dependencies" section)
-  //   - chore -> no bump
-  //   - ci    -> no bump
-  //   - !     -> major bump (breaking change)
-  //
-  // Resulting semantic commit types:
-  //   | Target          | major    | minor  | patch  |
-  //   |-----------------|----------|--------|--------|
-  //   | dependencies    | deps!:   | deps:  | deps:  |
-  //   | devDependencies | chore:   | chore: | chore: |
-  //   | github-actions  | ci:      | ci:    | ci:    |
-  //
   // Note: packageRules are evaluated in order and later rules override earlier ones.
   packageRules: [
     {
@@ -84,7 +68,21 @@
       matchUpdateTypes: ['patch'],
       addLabels: ['renovate/patch'],
     },
-    // dependencies: use deps type for release-please "Dependencies" section
+    // Semantic commit types for release-please integration.
+    // release-please treats these commit types as:
+    //   - feat  -> minor bump
+    //   - fix   -> patch bump
+    //   - deps  -> patch bump (shown in "Dependencies" section)
+    //   - chore -> no bump
+    //   - ci    -> no bump
+    //   - !     -> major bump (breaking change)
+    //
+    // Resulting semantic commit types:
+    //   | Target          | major    | minor  | patch  |
+    //   |-----------------|----------|--------|--------|
+    //   | dependencies    | deps!:   | deps:  | deps:  |
+    //   | devDependencies | chore:   | chore: | chore: |
+    //   | github-actions  | ci:      | ci:    | ci:    |
     {
       matchUpdateTypes: ['major'],
       commitMessagePrefix: 'deps!:',
@@ -94,12 +92,10 @@
       semanticCommitType: 'deps',
       semanticCommitScope: null,
     },
-    // devDependencies: no version bump (doesn't affect consumers)
     {
       matchDepTypes: ['devDependencies'],
       semanticCommitType: 'chore',
     },
-    // github-actions: use ci type (CI infrastructure, not features)
     {
       matchManagers: ['github-actions'],
       semanticCommitType: 'ci',
