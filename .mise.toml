@@ -1,4 +1,5 @@
 [tools]
+node = "24"
 lefthook = "2.0.12"
 
 # lefthook hooks

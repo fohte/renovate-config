@@ -14,6 +14,14 @@ import type { PackageFile } from 'renovate/dist/modules/manager/types'
 
 const FIXTURES_DIR = join(import.meta.dirname, '..', '__fixtures__')
 const BASE_CONFIG_PATH = join(import.meta.dirname, '..', '..', 'base.json5')
+const RENOVATE_BIN = join(
+  import.meta.dirname,
+  '..',
+  '..',
+  'node_modules',
+  '.bin',
+  'renovate'
+)
 
 export class RenovateTestContext {
   workDir: string | null = null
@@ -119,11 +127,10 @@ export class RenovateTestContext {
     try {
       execSync(
         [
-          'npx',
-          'renovate',
+          RENOVATE_BIN,
           '--platform=local',
           '--require-config=ignored',
-          '--dry-run=extract',
+          '--dry-run=lookup',
           '--report-type=file',
           `--report-path=${reportPath}`,
         ].join(' '),
@@ -133,18 +140,15 @@ export class RenovateTestContext {
             ...process.env,
             LOG_LEVEL: 'warn',
             RENOVATE_CONFIG_FILE: join(this.workDir, 'renovate.json'),
+            // Renovate expects GITHUB_COM_TOKEN for github.com API access
+            GITHUB_COM_TOKEN: process.env['GITHUB_TOKEN'],
           },
           encoding: 'utf-8',
           timeout: 60000,
         }
       )
-    } catch (error) {
+    } catch {
       // renovate may exit with non-zero even on dry-run, but report should still be generated
-      const execError = error as ExecException
-      console.warn(
-        'Renovate exited with error:',
-        execError.stderr?.slice(-2000) ?? execError.message
-      )
     }
 
     const reportContent = readFileSync(reportPath, 'utf-8')
