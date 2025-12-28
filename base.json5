@@ -71,6 +71,24 @@
       matchUpdateTypes: ['patch'],
       addLabels: ['renovate/patch'],
     },
+    // devDependencies major updates should not trigger breaking change
+    // since they don't affect consumers of the package
+    {
+      matchDepTypes: ['devDependencies'],
+      matchUpdateTypes: ['major'],
+      commitMessagePrefix: 'chore(deps):',
+    },
+    // github-actions updates should use ci: semantic type
+    {
+      matchManagers: ['github-actions'],
+      matchUpdateTypes: ['major'],
+      commitMessagePrefix: 'ci(deps):',
+    },
+    {
+      matchManagers: ['github-actions'],
+      matchUpdateTypes: ['minor'],
+      semanticCommitType: 'ci',
+    },
     {
       matchManagers: ['pre-commit'],
       schedule: 'after 9am on Saturday',
