@@ -1,13 +1,21 @@
-import { test } from 'vitest'
+import { afterAll, beforeAll, describe } from 'vitest'
 import { RenovateTestContext } from './renovate-test-context'
 
-export function createRenovateTest(fixtures: string[]) {
-  return test.extend<{ ctx: RenovateTestContext }>({
-    ctx: async ({}, use) => {
-      const ctx = new RenovateTestContext()
-      ctx.setup(fixtures)
-      await use(ctx)
-      ctx.cleanup()
-    },
+export { RenovateTestContext }
+
+/**
+ * Wraps describe() with automatic renovate context setup/cleanup.
+ * Context is shared across all tests in the describe block.
+ */
+export function describeWithRenovate(
+  name: string,
+  fixtures: string[],
+  fn: (ctx: RenovateTestContext) => void
+) {
+  describe(name, () => {
+    const ctx = new RenovateTestContext()
+    beforeAll(() => ctx.setup(fixtures))
+    afterAll(() => ctx.cleanup())
+    fn(ctx)
   })
 }
