@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe } from 'vitest'
-import { RenovateTestContext } from './renovate-test-context'
+import { RenovateTestContext, type SetupOptions } from './renovate-test-context'
 
 export { RenovateTestContext }
 
@@ -9,12 +9,12 @@ export { RenovateTestContext }
  */
 export function describeWithRenovate(
   name: string,
-  fixtures: string[],
+  fixturesOrOptions: string[] | SetupOptions,
   fn: (ctx: RenovateTestContext) => void
 ) {
   describe(name, () => {
     const ctx = new RenovateTestContext()
-    beforeAll(() => ctx.setup(fixtures))
+    beforeAll(() => ctx.setup(fixturesOrOptions))
     afterAll(() => ctx.cleanup())
     fn(ctx)
   })
