@@ -123,11 +123,19 @@ export class RenovateTestContext {
    */
   cleanup(): void {
     if (this.workDir) {
-      rmSync(this.workDir, { recursive: true, force: true })
+      try {
+        rmSync(this.workDir, { recursive: true, force: true })
+      } catch (error) {
+        console.error(`Failed to clean up workDir at ${this.workDir}:`, error)
+      }
       this.workDir = null
     }
     for (const repoPath of this.mockRepoPaths.values()) {
-      rmSync(repoPath, { recursive: true, force: true })
+      try {
+        rmSync(repoPath, { recursive: true, force: true })
+      } catch (error) {
+        console.error(`Failed to clean up mock repo at ${repoPath}:`, error)
+      }
     }
     this.mockRepoPaths.clear()
     this.report = null
