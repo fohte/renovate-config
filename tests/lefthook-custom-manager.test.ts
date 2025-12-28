@@ -38,7 +38,6 @@ describeWithRenovate('lefthook customManager', ['lefthook.yml'], (ctx) => {
       (d) => d.depName === 'fohte/lefthook-config'
     )
 
-    expect(dep?.updates).toBeDefined()
     expect(dep?.updates?.length).toBeGreaterThan(0)
     expect(dep?.updates?.[0]).toMatchObject({
       newValue: expect.stringMatching(/^v0\.1\.\d+$/),

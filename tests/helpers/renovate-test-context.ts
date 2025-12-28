@@ -147,8 +147,15 @@ export class RenovateTestContext {
           timeout: 60000,
         }
       )
-    } catch {
+    } catch (error) {
       // renovate may exit with non-zero even on dry-run, but report should still be generated
+      if (process.env['DEBUG']) {
+        const execError = error as ExecException
+        console.warn(
+          'Renovate exited with error:',
+          execError.stderr?.slice(-2000) ?? execError.message
+        )
+      }
     }
 
     const reportContent = readFileSync(reportPath, 'utf-8')
