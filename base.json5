@@ -147,13 +147,15 @@
     // ==========================================================================
     // mise
     // ==========================================================================
-    // Disable pinning for mise manager.
-    // Unlike Cargo.toml or package.json, mise.toml uses exact versions directly
-    // without SemVer range syntax (^, ~, etc.), so versions like "0.1.0" are
-    // already pinned. The global rangeStrategy: 'pin' incorrectly adds '=' prefix
-    // (e.g., "0.1.0" -> "=0.1.0") which mise doesn't support.
+    // Disable pinning for mise's cargo backend packages.
+    // The crate datasource uses Cargo.toml's SemVer syntax where rangeStrategy: 'pin'
+    // adds '=' prefix (e.g., "0.1.0" -> "=0.1.0"). However, mise's cargo backend
+    // doesn't support this syntax - versions like "0.1.0" are already exact.
+    // Note: This only affects cargo packages; other mise tools (e.g., using 'latest'
+    // or 'prefix:') will still be pinned as expected.
     {
       matchManagers: ['mise'],
+      matchDatasources: ['crate'],
       rangeStrategy: 'auto',
     },
   ],
