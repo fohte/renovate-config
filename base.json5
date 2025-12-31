@@ -147,16 +147,15 @@
     // ==========================================================================
     // mise
     // ==========================================================================
-    // Disable pinning for mise's cargo backend packages that already have exact versions.
+    // Disable pin updates that add '=' prefix to mise's cargo backend packages.
     // The crate datasource uses Cargo.toml's SemVer syntax where rangeStrategy: 'pin'
     // adds '=' prefix (e.g., "0.1.0" -> "=0.1.0"). However, mise's cargo backend
     // doesn't support this syntax - versions like "0.1.0" are already exact.
-    // Only match exact SemVer versions (X.Y.Z); ranges like 'latest' still get pinned.
     {
       matchManagers: ['mise'],
       matchDatasources: ['crate'],
-      matchCurrentValue: '/^\\d+\\.\\d+\\.\\d+$/',
-      rangeStrategy: 'auto',
+      matchNewValue: '/^=/',
+      enabled: false,
     },
   ],
 }
