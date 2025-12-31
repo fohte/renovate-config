@@ -274,7 +274,9 @@ export class RenovateTestContext {
     // Read base.json5 and create a test renovate config
     const baseConfig = JSON5.parse(readFileSync(BASE_CONFIG_PATH, 'utf-8'))
 
-    // Create renovate.json with customManagers and packageRules (no presets that require network)
+    // Exclude presets that require network access
+    const { extends: _, $schema: __, ...baseConfigWithoutPresets } = baseConfig
+
     // Add packageRule to redirect crate datasource to mock sparse registry if configured
     const packageRules = [...(baseConfig.packageRules ?? [])]
     if (this.mockCratesPort) {
@@ -286,7 +288,7 @@ export class RenovateTestContext {
 
     const testConfig: Record<string, unknown> = {
       $schema: 'https://docs.renovatebot.com/renovate-schema.json',
-      customManagers: baseConfig.customManagers,
+      ...baseConfigWithoutPresets,
       packageRules,
       // Allow custom crate registries for mock server
       allowCustomCrateRegistries: this.mockCratesPort ? true : undefined,
