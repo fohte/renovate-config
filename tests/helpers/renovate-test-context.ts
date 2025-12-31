@@ -182,10 +182,11 @@ export class RenovateTestContext {
     // Read base.json5 and create a test renovate config
     const baseConfig = JSON5.parse(readFileSync(BASE_CONFIG_PATH, 'utf-8'))
 
-    // Create renovate.json with only the customManagers (no presets that require network)
+    // Create renovate.json with customManagers and packageRules (no presets that require network)
     const testConfig = {
       $schema: 'https://docs.renovatebot.com/renovate-schema.json',
       customManagers: baseConfig.customManagers,
+      packageRules: baseConfig.packageRules,
     }
 
     writeFileSync(

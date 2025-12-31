@@ -1,0 +1,2 @@
+[tools]
+"cargo:example-crate" = "1.0.0"
