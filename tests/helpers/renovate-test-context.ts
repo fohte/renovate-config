@@ -1,4 +1,4 @@
-import { execSync, type ExecException } from 'node:child_process'
+import { spawn, execSync } from 'node:child_process'
 import {
   mkdirSync,
   mkdtempSync,
@@ -6,6 +6,7 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs'
+import { createServer, type Server } from 'node:http'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import JSON5 from 'json5'
@@ -34,25 +35,39 @@ export interface MockRepo {
   tags: string[]
 }
 
+export interface MockCrate {
+  name: string
+  versions: string[]
+}
+
 export interface SetupOptions {
   fixtures: string[]
   mockRepos?: MockRepo[]
+  mockCrates?: MockCrate[]
 }
 
 export class RenovateTestContext {
   workDir: string | null = null
   report: Report | null = null
   private mockRepoPaths: Map<string, string> = new Map()
+  private mockCratesServer: Server | null = null
+  private mockCratesPort: number | null = null
+  private mockCratesData: Map<string, MockCrate> = new Map()
 
   /**
    * Set up a temporary git repository with the specified fixture files.
    */
-  setup(fixturesOrOptions: string[] | SetupOptions): void {
+  async setup(fixturesOrOptions: string[] | SetupOptions): Promise<void> {
     const options: SetupOptions = Array.isArray(fixturesOrOptions)
       ? { fixtures: fixturesOrOptions }
       : fixturesOrOptions
 
-    const { fixtures, mockRepos = [] } = options
+    const { fixtures, mockRepos = [], mockCrates = [] } = options
+
+    // Set up mock crates server if needed
+    if (mockCrates.length > 0) {
+      await this.startMockCratesServer(mockCrates)
+    }
 
     // Create a temporary working directory
     this.workDir = mkdtempSync(join(tmpdir(), 'renovate-test-'))
@@ -93,7 +108,7 @@ export class RenovateTestContext {
     })
 
     // Run renovate and get report
-    this.report = this.dryRun()
+    this.report = await this.dryRun()
   }
 
   /**
@@ -119,9 +134,75 @@ export class RenovateTestContext {
   }
 
   /**
+   * Start a mock crates.io API server.
+   */
+  private startMockCratesServer(crates: MockCrate[]): Promise<void> {
+    return new Promise((resolve, reject) => {
+      // Store crate data for lookup
+      for (const crate of crates) {
+        this.mockCratesData.set(crate.name, crate)
+      }
+
+      this.mockCratesServer = createServer((req, res) => {
+        // Parse crate name from sparse registry URL format
+        // For crates with length > 3: /ex/am/example-crate
+        // For crates with length 3: /3/e/foo
+        // For crates with length 2: /2/ab
+        // For crates with length 1: /1/a
+        const url = req.url ?? ''
+        const parts = url.split('/').filter((p) => p.length > 0)
+
+        // The crate name is always the last part
+        const crateName = parts[parts.length - 1] ?? null
+
+        if (!crateName) {
+          res.writeHead(404)
+          res.end('Not Found')
+          return
+        }
+
+        const crateData = this.mockCratesData.get(crateName)
+        if (!crateData) {
+          res.writeHead(404)
+          res.end('Not Found')
+          return
+        }
+
+        // Build sparse registry index response (NDJSON format)
+        // Each line is a JSON object with version info
+        const lines = crateData.versions.map((version) =>
+          JSON.stringify({
+            name: crateData.name,
+            vers: version,
+            deps: [],
+            cksum: '0'.repeat(64), // dummy checksum
+            features: {},
+            yanked: false,
+          })
+        )
+
+        res.writeHead(200, { 'Content-Type': 'text/plain' })
+        res.end(lines.join('\n'))
+      })
+
+      this.mockCratesServer.listen(0, '127.0.0.1', () => {
+        const address = this.mockCratesServer!.address()
+        if (typeof address === 'object' && address) {
+          this.mockCratesPort = address.port
+          resolve()
+        } else {
+          reject(new Error('Failed to get server address'))
+        }
+      })
+
+      this.mockCratesServer.on('error', reject)
+    })
+  }
+
+  /**
    * Clean up the temporary directory and mock repos.
    */
-  cleanup(): void {
+  async cleanup(): Promise<void> {
     if (this.workDir) {
       try {
         rmSync(this.workDir, { recursive: true, force: true })
@@ -138,6 +219,17 @@ export class RenovateTestContext {
       }
     }
     this.mockRepoPaths.clear()
+
+    // Stop mock crates server
+    if (this.mockCratesServer) {
+      await new Promise<void>((resolve) => {
+        this.mockCratesServer!.close(() => resolve())
+      })
+      this.mockCratesServer = null
+      this.mockCratesPort = null
+      this.mockCratesData.clear()
+    }
+
     this.report = null
   }
 
@@ -172,7 +264,7 @@ export class RenovateTestContext {
     return packageFile
   }
 
-  private dryRun(): Report {
+  private async dryRun(): Promise<Report> {
     if (!this.workDir) {
       throw new Error('Work directory not set. Did you call setup()?')
     }
@@ -183,10 +275,25 @@ export class RenovateTestContext {
     const baseConfig = JSON5.parse(readFileSync(BASE_CONFIG_PATH, 'utf-8'))
 
     // Create renovate.json with customManagers and packageRules (no presets that require network)
-    const testConfig = {
+    // Add packageRule to redirect crate datasource to mock sparse registry if configured
+    const packageRules = [...(baseConfig.packageRules ?? [])]
+    if (this.mockCratesPort) {
+      packageRules.unshift({
+        matchDatasources: ['crate'],
+        registryUrls: [`sparse+http://127.0.0.1:${this.mockCratesPort}/`],
+      })
+    }
+
+    const testConfig: Record<string, unknown> = {
       $schema: 'https://docs.renovatebot.com/renovate-schema.json',
       customManagers: baseConfig.customManagers,
-      packageRules: baseConfig.packageRules,
+      packageRules,
+      // Allow custom crate registries for mock server
+      allowCustomCrateRegistries: this.mockCratesPort ? true : undefined,
+      // Override default registry URL for crate datasource
+      defaultRegistryUrls: this.mockCratesPort
+        ? { crate: [`sparse+http://127.0.0.1:${this.mockCratesPort}/`] }
+        : undefined,
     }
 
     writeFileSync(
@@ -195,35 +302,64 @@ export class RenovateTestContext {
     )
 
     // Run renovate with dry-run and report output
-    try {
-      execSync(
+    // Use spawn instead of execSync to allow the event loop to run (for mock servers)
+    await new Promise<void>((resolve, reject) => {
+      const child = spawn(
+        RENOVATE_BIN,
         [
-          RENOVATE_BIN,
           '--platform=local',
           '--require-config=ignored',
           '--dry-run=lookup',
           '--report-type=file',
           `--report-path=${reportPath}`,
-        ].join(' '),
+        ],
         {
-          cwd: this.workDir,
+          cwd: this.workDir!,
           env: {
             ...process.env,
             LOG_LEVEL: 'warn',
-            RENOVATE_CONFIG_FILE: join(this.workDir, 'renovate.json'),
+            RENOVATE_CONFIG_FILE: join(this.workDir!, 'renovate.json'),
           },
-          encoding: 'utf-8',
-          timeout: 60000,
+          stdio: ['ignore', 'pipe', 'pipe'],
         }
       )
-    } catch (error) {
-      // renovate may exit with non-zero even on dry-run, but report should still be generated
-      const execError = error as ExecException
-      console.warn(
-        'Renovate exited with error:',
-        execError.stderr?.slice(-2000) ?? execError.message
-      )
-    }
+
+      let stdout = ''
+      let stderr = ''
+      child.stdout?.on('data', (data) => {
+        stdout += data.toString()
+      })
+      child.stderr?.on('data', (data) => {
+        stderr += data.toString()
+      })
+
+      const timeout = setTimeout(() => {
+        child.kill()
+        reject(
+          new Error(
+            `Renovate timed out after 30s\nstdout: ${stdout.slice(-2000)}\nstderr: ${stderr.slice(-2000)}`
+          )
+        )
+      }, 30000)
+
+      child.on('close', (code) => {
+        clearTimeout(timeout)
+        if (code !== 0) {
+          console.warn(
+            'Renovate exited with error:',
+            stderr.slice(-2000),
+            '\nstdout:',
+            stdout.slice(-2000)
+          )
+        }
+        resolve()
+      })
+
+      child.on('error', (err) => {
+        clearTimeout(timeout)
+        reject(err)
+      })
+    })
 
     const reportContent = readFileSync(reportPath, 'utf-8')
     return JSON.parse(reportContent) as Report
