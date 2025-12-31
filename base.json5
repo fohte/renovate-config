@@ -143,5 +143,18 @@
       matchPackageNames: ['/^https:\\/\\/github\\.com\\//'],
       commitMessageTopic: '{{{replace "\\.git$" "" (replace "https://github\\.com/[^/]+/" "" packageName)}}}',
     },
+
+    // ==========================================================================
+    // mise
+    // ==========================================================================
+    // Use 'bump' rangeStrategy for mise's cargo backend packages.
+    // The global 'pin' strategy adds an '=' prefix (e.g., "0.1.0" -> "=0.1.0"),
+    // which is invalid for mise. 'bump' updates the version without adding a prefix,
+    // ensuring versions are updated correctly (e.g., "0.1.0" -> "0.2.0").
+    {
+      matchManagers: ['mise'],
+      matchDatasources: ['crate'],
+      rangeStrategy: 'bump',
+    },
   ],
 }
