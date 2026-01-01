@@ -33,21 +33,6 @@
   // ref: https://docs.renovatebot.com/dependency-pinning
   rangeStrategy: 'pin',
 
-  customManagers: [
-    {
-      // Update lefthook remotes ref (semver tag only)
-      // Note: lefthook remotes only support branch/tag names, not commit hashes
-      // Usage: ref: v0.1.3 # renovate: datasource=github-tags depName=fohte/lefthook-config
-      customType: 'regex',
-      fileMatch: ['(^|/)lefthook\\.ya?ml(\\.jinja)?$'],
-      matchStrings: [
-        'ref:\\s*(?<currentValue>v?\\d[^\\s#]*)\\s*#\\s*renovate:\\s*datasource=(?<datasource>[^\\s]+)\\s+depName=(?<depName>[^\\s]+)',
-      ],
-      autoReplaceStringTemplate: 'ref: {{{newValue}}} # renovate: datasource={{{datasource}}} depName={{{depName}}}',
-      versioningTemplate: 'semver',
-    },
-  ],
-
   // Note: packageRules are evaluated in order and later rules override earlier ones.
   packageRules: [
     // ==========================================================================
