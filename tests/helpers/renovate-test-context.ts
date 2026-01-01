@@ -44,6 +44,8 @@ export interface SetupOptions {
   fixtures: string[]
   mockRepos?: MockRepo[]
   mockCrates?: MockCrate[]
+  // Additional config files to merge with base.json5 (e.g., ['lefthook.json5'])
+  additionalConfigs?: string[]
 }
 
 export class RenovateTestContext {
@@ -53,6 +55,7 @@ export class RenovateTestContext {
   private mockCratesServer: Server | null = null
   private mockCratesPort: number | null = null
   private mockCratesData: Map<string, MockCrate> = new Map()
+  private additionalConfigs: string[] = []
 
   /**
    * Set up a temporary git repository with the specified fixture files.
@@ -62,7 +65,13 @@ export class RenovateTestContext {
       ? { fixtures: fixturesOrOptions }
       : fixturesOrOptions
 
-    const { fixtures, mockRepos = [], mockCrates = [] } = options
+    const {
+      fixtures,
+      mockRepos = [],
+      mockCrates = [],
+      additionalConfigs = [],
+    } = options
+    this.additionalConfigs = additionalConfigs
 
     // Set up mock crates server if needed
     if (mockCrates.length > 0) {
@@ -274,8 +283,22 @@ export class RenovateTestContext {
     // Read base.json5 and create a test renovate config
     const baseConfig = JSON5.parse(readFileSync(BASE_CONFIG_PATH, 'utf-8'))
 
+    // Read and merge additional config files
+    const additionalConfigsContent = this.additionalConfigs.map(
+      (configFile) => {
+        const configPath = join(import.meta.dirname, '..', '..', configFile)
+        return JSON5.parse(readFileSync(configPath, 'utf-8'))
+      }
+    )
+
     // Exclude presets that require network access
     const { extends: _, $schema: __, ...baseConfigWithoutPresets } = baseConfig
+
+    // Merge customManagers from additional configs
+    const customManagers = [
+      ...(baseConfig.customManagers ?? []),
+      ...additionalConfigsContent.flatMap((c) => c.customManagers ?? []),
+    ]
 
     // Add packageRule to redirect crate datasource to mock sparse registry if configured
     const packageRules = [...(baseConfig.packageRules ?? [])]
@@ -289,6 +312,7 @@ export class RenovateTestContext {
     const testConfig: Record<string, unknown> = {
       $schema: 'https://docs.renovatebot.com/renovate-schema.json',
       ...baseConfigWithoutPresets,
+      customManagers: customManagers.length > 0 ? customManagers : undefined,
       packageRules,
       // Allow custom crate registries for mock server
       allowCustomCrateRegistries: this.mockCratesPort ? true : undefined,

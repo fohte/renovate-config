@@ -6,6 +6,7 @@ describeWithRenovate(
   {
     fixtures: ['lefthook.yml', 'lefthook.yml.jinja'],
     mockRepos: [{ name: 'config', tags: ['v1.0.0', 'v1.0.1', 'v1.1.0'] }],
+    additionalConfigs: ['lefthook.json5'],
   },
   (ctx) => {
     it('should detect available updates in lefthook.yml', () => {
