@@ -75,11 +75,11 @@
     //   - !     -> major bump (breaking change)
     //
     // Resulting semantic commit types:
-    //   | Target          | major    | minor  | patch  |
-    //   |-----------------|----------|--------|--------|
-    //   | dependencies    | deps!:   | deps:  | deps:  |
-    //   | devDependencies | chore:   | chore: | chore: |
-    //   | github-actions  | ci:      | ci:    | ci:    |
+    //   | Target          | major    | minor  | patch  | pin    |
+    //   |-----------------|----------|--------|--------|--------|
+    //   | dependencies    | deps!:   | deps:  | deps:  | chore: |
+    //   | devDependencies | chore:   | chore: | chore: | chore: |
+    //   | github-actions  | ci:      | ci:    | ci:    | ci:    |
     {
       matchUpdateTypes: ['major'],
       commitMessagePrefix: 'deps!:',
@@ -88,6 +88,12 @@
       matchUpdateTypes: ['minor', 'patch'],
       semanticCommitType: 'deps',
       semanticCommitScope: null,
+    },
+    // Pin updates don't change runtime behavior, so exclude from CHANGELOG.
+    {
+      matchUpdateTypes: ['pin'],
+      semanticCommitType: 'chore',
+      semanticCommitScope: 'deps',
     },
     {
       matchDepTypes: ['devDependencies'],
