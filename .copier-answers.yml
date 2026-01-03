@@ -1,3 +1,7 @@
 # Changes here will be overwritten by Copier
-_commit: v0.1.8
-_src_path: gh:fohte/generic-boilerplate
+_commit: v0.1.20
+_src_path: https://github.com/fohte/generic-boilerplate
+description: ''
+is_public: false
+type: node
+use_release_please: false

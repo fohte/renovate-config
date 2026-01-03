@@ -26,5 +26,5 @@ describeWithRenovate(
       const pinUpdate = dep?.updates?.find((u) => u.updateType === 'pin')
       expect(pinUpdate).toBeUndefined()
     })
-  }
+  },
 )
