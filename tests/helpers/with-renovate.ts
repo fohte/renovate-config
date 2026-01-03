@@ -10,7 +10,7 @@ export { RenovateTestContext }
 export function describeWithRenovate(
   name: string,
   fixturesOrOptions: string[] | SetupOptions,
-  fn: (ctx: RenovateTestContext) => void
+  fn: (ctx: RenovateTestContext) => void,
 ) {
   describe(name, () => {
     const ctx = new RenovateTestContext()

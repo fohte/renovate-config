@@ -80,6 +80,7 @@
     //   | dependencies    | deps!:   | deps:  | deps:  | chore: |
     //   | devDependencies | chore:   | chore: | chore: | chore: |
     //   | github-actions  | ci:      | ci:    | ci:    | ci:    |
+    //   | copier          | chore:   | chore: | chore: | chore: |
     {
       matchUpdateTypes: ['major'],
       commitMessagePrefix: 'deps!:',
@@ -105,6 +106,12 @@
     {
       matchManagers: ['github-actions'],
       commitMessagePrefix: 'ci:',
+      semanticCommitScope: null,
+    },
+    // Copier templates are boilerplate references, not runtime/dev dependencies.
+    {
+      matchManagers: ['copier'],
+      commitMessagePrefix: 'chore(deps):',
       semanticCommitScope: null,
     },
 
