@@ -1,0 +1,7 @@
+{
+  "name": "test-dev",
+  "version": "1.0.0",
+  "devDependencies": {
+    "test-pkg-dev": "1.0.0"
+  }
+}

@@ -1,0 +1,2 @@
+[tools]
+"cargo:test-patch" = "1.0.0"

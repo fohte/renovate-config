@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe } from 'vitest'
 
 import { RenovateTestContext, type SetupOptions } from './renovate-test-context'
 
-export { RenovateTestContext }
+export { RenovateTestContext, type SetupOptions }
 
 /**
  * Wraps describe() with automatic renovate context setup/cleanup.
