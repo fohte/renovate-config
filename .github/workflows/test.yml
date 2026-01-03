@@ -39,6 +39,14 @@ jobs:
 
       - uses: jdx/mise-action@v2
 
+      - uses: actions/cache@v4
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: pnpm-${{ runner.os }}-
+
+      - run: pnpm install --frozen-lockfile
+
       - name: Run lefthook
         id: lefthook
         continue-on-error: true
@@ -64,11 +72,4 @@ jobs:
         if: steps.lefthook.outcome == 'failure'
         run: exit 1
 
-      - uses: actions/cache@v4
-        with:
-          path: ~/.local/share/pnpm/store
-          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: pnpm-${{ runner.os }}-
-
-      - run: pnpm install --frozen-lockfile
       - run: pnpm test
