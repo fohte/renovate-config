@@ -36,6 +36,26 @@
   // Note: packageRules are evaluated in order and later rules override earlier ones.
   packageRules: [
     // ==========================================================================
+    // priority overrides
+    // ==========================================================================
+    // Lockfile maintenance PRs unblock Renovate self-healing, so keep them at
+    // the head of the queue even when the global PR concurrency limit is hit.
+    {
+      matchUpdateTypes: ['lockFileMaintenance'],
+      prPriority: 100,
+    },
+    // Updates sourced from the fohte org keep template-based projects
+    // synchronized, so let them skip ahead when Renovate throttles PRs.
+    {
+      matchPackagePatterns: [
+        '^fohte/',
+        '^https://github\\.com/fohte/',
+        '^git\\+https://github\\.com/fohte/',
+      ],
+      prPriority: 100,
+    },
+
+    // ==========================================================================
     // automerge
     // ==========================================================================
     // Automerge low-risk updates to reduce PR noise.
