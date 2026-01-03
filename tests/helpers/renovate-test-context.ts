@@ -12,6 +12,7 @@ import { dirname, join } from 'node:path'
 import JSON5 from 'json5'
 import type { Report } from 'renovate/dist/instrumentation/types'
 import type { PackageFile } from 'renovate/dist/modules/manager/types'
+import type { BranchCache } from 'renovate/dist/util/cache/repository/types'
 
 const FIXTURES_DIR = join(import.meta.dirname, '..', '__fixtures__')
 const BASE_CONFIG_PATH = join(import.meta.dirname, '..', '..', 'base.json5')
@@ -46,6 +47,9 @@ export interface SetupOptions {
   mockCrates?: MockCrate[]
   // Additional config files to merge with base.json5 (e.g., ['lefthook.json5'])
   additionalConfigs?: string[]
+  // Dry-run mode: 'lookup' (default) for fast dependency detection,
+  // 'full' for complete branch/PR simulation including prTitle
+  dryRunMode?: 'lookup' | 'full'
 }
 
 export class RenovateTestContext {
@@ -56,6 +60,7 @@ export class RenovateTestContext {
   private mockCratesPort: number | null = null
   private mockCratesData: Map<string, MockCrate> = new Map()
   private additionalConfigs: string[] = []
+  private dryRunMode: 'lookup' | 'full' = 'lookup'
 
   /**
    * Set up a temporary git repository with the specified fixture files.
@@ -70,8 +75,10 @@ export class RenovateTestContext {
       mockRepos = [],
       mockCrates = [],
       additionalConfigs = [],
+      dryRunMode = 'lookup',
     } = options
     this.additionalConfigs = additionalConfigs
+    this.dryRunMode = dryRunMode
 
     // Set up mock crates server if needed
     if (mockCrates.length > 0) {
@@ -273,6 +280,23 @@ export class RenovateTestContext {
     return packageFile
   }
 
+  /**
+   * Get branches from the report.
+   * Only available when dryRunMode is 'full'.
+   */
+  getBranches(): Partial<BranchCache>[] {
+    if (!this.report) {
+      throw new Error('Report not available. Did you call setup()?')
+    }
+
+    const repoReport = this.report.repositories['local']
+    if (!repoReport) {
+      throw new Error('Repository report not found')
+    }
+
+    return repoReport.branches
+  }
+
   private async dryRun(): Promise<Report> {
     if (!this.workDir) {
       throw new Error('Work directory not set. Did you call setup()?')
@@ -335,7 +359,7 @@ export class RenovateTestContext {
         [
           '--platform=local',
           '--require-config=ignored',
-          '--dry-run=lookup',
+          `--dry-run=${this.dryRunMode}`,
           '--report-type=file',
           `--report-path=${reportPath}`,
         ],
