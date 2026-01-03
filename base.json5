@@ -79,7 +79,7 @@
     //   |-----------------|----------|--------|--------|--------|
     //   | dependencies    | deps!:   | deps:  | deps:  | chore: |
     //   | devDependencies | chore:   | chore: | chore: | chore: |
-    //   | github-actions  | ci:      | ci:    | ci:    | chore: |
+    //   | github-actions  | ci:      | ci:    | ci:    | ci:    |
     {
       matchUpdateTypes: ['major'],
       commitMessagePrefix: 'deps!:',
