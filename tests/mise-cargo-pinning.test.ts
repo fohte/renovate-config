@@ -1,4 +1,5 @@
 import { expect, it } from 'vitest'
+
 import { describeWithRenovate } from './helpers/with-renovate'
 
 describeWithRenovate(
