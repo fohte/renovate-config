@@ -21,7 +21,7 @@ const RENOVATE_BIN = join(
   '..',
   'node_modules',
   '.bin',
-  'renovate'
+  'renovate',
 )
 
 function initGitRepo(dir: string): void {
@@ -187,7 +187,7 @@ export class RenovateTestContext {
             cksum: '0'.repeat(64), // dummy checksum
             features: {},
             yanked: false,
-          })
+          }),
         )
 
         res.writeHead(200, { 'Content-Type': 'text/plain' })
@@ -266,7 +266,7 @@ export class RenovateTestContext {
     if (!packageFile) {
       throw new Error(
         `${filePath} not found in ${manager} package files. ` +
-          `Available: ${managerFiles.map((f) => f.packageFile).join(', ')}`
+          `Available: ${managerFiles.map((f) => f.packageFile).join(', ')}`,
       )
     }
 
@@ -288,7 +288,7 @@ export class RenovateTestContext {
       (configFile) => {
         const configPath = join(import.meta.dirname, '..', '..', configFile)
         return JSON5.parse(readFileSync(configPath, 'utf-8'))
-      }
+      },
     )
 
     // Exclude presets that require network access
@@ -324,7 +324,7 @@ export class RenovateTestContext {
 
     writeFileSync(
       join(this.workDir, 'renovate.json'),
-      JSON.stringify(testConfig, null, 2)
+      JSON.stringify(testConfig, null, 2),
     )
 
     // Run renovate with dry-run and report output
@@ -347,7 +347,7 @@ export class RenovateTestContext {
             RENOVATE_CONFIG_FILE: join(this.workDir!, 'renovate.json'),
           },
           stdio: ['ignore', 'pipe', 'pipe'],
-        }
+        },
       )
 
       let stdout = ''
@@ -363,8 +363,8 @@ export class RenovateTestContext {
         child.kill()
         reject(
           new Error(
-            `Renovate timed out after 30s\nstdout: ${stdout.slice(-2000)}\nstderr: ${stderr.slice(-2000)}`
-          )
+            `Renovate timed out after 30s\nstdout: ${stdout.slice(-2000)}\nstderr: ${stderr.slice(-2000)}`,
+          ),
         )
       }, 30000)
 
@@ -375,7 +375,7 @@ export class RenovateTestContext {
             'Renovate exited with error:',
             stderr.slice(-2000),
             '\nstdout:',
-            stdout.slice(-2000)
+            stdout.slice(-2000),
           )
         }
         resolve()
