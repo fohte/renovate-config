@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe } from 'vitest'
+
 import { RenovateTestContext, type SetupOptions } from './renovate-test-context'
 
 export { RenovateTestContext }
