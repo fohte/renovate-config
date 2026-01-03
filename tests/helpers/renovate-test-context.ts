@@ -338,6 +338,9 @@ export class RenovateTestContext {
       ...baseConfigWithoutPresets,
       customManagers: customManagers.length > 0 ? customManagers : undefined,
       packageRules,
+      // Enable semantic commits explicitly since extends preset is excluded
+      // and auto-detection won't work without real commit history
+      semanticCommits: 'enabled',
       // Allow custom crate registries for mock server
       allowCustomCrateRegistries: this.mockCratesPort ? true : undefined,
       // Override default registry URL for crate datasource

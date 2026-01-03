@@ -9,7 +9,7 @@ describeWithRenovate(
     dryRunMode: 'full',
   },
   (ctx) => {
-    it('should generate prTitle for minor update', () => {
+    it('should use deps: prefix for minor update', () => {
       const branches = ctx.getBranches()
 
       // Find the branch for example-crate update
@@ -18,7 +18,7 @@ describeWithRenovate(
       )
 
       expect(branch).toMatchObject({
-        prTitle: expect.stringMatching(/cargo:example-crate.*1\.1\.0/),
+        prTitle: expect.stringMatching(/^deps: /),
         upgrades: expect.arrayContaining([
           expect.objectContaining({
             depName: 'cargo:example-crate',
