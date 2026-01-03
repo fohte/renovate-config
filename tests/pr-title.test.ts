@@ -22,7 +22,7 @@ describe('PR title format for release-please', () => {
           const branch = ctx
             .getBranches()
             .find((b) =>
-              b.upgrades?.some((u) => u.depName === 'cargo:test-major')
+              b.upgrades?.some((u) => u.depName === 'cargo:test-major'),
             )
 
           expect(branch).toMatchObject({
@@ -35,7 +35,7 @@ describe('PR title format for release-please', () => {
             ]),
           })
         })
-      }
+      },
     )
 
     describeWithRenovate(
@@ -50,7 +50,7 @@ describe('PR title format for release-please', () => {
           const branch = ctx
             .getBranches()
             .find((b) =>
-              b.upgrades?.some((u) => u.depName === 'cargo:example-crate')
+              b.upgrades?.some((u) => u.depName === 'cargo:example-crate'),
             )
 
           expect(branch).toMatchObject({
@@ -63,7 +63,7 @@ describe('PR title format for release-please', () => {
             ]),
           })
         })
-      }
+      },
     )
 
     describeWithRenovate(
@@ -78,7 +78,7 @@ describe('PR title format for release-please', () => {
           const branch = ctx
             .getBranches()
             .find((b) =>
-              b.upgrades?.some((u) => u.depName === 'cargo:test-patch')
+              b.upgrades?.some((u) => u.depName === 'cargo:test-patch'),
             )
 
           expect(branch).toMatchObject({
@@ -91,7 +91,7 @@ describe('PR title format for release-please', () => {
             ]),
           })
         })
-      }
+      },
     )
 
     describeWithRenovate(
@@ -117,7 +117,7 @@ describe('PR title format for release-please', () => {
             ]),
           })
         })
-      }
+      },
     )
   })
 
@@ -147,7 +147,7 @@ describe('PR title format for release-please', () => {
             ]),
           })
         })
-      }
+      },
     )
   })
 
