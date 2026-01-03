@@ -46,11 +46,18 @@ export interface MockNpmPackage {
   versions: string[]
 }
 
+export interface MockGitHubRepo {
+  // Format: owner/repo (e.g., 'actions/checkout')
+  name: string
+  tags: string[]
+}
+
 export interface SetupOptions {
   fixtures: string[]
   mockRepos?: MockRepo[]
   mockCrates?: MockCrate[]
   mockNpmPackages?: MockNpmPackage[]
+  mockGitHubRepos?: MockGitHubRepo[]
   // Additional config files to merge with base.json5 (e.g., ['lefthook.json5'])
   additionalConfigs?: string[]
   // Dry-run mode: 'lookup' (default) for fast dependency detection,
@@ -68,6 +75,9 @@ export class RenovateTestContext {
   private mockNpmServer: Server | null = null
   private mockNpmPort: number | null = null
   private mockNpmData: Map<string, MockNpmPackage> = new Map()
+  private mockGitHubServer: Server | null = null
+  private mockGitHubPort: number | null = null
+  private mockGitHubData: Map<string, MockGitHubRepo> = new Map()
   private additionalConfigs: string[] = []
   private dryRunMode: 'lookup' | 'full' = 'lookup'
 
@@ -84,6 +94,7 @@ export class RenovateTestContext {
       mockRepos = [],
       mockCrates = [],
       mockNpmPackages = [],
+      mockGitHubRepos = [],
       additionalConfigs = [],
       dryRunMode = 'lookup',
     } = options
@@ -98,6 +109,11 @@ export class RenovateTestContext {
     // Set up mock npm server if needed
     if (mockNpmPackages.length > 0) {
       await this.startMockNpmServer(mockNpmPackages)
+    }
+
+    // Set up mock GitHub API server if needed
+    if (mockGitHubRepos.length > 0) {
+      await this.startMockGitHubServer(mockGitHubRepos)
     }
 
     // Create a temporary working directory
@@ -121,13 +137,13 @@ export class RenovateTestContext {
       mkdirSync(dirname(destPath), { recursive: true })
 
       let content = readFileSync(srcPath, 'utf-8')
-      // Replace {{MOCK_REPO:name}} placeholders with actual paths
-      content = content.replace(/\{\{MOCK_REPO:(\w+)\}\}/g, (_, name) => {
+      // Replace {{MOCK_REPO:name}} placeholders with file:// URLs
+      content = content.replace(/\{\{MOCK_REPO:([\w-]+)\}\}/g, (_, name) => {
         const repoPath = this.mockRepoPaths.get(name)
         if (!repoPath) {
           throw new Error(`Mock repo '${name}' not found`)
         }
-        return repoPath
+        return `file://${repoPath}`
       })
       writeFileSync(destPath, content)
     }
@@ -298,6 +314,127 @@ export class RenovateTestContext {
   }
 
   /**
+   * Start a mock GitHub API server for github-tags datasource.
+   */
+  private startMockGitHubServer(repos: MockGitHubRepo[]): Promise<void> {
+    return new Promise((resolve, reject) => {
+      // Store repo data for lookup
+      for (const repo of repos) {
+        this.mockGitHubData.set(repo.name, repo)
+      }
+
+      this.mockGitHubServer = createServer((req, res) => {
+        const url = req.url ?? ''
+
+        // Handle GraphQL endpoint
+        if (url === '/api/graphql' || url === '/graphql') {
+          let body = ''
+          req.on('data', (chunk) => {
+            body += chunk
+          })
+          req.on('end', () => {
+            try {
+              const query = JSON.parse(body)
+
+              // Extract repo name from query variables
+              const repoName = `${query.variables?.owner}/${query.variables?.name}`
+              const repoData = this.mockGitHubData.get(repoName)
+
+              if (!repoData) {
+                res.writeHead(200, { 'Content-Type': 'application/json' })
+                res.end(
+                  JSON.stringify({
+                    data: { repository: null },
+                    errors: [{ message: 'Repository not found' }],
+                  }),
+                )
+                return
+              }
+
+              // Build GraphQL response for refs query
+              const nodes = repoData.tags.map((tag) => ({
+                version: tag,
+                target: {
+                  type: 'Commit',
+                  oid: '0'.repeat(40),
+                  releaseTimestamp: new Date().toISOString(),
+                },
+              }))
+
+              res.writeHead(200, { 'Content-Type': 'application/json' })
+              res.end(
+                JSON.stringify({
+                  data: {
+                    repository: {
+                      isRepoPrivate: false,
+                      payload: {
+                        pageInfo: {
+                          hasNextPage: false,
+                          endCursor: null,
+                        },
+                        nodes,
+                      },
+                    },
+                  },
+                }),
+              )
+            } catch {
+              res.writeHead(400)
+              res.end('Invalid request')
+            }
+          })
+          return
+        }
+
+        // Parse owner/repo from URL for REST API
+        // GitHub API format: /repos/:owner/:repo/tags
+        // GitHub Enterprise format: /api/v3/repos/:owner/:repo/tags
+        const match = url.match(/^(?:\/api\/v3)?\/repos\/([^/]+\/[^/]+)\/tags/)
+
+        if (!match) {
+          res.writeHead(404)
+          res.end('Not Found')
+          return
+        }
+
+        const repoName = match[1]!
+        const repoData = this.mockGitHubData.get(repoName)
+        if (!repoData) {
+          res.writeHead(404)
+          res.end('Not Found')
+          return
+        }
+
+        // Build GitHub API tags response
+        const tags = repoData.tags.map((tag) => ({
+          name: tag,
+          commit: {
+            sha: '0'.repeat(40),
+            url: `http://127.0.0.1:${this.mockGitHubPort}/repos/${repoName}/commits/${'0'.repeat(40)}`,
+          },
+          zipball_url: `http://127.0.0.1:${this.mockGitHubPort}/repos/${repoName}/zipball/${tag}`,
+          tarball_url: `http://127.0.0.1:${this.mockGitHubPort}/repos/${repoName}/tarball/${tag}`,
+        }))
+
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        res.end(JSON.stringify(tags))
+      })
+
+      this.mockGitHubServer.listen(0, '127.0.0.1', () => {
+        const address = this.mockGitHubServer!.address()
+        if (typeof address === 'object' && address) {
+          this.mockGitHubPort = address.port
+          resolve()
+        } else {
+          reject(new Error('Failed to get server address'))
+        }
+      })
+
+      this.mockGitHubServer.on('error', reject)
+    })
+  }
+
+  /**
    * Clean up the temporary directory and mock repos.
    */
   async cleanup(): Promise<void> {
@@ -336,6 +473,16 @@ export class RenovateTestContext {
       this.mockNpmServer = null
       this.mockNpmPort = null
       this.mockNpmData.clear()
+    }
+
+    // Stop mock GitHub API server
+    if (this.mockGitHubServer) {
+      await new Promise<void>((resolve) => {
+        this.mockGitHubServer!.close(() => resolve())
+      })
+      this.mockGitHubServer = null
+      this.mockGitHubPort = null
+      this.mockGitHubData.clear()
     }
 
     this.report = null
@@ -431,11 +578,30 @@ export class RenovateTestContext {
       })
     }
 
+    // Add packageRule for github-tags datasource
+    if (this.mockGitHubPort) {
+      packageRules.unshift({
+        matchDatasources: ['github-tags'],
+        registryUrls: [`http://127.0.0.1:${this.mockGitHubPort}/`],
+      })
+    }
+
+    // Build hostRules for authentication
+    const hostRules: object[] = []
+    if (this.mockGitHubPort) {
+      // Provide a fake token to satisfy github-token-required check
+      hostRules.push({
+        matchHost: `127.0.0.1:${this.mockGitHubPort}`,
+        token: 'fake-token-for-testing',
+      })
+    }
+
     const testConfig: Record<string, unknown> = {
       $schema: 'https://docs.renovatebot.com/renovate-schema.json',
       ...baseConfigWithoutPresets,
       customManagers: customManagers.length > 0 ? customManagers : undefined,
       packageRules,
+      hostRules: hostRules.length > 0 ? hostRules : undefined,
       // Enable semantic commits explicitly since extends preset is excluded
       // and auto-detection won't work without real commit history
       semanticCommits: 'enabled',
@@ -470,6 +636,10 @@ export class RenovateTestContext {
             ...process.env,
             LOG_LEVEL: 'warn',
             RENOVATE_CONFIG_FILE: join(this.workDir!, 'renovate.json'),
+            // Provide fake token for github-actions tests
+            GITHUB_COM_TOKEN: this.mockGitHubPort
+              ? 'fake-token-for-testing'
+              : undefined,
           },
           stdio: ['ignore', 'pipe', 'pipe'],
         },

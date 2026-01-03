@@ -5,11 +5,12 @@ import {
 } from './helpers/with-renovate'
 
 // Test PR title format according to release-please configuration in base.json5:
-//   | Target          | major    | minor  | patch  | pin          |
-//   |-----------------|----------|--------|--------|--------------|
-//   | dependencies    | deps!:   | deps:  | deps:  | chore(deps): |
-//   | devDependencies | chore:   | chore: | chore: | chore:       |
-//   | github-actions  | ci:      | ci:    | ci:    | ci:          |
+//   | Target          | major        | minor        | patch        | pin          |
+//   |-----------------|--------------|--------------|--------------|--------------|
+//   | dependencies    | deps!:       | deps:        | deps:        | chore(deps): |
+//   | devDependencies | chore:       | chore:       | chore:       | chore:       |
+//   | github-actions  | ci:          | ci:          | ci:          | ci:          |
+//   | copier          | chore(deps): | chore(deps): | chore(deps): | chore(deps): |
 
 interface TestCase {
   category: string
@@ -78,6 +79,32 @@ const testCases: TestCase[] = [
     expectedPrefix: /^chore: /,
     updateType: 'minor',
   },
+  // copier
+  {
+    category: 'copier',
+    description: 'minor update',
+    options: {
+      fixtures: ['.copier-answers.yml'],
+      mockRepos: [{ name: 'test-template', tags: ['v1.0.0', 'v1.1.0'] }],
+    },
+    depName: 'test-template',
+    expectedPrefix: /^chore\(deps\): /,
+    updateType: 'minor',
+  },
+  // github-actions
+  {
+    category: 'github-actions',
+    description: 'minor update',
+    options: {
+      fixtures: ['github-actions/.github/workflows/test.yml'],
+      mockGitHubRepos: [
+        { name: 'actions/checkout', tags: ['v1.0.0', 'v1.1.0'] },
+      ],
+    },
+    depName: 'actions/checkout',
+    expectedPrefix: /^ci: /,
+    updateType: 'minor',
+  },
 ]
 
 describe('PR title format for release-please', () => {
@@ -96,13 +123,15 @@ describe('PR title format for release-please', () => {
             it(`should use ${tc.expectedPrefix.source} prefix`, () => {
               const branch = ctx
                 .getBranches()
-                .find((b) => b.upgrades?.some((u) => u.depName === tc.depName))
+                .find((b) =>
+                  b.upgrades?.some((u) => u.depName?.includes(tc.depName)),
+                )
 
               expect(branch).toMatchObject({
                 prTitle: expect.stringMatching(tc.expectedPrefix),
                 upgrades: expect.arrayContaining([
                   expect.objectContaining({
-                    depName: tc.depName,
+                    depName: expect.stringContaining(tc.depName),
                     updateType: tc.updateType,
                   }),
                 ]),
@@ -113,8 +142,4 @@ describe('PR title format for release-please', () => {
       }
     })
   }
-
-  // TODO: github-actions tests require mocking the GitHub API (github-tags datasource)
-  // since mockRepos (local git repos) don't work with the github-actions manager
-  // which expects owner/repo@version format.
 })
