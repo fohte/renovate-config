@@ -268,16 +268,9 @@ export class RenovateTestContext {
         }
 
         // Set latest tag to the highest version
-        const sortedVersions = [...pkgData.versions].sort((a, b) => {
-          const aParts = a.split('.').map(Number)
-          const bParts = b.split('.').map(Number)
-          for (let i = 0; i < 3; i++) {
-            if ((aParts[i] ?? 0) !== (bParts[i] ?? 0)) {
-              return (aParts[i] ?? 0) - (bParts[i] ?? 0)
-            }
-          }
-          return 0
-        })
+        const sortedVersions = [...pkgData.versions].sort((a, b) =>
+          a.localeCompare(b, undefined, { numeric: true }),
+        )
         distTags['latest'] = sortedVersions[sortedVersions.length - 1] ?? ''
 
         const response = {
