@@ -26,10 +26,26 @@ const RENOVATE_BIN = join(
   'renovate',
 )
 
+// Ignore global/system git config to ensure tests are isolated from local settings
+// (e.g., GPG signing, aliases, hooks).
+const GIT_ENV = {
+  ...process.env,
+  GIT_CONFIG_GLOBAL: '/dev/null',
+  GIT_CONFIG_SYSTEM: '/dev/null',
+}
+
 function initGitRepo(dir: string): void {
-  execSync('git init', { cwd: dir, stdio: 'pipe' })
-  execSync('git config user.email "test@test.com"', { cwd: dir, stdio: 'pipe' })
-  execSync('git config user.name "Test"', { cwd: dir, stdio: 'pipe' })
+  execSync('git init', { cwd: dir, stdio: 'pipe', env: GIT_ENV })
+  execSync('git config user.email "test@test.com"', {
+    cwd: dir,
+    stdio: 'pipe',
+    env: GIT_ENV,
+  })
+  execSync('git config user.name "Test"', {
+    cwd: dir,
+    stdio: 'pipe',
+    env: GIT_ENV,
+  })
 }
 
 export interface MockRepo {
@@ -153,6 +169,7 @@ export class RenovateTestContext {
     execSync('git add -A && git commit -m "initial"', {
       cwd: this.workDir,
       stdio: 'pipe',
+      env: GIT_ENV,
     })
 
     // Run renovate and get report
@@ -171,11 +188,12 @@ export class RenovateTestContext {
     execSync('git add -A && git commit -m "initial"', {
       cwd: repoPath,
       stdio: 'pipe',
+      env: GIT_ENV,
     })
 
     // Create tags
     for (const tag of tags) {
-      execSync(`git tag ${tag}`, { cwd: repoPath, stdio: 'pipe' })
+      execSync(`git tag ${tag}`, { cwd: repoPath, stdio: 'pipe', env: GIT_ENV })
     }
 
     return repoPath
