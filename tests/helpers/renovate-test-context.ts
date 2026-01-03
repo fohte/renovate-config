@@ -1,4 +1,4 @@
-import { spawn, execSync } from 'node:child_process'
+import { execSync, spawn } from 'node:child_process'
 import {
   mkdirSync,
   mkdtempSync,
@@ -9,6 +9,7 @@ import {
 import { createServer, type Server } from 'node:http'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
+
 import JSON5 from 'json5'
 import type { Report } from 'renovate/dist/instrumentation/types'
 import type { PackageFile } from 'renovate/dist/modules/manager/types'

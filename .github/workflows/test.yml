@@ -39,6 +39,18 @@ jobs:
 
       - uses: jdx/mise-action@v2
 
+      - name: Cache bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            ~/.bun/install/global
+            node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: ${{ runner.os }}-bun-
+
+      - run: bun install --frozen-lockfile
+
       - name: Run lefthook
         id: lefthook
         continue-on-error: true
@@ -64,13 +76,25 @@ jobs:
         if: steps.lefthook.outcome == 'failure'
         run: exit 1
 
-      - uses: actions/cache@v4
+  unit-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: jdx/mise-action@v2
+
+      - name: Cache bun dependencies
+        uses: actions/cache@v4
         with:
           path: |
             ~/.bun/install/cache
+            ~/.bun/install/global
             node_modules
-          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
-          restore-keys: bun-${{ runner.os }}-
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: ${{ runner.os }}-bun-
 
       - run: bun install --frozen-lockfile
-      - run: bun run test
+
+      - name: Run tests
+        run: bun run test
