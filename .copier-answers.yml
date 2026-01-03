@@ -3,5 +3,5 @@ _commit: v0.1.20
 _src_path: https://github.com/fohte/generic-boilerplate
 description: ''
 is_public: false
-type: base
+type: node
 use_release_please: false
