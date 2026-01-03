@@ -58,11 +58,9 @@ jobs:
 
       - uses: actions/cache@v4
         with:
-          path: |
-            ~/.bun/install/cache
-            node_modules
-          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
-          restore-keys: bun-${{ runner.os }}-
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: pnpm-${{ runner.os }}-
 
-      - run: bun install --frozen-lockfile
-      - run: bun run test
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test

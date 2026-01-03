@@ -3,13 +3,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "conc -g 'bun:test:typecheck' 'bun:test:vitest'",
+    "test": "conc -g 'npm:test:typecheck' 'npm:test:vitest'",
     "test:typecheck": "tsc --noEmit",
     "test:vitest": "vitest run",
     "test:watch": "vitest"
   },
   "devDependencies": {
-    "@tsconfig/bun": "1.0.10",
+    "@tsconfig/node24": "24.0.3",
     "concurrently": "9.2.1",
     "json5": "2.2.3",
     "nock": "14.0.10",
