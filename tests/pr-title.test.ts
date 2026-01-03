@@ -17,14 +17,15 @@ describeWithRenovate(
         b.upgrades?.some((u) => u.depName === 'cargo:example-crate')
       )
 
-      expect(branch).toBeDefined()
-      // Verify the update type is minor and prTitle contains the dependency name
-      const upgrade = branch?.upgrades?.find(
-        (u) => u.depName === 'cargo:example-crate'
-      )
-      expect(upgrade?.updateType).toBe('minor')
-      expect(branch?.prTitle).toContain('cargo:example-crate')
-      expect(branch?.prTitle).toContain('1.1.0')
+      expect(branch).toMatchObject({
+        prTitle: expect.stringMatching(/cargo:example-crate.*1\.1\.0/),
+        upgrades: expect.arrayContaining([
+          expect.objectContaining({
+            depName: 'cargo:example-crate',
+            updateType: 'minor',
+          }),
+        ]),
+      })
     })
   }
 )
