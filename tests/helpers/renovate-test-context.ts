@@ -41,10 +41,16 @@ export interface MockCrate {
   versions: string[]
 }
 
+export interface MockNpmPackage {
+  name: string
+  versions: string[]
+}
+
 export interface SetupOptions {
   fixtures: string[]
   mockRepos?: MockRepo[]
   mockCrates?: MockCrate[]
+  mockNpmPackages?: MockNpmPackage[]
   // Additional config files to merge with base.json5 (e.g., ['lefthook.json5'])
   additionalConfigs?: string[]
   // Dry-run mode: 'lookup' (default) for fast dependency detection,
@@ -59,6 +65,9 @@ export class RenovateTestContext {
   private mockCratesServer: Server | null = null
   private mockCratesPort: number | null = null
   private mockCratesData: Map<string, MockCrate> = new Map()
+  private mockNpmServer: Server | null = null
+  private mockNpmPort: number | null = null
+  private mockNpmData: Map<string, MockNpmPackage> = new Map()
   private additionalConfigs: string[] = []
   private dryRunMode: 'lookup' | 'full' = 'lookup'
 
@@ -74,6 +83,7 @@ export class RenovateTestContext {
       fixtures,
       mockRepos = [],
       mockCrates = [],
+      mockNpmPackages = [],
       additionalConfigs = [],
       dryRunMode = 'lookup',
     } = options
@@ -83,6 +93,11 @@ export class RenovateTestContext {
     // Set up mock crates server if needed
     if (mockCrates.length > 0) {
       await this.startMockCratesServer(mockCrates)
+    }
+
+    // Set up mock npm server if needed
+    if (mockNpmPackages.length > 0) {
+      await this.startMockNpmServer(mockNpmPackages)
     }
 
     // Create a temporary working directory
@@ -216,6 +231,80 @@ export class RenovateTestContext {
   }
 
   /**
+   * Start a mock npm registry server.
+   */
+  private startMockNpmServer(packages: MockNpmPackage[]): Promise<void> {
+    return new Promise((resolve, reject) => {
+      // Store package data for lookup
+      for (const pkg of packages) {
+        this.mockNpmData.set(pkg.name, pkg)
+      }
+
+      this.mockNpmServer = createServer((req, res) => {
+        // Parse package name from URL
+        // For regular packages: /package-name
+        // For scoped packages: /@scope%2Fpackage-name
+        const url = req.url ?? ''
+        let packageName = decodeURIComponent(url.slice(1)) // Remove leading /
+
+        const pkgData = this.mockNpmData.get(packageName)
+        if (!pkgData) {
+          res.writeHead(404)
+          res.end('Not Found')
+          return
+        }
+
+        // Build npm registry response
+        const versions: Record<string, object> = {}
+        const distTags: Record<string, string> = {}
+
+        for (const version of pkgData.versions) {
+          versions[version] = {
+            name: pkgData.name,
+            version,
+            dependencies: {},
+            devDependencies: {},
+          }
+        }
+
+        // Set latest tag to the highest version
+        const sortedVersions = [...pkgData.versions].sort((a, b) => {
+          const aParts = a.split('.').map(Number)
+          const bParts = b.split('.').map(Number)
+          for (let i = 0; i < 3; i++) {
+            if ((aParts[i] ?? 0) !== (bParts[i] ?? 0)) {
+              return (aParts[i] ?? 0) - (bParts[i] ?? 0)
+            }
+          }
+          return 0
+        })
+        distTags['latest'] = sortedVersions[sortedVersions.length - 1] ?? ''
+
+        const response = {
+          name: pkgData.name,
+          versions,
+          'dist-tags': distTags,
+        }
+
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        res.end(JSON.stringify(response))
+      })
+
+      this.mockNpmServer.listen(0, '127.0.0.1', () => {
+        const address = this.mockNpmServer!.address()
+        if (typeof address === 'object' && address) {
+          this.mockNpmPort = address.port
+          resolve()
+        } else {
+          reject(new Error('Failed to get server address'))
+        }
+      })
+
+      this.mockNpmServer.on('error', reject)
+    })
+  }
+
+  /**
    * Clean up the temporary directory and mock repos.
    */
   async cleanup(): Promise<void> {
@@ -244,6 +333,16 @@ export class RenovateTestContext {
       this.mockCratesServer = null
       this.mockCratesPort = null
       this.mockCratesData.clear()
+    }
+
+    // Stop mock npm server
+    if (this.mockNpmServer) {
+      await new Promise<void>((resolve) => {
+        this.mockNpmServer!.close(() => resolve())
+      })
+      this.mockNpmServer = null
+      this.mockNpmPort = null
+      this.mockNpmData.clear()
     }
 
     this.report = null
@@ -324,12 +423,18 @@ export class RenovateTestContext {
       ...additionalConfigsContent.flatMap((c) => c.customManagers ?? []),
     ]
 
-    // Add packageRule to redirect crate datasource to mock sparse registry if configured
+    // Add packageRule to redirect datasources to mock registries if configured
     const packageRules = [...(baseConfig.packageRules ?? [])]
     if (this.mockCratesPort) {
       packageRules.unshift({
         matchDatasources: ['crate'],
         registryUrls: [`sparse+http://127.0.0.1:${this.mockCratesPort}/`],
+      })
+    }
+    if (this.mockNpmPort) {
+      packageRules.unshift({
+        matchDatasources: ['npm'],
+        registryUrls: [`http://127.0.0.1:${this.mockNpmPort}/`],
       })
     }
 

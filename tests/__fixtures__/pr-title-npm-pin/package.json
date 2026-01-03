@@ -1,0 +1,7 @@
+{
+  "name": "test-pin",
+  "version": "1.0.0",
+  "dependencies": {
+    "test-pkg-pin": "^1.0.0"
+  }
+}
