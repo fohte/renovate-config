@@ -180,7 +180,9 @@ export class RenovateTestContext {
    * Create a mock git repository with the specified tags.
    */
   private createMockGitRepo(name: string, tags: string[]): string {
-    const repoPath = mkdtempSync(join(tmpdir(), `renovate-mock-${name}-`))
+    // Replace / with - in directory name to avoid path issues
+    const safeName = name.replace(/\//g, '-')
+    const repoPath = mkdtempSync(join(tmpdir(), `renovate-mock-${safeName}-`))
     initGitRepo(repoPath)
 
     // Create initial commit

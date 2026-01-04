@@ -19,31 +19,81 @@ const baseConfig = JSON5.parse(
   packageRules?: PackageRule[]
 }
 
-describe('PR priority rules', () => {
-  it('keeps lockfile maintenance at the front of the queue', () => {
-    const rule = baseConfig.packageRules?.find((candidate) => {
-      const types = candidate.matchUpdateTypes
-      return Array.isArray(types) && types.includes('lockFileMaintenance')
-    })
+/**
+ * Find the prPriority value for a given package name by evaluating
+ * all matching packageRules in order (later rules override earlier ones).
+ */
+function getPrPriorityByPackageName(packageName: string): number | undefined {
+  let priority: number | undefined
 
-    expect(rule).toMatchObject({
-      prPriority: 100,
+  for (const rule of baseConfig.packageRules ?? []) {
+    if (rule.prPriority === undefined) continue
+
+    const patterns = rule.matchPackagePatterns ?? []
+    const matches = patterns.some((pattern) =>
+      new RegExp(pattern).test(packageName),
+    )
+
+    if (matches) {
+      priority = rule.prPriority
+    }
+  }
+
+  return priority
+}
+
+/**
+ * Find the prPriority value for a given updateType by evaluating
+ * all matching packageRules in order (later rules override earlier ones).
+ */
+function getPrPriorityByUpdateType(updateType: string): number | undefined {
+  let priority: number | undefined
+
+  for (const rule of baseConfig.packageRules ?? []) {
+    if (rule.prPriority === undefined) continue
+
+    const types = rule.matchUpdateTypes ?? []
+    if (types.includes(updateType)) {
+      priority = rule.prPriority
+    }
+  }
+
+  return priority
+}
+
+describe('PR priority rules', () => {
+  describe('lockFileMaintenance', () => {
+    it('should set prPriority to 100', () => {
+      expect(getPrPriorityByUpdateType('lockFileMaintenance')).toBe(100)
     })
   })
 
-  it('bumps fohte org updates ahead when rate-limited', () => {
-    const rule = baseConfig.packageRules?.find((candidate) => {
-      const patterns = candidate.matchPackagePatterns
-      return (
-        Array.isArray(patterns) &&
-        patterns.includes('^fohte/') &&
-        patterns.includes('^https://github\\.com/fohte/') &&
-        patterns.includes('^git\\+https://github\\.com/fohte/')
-      )
-    })
+  describe('fohte org packages', () => {
+    const testCases = [
+      'fohte/lefthook-config',
+      'fohte/renovate-config',
+      'https://github.com/fohte/lefthook-config',
+      'git+https://github.com/fohte/renovate-config',
+    ]
 
-    expect(rule).toMatchObject({
-      prPriority: 100,
-    })
+    for (const packageName of testCases) {
+      it(`should set prPriority to 100 for "${packageName}"`, () => {
+        expect(getPrPriorityByPackageName(packageName)).toBe(100)
+      })
+    }
+  })
+
+  describe('non-fohte packages', () => {
+    const testCases = [
+      'actions/checkout',
+      'lodash',
+      'https://github.com/actions/checkout',
+    ]
+
+    for (const packageName of testCases) {
+      it(`should not set elevated prPriority for "${packageName}"`, () => {
+        expect(getPrPriorityByPackageName(packageName)).toBeUndefined()
+      })
+    }
   })
 })
