@@ -15,30 +15,17 @@ const baseConfig = JSON5.parse(
 }
 
 /**
- * Find the prPriority value for a given package name by evaluating
- * all matching packageRules in order (later rules override earlier ones).
- *
- * matchPackageNames supports both exact matches and regex patterns.
- * Regex patterns use the format `/pattern/` (e.g., `/^fohte\//`).
+ * Find the prPriority value by evaluating all matching packageRules in order
+ * (later rules override earlier ones).
  */
-function getPrPriorityByPackageName(packageName: string): number | undefined {
+function findPrPriority(
+  matcher: (rule: PackageRule) => boolean,
+): number | undefined {
   let priority: number | undefined
 
   for (const rule of baseConfig.packageRules ?? []) {
     if (rule.prPriority === undefined) continue
-
-    const names = rule.matchPackageNames ?? []
-    const matches = names.some((name) => {
-      // Check if it's a regex pattern (wrapped in /.../)
-      const regexMatch = name.match(/^\/(.+)\/$/)
-      if (regexMatch) {
-        return new RegExp(regexMatch[1]).test(packageName)
-      }
-      // Exact match
-      return name === packageName
-    })
-
-    if (matches) {
+    if (matcher(rule)) {
       priority = rule.prPriority
     }
   }
@@ -47,22 +34,34 @@ function getPrPriorityByPackageName(packageName: string): number | undefined {
 }
 
 /**
- * Find the prPriority value for a given updateType by evaluating
- * all matching packageRules in order (later rules override earlier ones).
+ * Find the prPriority value for a given package name.
+ *
+ * matchPackageNames supports both exact matches and regex patterns.
+ * Regex patterns use the format `/pattern/` (e.g., `/^fohte\//`).
+ */
+function getPrPriorityByPackageName(packageName: string): number | undefined {
+  return findPrPriority((rule) => {
+    const names = rule.matchPackageNames ?? []
+    return names.some((name) => {
+      // Check if it's a regex pattern (wrapped in /.../)
+      const regexMatch = name.match(/^\/(.+)\/$/)
+      if (regexMatch) {
+        return new RegExp(regexMatch[1]).test(packageName)
+      }
+      // Exact match
+      return name === packageName
+    })
+  })
+}
+
+/**
+ * Find the prPriority value for a given updateType.
  */
 function getPrPriorityByUpdateType(updateType: UpdateType): number | undefined {
-  let priority: number | undefined
-
-  for (const rule of baseConfig.packageRules ?? []) {
-    if (rule.prPriority === undefined) continue
-
+  return findPrPriority((rule) => {
     const types = rule.matchUpdateTypes ?? []
-    if (types.includes(updateType)) {
-      priority = rule.prPriority
-    }
-  }
-
-  return priority
+    return types.includes(updateType)
+  })
 }
 
 describe('PR priority rules', () => {

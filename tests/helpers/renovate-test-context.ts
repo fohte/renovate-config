@@ -35,17 +35,10 @@ const GIT_ENV = {
 }
 
 function initGitRepo(dir: string): void {
-  execSync('git init', { cwd: dir, stdio: 'pipe', env: GIT_ENV })
-  execSync('git config user.email "test@test.com"', {
-    cwd: dir,
-    stdio: 'pipe',
-    env: GIT_ENV,
-  })
-  execSync('git config user.name "Test"', {
-    cwd: dir,
-    stdio: 'pipe',
-    env: GIT_ENV,
-  })
+  const opts = { cwd: dir, stdio: 'pipe' as const, env: GIT_ENV }
+  execSync('git init', opts)
+  execSync('git config user.email "test@test.com"', opts)
+  execSync('git config user.name "Test"', opts)
 }
 
 export interface MockRepo {
