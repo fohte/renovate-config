@@ -20,12 +20,10 @@ describeWithRenovate(
       )
       const prettierDep = pkgFile.deps.find((d) => d.depName === 'prettier')
 
-      expect(prettierDep).toBeDefined()
-      // managed packages should be disabled (skipReason or no updates)
-      expect(
-        prettierDep?.skipReason === 'disabled' ||
-          (prettierDep?.updates ?? []).length === 0,
-      ).toBe(true)
+      expect(prettierDep).toMatchObject({
+        depName: 'prettier',
+        skipReason: 'disabled',
+      })
     })
 
     it('should allow updates for unmanaged packages (lodash)', () => {
@@ -35,14 +33,14 @@ describeWithRenovate(
       )
       const lodashDep = pkgFile.deps.find((d) => d.depName === 'lodash')
 
-      expect(lodashDep).toBeDefined()
-      expect(lodashDep?.updates).toEqual(
-        expect.arrayContaining([
+      expect(lodashDep).toMatchObject({
+        depName: 'lodash',
+        updates: expect.arrayContaining([
           expect.objectContaining({
             newValue: '4.18.0',
           }),
         ]),
-      )
+      })
     })
   },
 )
