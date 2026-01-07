@@ -2,13 +2,8 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
 import JSON5 from 'json5'
+import type { PackageRule, UpdateType } from 'renovate/dist/config/types'
 import { describe, expect, it } from 'vitest'
-
-interface PackageRule {
-  matchUpdateTypes?: string[]
-  matchPackageNames?: string[]
-  prPriority?: number
-}
 
 const baseConfig = JSON5.parse(
   readFileSync(
@@ -55,7 +50,7 @@ function getPrPriorityByPackageName(packageName: string): number | undefined {
  * Find the prPriority value for a given updateType by evaluating
  * all matching packageRules in order (later rules override earlier ones).
  */
-function getPrPriorityByUpdateType(updateType: string): number | undefined {
+function getPrPriorityByUpdateType(updateType: UpdateType): number | undefined {
   let priority: number | undefined
 
   for (const rule of baseConfig.packageRules ?? []) {
