@@ -47,10 +47,10 @@
     // Updates sourced from the fohte org keep template-based projects
     // synchronized, so let them skip ahead when Renovate throttles PRs.
     {
-      matchPackagePatterns: [
-        '^fohte/',
-        '^https://github\\.com/fohte/',
-        '^git\\+https://github\\.com/fohte/',
+      matchPackageNames: [
+        '/^fohte\\//',
+        '/^https:\\/\\/github\\.com\\/fohte\\//',
+        '/^git\\+https:\\/\\/github\\.com\\/fohte\\//',
       ],
       prPriority: 100,
     },

@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest'
 
 interface PackageRule {
   matchUpdateTypes?: string[]
-  matchPackagePatterns?: string[]
+  matchPackageNames?: string[]
   prPriority?: number
 }
 
@@ -22,6 +22,9 @@ const baseConfig = JSON5.parse(
 /**
  * Find the prPriority value for a given package name by evaluating
  * all matching packageRules in order (later rules override earlier ones).
+ *
+ * matchPackageNames supports both exact matches and regex patterns.
+ * Regex patterns use the format `/pattern/` (e.g., `/^fohte\//`).
  */
 function getPrPriorityByPackageName(packageName: string): number | undefined {
   let priority: number | undefined
@@ -29,10 +32,16 @@ function getPrPriorityByPackageName(packageName: string): number | undefined {
   for (const rule of baseConfig.packageRules ?? []) {
     if (rule.prPriority === undefined) continue
 
-    const patterns = rule.matchPackagePatterns ?? []
-    const matches = patterns.some((pattern) =>
-      new RegExp(pattern).test(packageName),
-    )
+    const names = rule.matchPackageNames ?? []
+    const matches = names.some((name) => {
+      // Check if it's a regex pattern (wrapped in /.../)
+      const regexMatch = name.match(/^\/(.+)\/$/)
+      if (regexMatch) {
+        return new RegExp(regexMatch[1]).test(packageName)
+      }
+      // Exact match
+      return name === packageName
+    })
 
     if (matches) {
       priority = rule.prPriority
