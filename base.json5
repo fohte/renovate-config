@@ -6,6 +6,11 @@
   configMigration: true,
   timezone: 'Asia/Tokyo',
 
+  // Wait 7 days after a package release before creating a PR.
+  // This helps mitigate supply chain attacks by allowing time for
+  // security researchers and automated tools to detect malicious packages.
+  minimumReleaseAge: '7 days',
+
   // set this to unlimited to ensure that a new PR is created so
   // we can notice when a version upgrade is available,
   // even if the previous PR hasn't been merged.
@@ -36,22 +41,23 @@
   // Note: packageRules are evaluated in order and later rules override earlier ones.
   packageRules: [
     // ==========================================================================
-    // priority overrides
+    // trusted updates
     // ==========================================================================
-    // Lockfile maintenance PRs unblock Renovate self-healing, so keep them at
-    // the head of the queue even when the global PR concurrency limit is hit.
+    // Prioritize trusted updates to ensure they are processed first.
+    // Lockfile maintenance PRs unblock Renovate self-healing.
     {
       matchUpdateTypes: ['lockFileMaintenance'],
       prPriority: 100,
     },
-    // Updates sourced from the fohte org keep template-based projects
-    // synchronized, so let them skip ahead when Renovate throttles PRs.
+    // Internal packages: skip minimumReleaseAge delay since they are trusted.
     {
       matchPackageNames: [
+        '/^@fohte\\//',
         '/^fohte\\//',
         '/^https:\\/\\/github\\.com\\/fohte\\//',
         '/^git\\+https:\\/\\/github\\.com\\/fohte\\//',
       ],
+      minimumReleaseAge: null,
       prPriority: 100,
     },
 
