@@ -19,6 +19,7 @@ const GENERIC_BOILERPLATE_REPO =
 
 interface SyncResult {
   updated: boolean
+  key: string
   file: string
   oldPackages: string[]
   newPackages: string[]
@@ -108,7 +109,6 @@ function extractAllPackages(tmpDir: string): {
   const allMiseNpmBackendTools = new Set<string>()
 
   for (const dir of dirs) {
-    // Extract mise tools
     const miseTomlPath = path.join(dir, '.mise.toml')
     const tools = extractMiseToolsFromFile(miseTomlPath)
 
@@ -120,7 +120,6 @@ function extractAllPackages(tmpDir: string): {
       }
     }
 
-    // Extract npm packages
     const packageJsonPath = path.join(dir, 'package.json')
     const packages = extractNpmPackagesFromFile(packageJsonPath)
 
@@ -137,148 +136,83 @@ function extractAllPackages(tmpDir: string): {
 }
 
 /**
- * Update base.json5 with mise tools
+ * Update content between markers
+ *
+ * Markers format:
+ *   // @auto-generated sync:generic-boilerplate:<key> start
+ *   matchPackageNames: [...]
+ *   // @auto-generated sync:generic-boilerplate:<key> end
  */
-function updateBaseJson5(rootDir: string, miseTools: string[]): SyncResult {
-  const filePath = path.join(rootDir, 'base.json5')
-  const content = fs.readFileSync(filePath, 'utf-8')
+function updateMarkerSection(
+  content: string,
+  key: string,
+  packages: string[],
+): { content: string; oldPackages: string[]; updated: boolean } {
+  const startMarker = `// @auto-generated sync:generic-boilerplate:${key} start`
+  const endMarker = `// @auto-generated sync:generic-boilerplate:${key} end`
 
-  // Find and update the generic-boilerplate mise section
-  const sectionRegex =
-    /(\/\/ generic-boilerplate[\s\S]*?\{[\s\S]*?matchManagers:\s*\['mise'\],[\s\S]*?matchPackageNames:\s*\[)([^\]]*?)(\],[\s\S]*?enabled:\s*false,[\s\S]*?\},)/
+  const startIndex = content.indexOf(startMarker)
+  const endIndex = content.indexOf(endMarker)
 
-  const match = content.match(sectionRegex)
-  if (!match) {
-    console.error(
-      'Could not find generic-boilerplate mise section in base.json5',
-    )
-    return {
-      updated: false,
-      file: filePath,
-      oldPackages: [],
-      newPackages: miseTools,
-    }
+  if (startIndex === -1 || endIndex === -1) {
+    console.error(`Could not find markers for ${key}`)
+    return { content, oldPackages: [], updated: false }
   }
 
-  const oldPackagesStr = match[2]
-  const oldPackages = (oldPackagesStr.match(/'[^']+'/g) || []).map((p) =>
+  const before = content.slice(0, startIndex + startMarker.length)
+  const after = content.slice(endIndex)
+  const between = content.slice(startIndex + startMarker.length, endIndex)
+
+  // Extract old packages from between
+  const oldPackages = (between.match(/'[^']+'/g) || []).map((p) =>
     p.replace(/'/g, ''),
   )
 
-  if (JSON.stringify(oldPackages.sort()) === JSON.stringify(miseTools.sort())) {
-    console.log('base.json5: No changes needed')
-    return {
-      updated: false,
-      file: filePath,
-      oldPackages,
-      newPackages: miseTools,
-    }
+  // Check if update is needed
+  if (JSON.stringify(oldPackages.sort()) === JSON.stringify(packages.sort())) {
+    return { content, oldPackages, updated: false }
   }
 
+  // Format new packages
   const indent = '        '
-  const formattedPackages = miseTools.map((p) => `${indent}'${p}',`).join('\n')
-  const updatedContent = content.replace(
-    sectionRegex,
-    `$1\n${formattedPackages}\n      $3`,
-  )
+  const formattedPackages =
+    packages.length > 0
+      ? `\n      matchPackageNames: [\n${packages.map((p) => `${indent}'${p}',`).join('\n')}\n      ],\n      `
+      : `\n      matchPackageNames: [],\n      `
 
-  fs.writeFileSync(filePath, updatedContent)
-  console.log('base.json5: Updated')
-
-  return { updated: true, file: filePath, oldPackages, newPackages: miseTools }
+  return {
+    content: before + formattedPackages + after,
+    oldPackages,
+    updated: true,
+  }
 }
 
 /**
- * Update node.json5 with npm packages and mise npm backend tools
+ * Update a config file with the given package lists
  */
-function updateNodeJson5(
-  rootDir: string,
-  npmPackages: string[],
-  miseNpmBackendTools: string[],
+function updateConfigFile(
+  filePath: string,
+  updates: { key: string; packages: string[] }[],
 ): SyncResult[] {
-  const filePath = path.join(rootDir, 'node.json5')
   let content = fs.readFileSync(filePath, 'utf-8')
   const results: SyncResult[] = []
 
-  // Update npm devDependencies section
-  const npmSectionRegex =
-    /(\/\/ npm devDependencies[\s\S]*?matchPackageNames:\s*\[)([^\]]*?)(\],[\s\S]*?enabled:\s*false,[\s\S]*?\},)/
+  for (const { key, packages } of updates) {
+    const result = updateMarkerSection(content, key, packages)
+    content = result.content
 
-  const npmMatch = content.match(npmSectionRegex)
-  if (npmMatch) {
-    const oldNpmPackagesStr = npmMatch[2]
-    const oldNpmPackages = (oldNpmPackagesStr.match(/'[^']+'/g) || []).map(
-      (p) => p.replace(/'/g, ''),
-    )
+    results.push({
+      updated: result.updated,
+      key,
+      file: filePath,
+      oldPackages: result.oldPackages,
+      newPackages: packages,
+    })
 
-    if (
-      JSON.stringify(oldNpmPackages.sort()) !==
-      JSON.stringify(npmPackages.sort())
-    ) {
-      const indent = '        '
-      const formattedPackages = npmPackages
-        .map((p) => `${indent}'${p}',`)
-        .join('\n')
-      content = content.replace(
-        npmSectionRegex,
-        `$1\n${formattedPackages}\n      $3`,
-      )
-      results.push({
-        updated: true,
-        file: `${filePath} (npm packages)`,
-        oldPackages: oldNpmPackages,
-        newPackages: npmPackages,
-      })
-      console.log('node.json5: npm packages updated')
+    if (result.updated) {
+      console.log(`${path.basename(filePath)}: ${key} updated`)
     } else {
-      console.log('node.json5: npm packages - No changes needed')
-      results.push({
-        updated: false,
-        file: `${filePath} (npm packages)`,
-        oldPackages: oldNpmPackages,
-        newPackages: npmPackages,
-      })
-    }
-  }
-
-  // Update mise npm backend section
-  const miseSectionRegex =
-    /(\/\/ mise npm backend[\s\S]*?matchManagers:\s*\['mise'\],[\s\S]*?matchPackageNames:\s*\[)([^\]]*?)(\],[\s\S]*?enabled:\s*false,[\s\S]*?\},)/
-
-  const miseMatch = content.match(miseSectionRegex)
-  if (miseMatch) {
-    const oldMisePackagesStr = miseMatch[2]
-    const oldMisePackages = (oldMisePackagesStr.match(/'[^']+'/g) || []).map(
-      (p) => p.replace(/'/g, ''),
-    )
-
-    if (
-      JSON.stringify(oldMisePackages.sort()) !==
-      JSON.stringify(miseNpmBackendTools.sort())
-    ) {
-      const indent = '        '
-      const formattedPackages = miseNpmBackendTools
-        .map((p) => `${indent}'${p}',`)
-        .join('\n')
-      content = content.replace(
-        miseSectionRegex,
-        `$1\n${formattedPackages}\n      $3`,
-      )
-      results.push({
-        updated: true,
-        file: `${filePath} (mise npm backend)`,
-        oldPackages: oldMisePackages,
-        newPackages: miseNpmBackendTools,
-      })
-      console.log('node.json5: mise npm backend updated')
-    } else {
-      console.log('node.json5: mise npm backend - No changes needed')
-      results.push({
-        updated: false,
-        file: `${filePath} (mise npm backend)`,
-        oldPackages: oldMisePackages,
-        newPackages: miseNpmBackendTools,
-      })
+      console.log(`${path.basename(filePath)}: ${key} - No changes needed`)
     }
   }
 
@@ -306,22 +240,25 @@ async function main(): Promise<void> {
     console.log(`  mise npm backend: ${miseNpmBackendTools.join(', ')}`)
 
     console.log('\nUpdating config files...')
-    const baseResult = updateBaseJson5(rootDir, miseTools)
-    const nodeResults = updateNodeJson5(
-      rootDir,
-      npmPackages,
-      miseNpmBackendTools,
-    )
+
+    const baseResults = updateConfigFile(path.join(rootDir, 'base.json5'), [
+      { key: 'mise-tools', packages: miseTools },
+    ])
+
+    const nodeResults = updateConfigFile(path.join(rootDir, 'node.json5'), [
+      { key: 'npm-packages', packages: npmPackages },
+      { key: 'mise-npm-backend', packages: miseNpmBackendTools },
+    ])
 
     console.log('\n=== Summary ===')
-    const allResults = [baseResult, ...nodeResults]
+    const allResults = [...baseResults, ...nodeResults]
     const updatedCount = allResults.filter((r) => r.updated).length
 
     if (updatedCount > 0) {
       console.log(`Updated ${updatedCount} section(s):`)
       for (const result of allResults) {
         if (result.updated) {
-          console.log(`  - ${result.file}`)
+          console.log(`  - ${path.basename(result.file)} (${result.key})`)
           console.log(`    Old: ${result.oldPackages.join(', ')}`)
           console.log(`    New: ${result.newPackages.join(', ')}`)
         }

@@ -183,6 +183,7 @@
     // Note: generic-boilerplate itself should override this with `enabled: true`.
     {
       matchManagers: ['mise'],
+      // @auto-generated sync:generic-boilerplate:mise-tools start
       matchPackageNames: [
         'actionlint',
         'bun',
@@ -191,6 +192,7 @@
         'shellcheck',
         'shfmt',
       ],
+      // @auto-generated sync:generic-boilerplate:mise-tools end
       enabled: false,
     },
   ],

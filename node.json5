@@ -9,7 +9,7 @@
     // These packages are updated in generic-boilerplate and synced via copier.
     // Note: generic-boilerplate itself does NOT extend node.json5.
     {
-      // npm devDependencies from template/package.json.jinja
+      // @auto-generated sync:generic-boilerplate:npm-packages start
       matchPackageNames: [
         '@commitlint/cli',
         '@fohte/eslint-config',
@@ -21,12 +21,14 @@
         'typescript',
         'vitest',
       ],
+      // @auto-generated sync:generic-boilerplate:npm-packages end
       enabled: false,
     },
     {
-      // mise npm backend from template/.mise.toml.jinja (non-node types only)
       matchManagers: ['mise'],
+      // @auto-generated sync:generic-boilerplate:mise-npm-backend start
       matchPackageNames: ['npm:@commitlint/cli', 'npm:prettier'],
+      // @auto-generated sync:generic-boilerplate:mise-npm-backend end
       enabled: false,
     },
 
