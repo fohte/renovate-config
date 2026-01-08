@@ -3,26 +3,33 @@
  *
  * This script:
  * 1. Clones generic-boilerplate (shallow)
- * 2. Extracts package names from generated/node/package.json and generated/node/.mise.toml
+ * 2. Scans all generated/* directories for package.json and .mise.toml
  * 3. Updates base.json5 and node.json5 with the extracted package names
  *
- * Run with: npx tsx scripts/sync-generic-boilerplate.ts
+ * Run with: pnpm sync:generic-boilerplate
  */
 
 import { execSync } from 'child_process'
 import * as fs from 'fs'
 import * as path from 'path'
+import { parse as parseToml } from 'smol-toml'
 
 const GENERIC_BOILERPLATE_REPO =
   'https://github.com/fohte/generic-boilerplate.git'
-const GENERATED_NODE_PATH = 'generated/node'
-const GENERATED_BASE_PATH = 'generated/base'
 
 interface SyncResult {
   updated: boolean
   file: string
   oldPackages: string[]
   newPackages: string[]
+}
+
+interface MiseToml {
+  tools?: Record<string, unknown>
+}
+
+interface PackageJson {
+  devDependencies?: Record<string, string>
 }
 
 /**
@@ -32,131 +39,101 @@ function cloneRepo(tmpDir: string): void {
   console.log('Cloning generic-boilerplate...')
   execSync(
     `git clone --depth 1 --single-branch ${GENERIC_BOILERPLATE_REPO} ${tmpDir}`,
-    {
-      stdio: 'pipe',
-    },
+    { stdio: 'pipe' },
   )
 }
 
 /**
- * Extract devDependencies from package.json
+ * Get all directories under generated/
  */
-function extractNpmPackages(tmpDir: string): string[] {
-  const packageJsonPath = path.join(tmpDir, GENERATED_NODE_PATH, 'package.json')
-  const content = fs.readFileSync(packageJsonPath, 'utf-8')
-  const pkg = JSON.parse(content) as {
-    devDependencies?: Record<string, string>
+function getGeneratedDirs(tmpDir: string): string[] {
+  const generatedPath = path.join(tmpDir, 'generated')
+  if (!fs.existsSync(generatedPath)) {
+    return []
   }
+
+  return fs
+    .readdirSync(generatedPath, { withFileTypes: true })
+    .filter((dirent) => dirent.isDirectory())
+    .map((dirent) => path.join(generatedPath, dirent.name))
+}
+
+/**
+ * Extract mise tools from a .mise.toml file
+ */
+function extractMiseToolsFromFile(filePath: string): string[] {
+  if (!fs.existsSync(filePath)) {
+    return []
+  }
+
+  const content = fs.readFileSync(filePath, 'utf-8')
+  const parsed = parseToml(content) as MiseToml
+
+  if (!parsed.tools) {
+    return []
+  }
+
+  return Object.keys(parsed.tools)
+}
+
+/**
+ * Extract devDependencies from a package.json file
+ */
+function extractNpmPackagesFromFile(filePath: string): string[] {
+  if (!fs.existsSync(filePath)) {
+    return []
+  }
+
+  const content = fs.readFileSync(filePath, 'utf-8')
+  const pkg = JSON.parse(content) as PackageJson
 
   if (!pkg.devDependencies) {
     return []
   }
 
-  return Object.keys(pkg.devDependencies).sort()
+  return Object.keys(pkg.devDependencies)
 }
 
 /**
- * Parse tools from a .mise.toml content
+ * Scan all generated/* directories and extract packages
  */
-function parseMiseTomlTools(content: string): string[] {
-  const tools: string[] = []
+function extractAllPackages(tmpDir: string): {
+  miseTools: string[]
+  npmPackages: string[]
+  miseNpmBackendTools: string[]
+} {
+  const dirs = getGeneratedDirs(tmpDir)
+  const allMiseTools = new Set<string>()
+  const allNpmPackages = new Set<string>()
+  const allMiseNpmBackendTools = new Set<string>()
 
-  // Parse [tools] section
-  const toolsSectionMatch = content.match(/\[tools\]([\s\S]*?)(?:\n\[|$)/)
-  if (!toolsSectionMatch) {
-    return []
+  for (const dir of dirs) {
+    // Extract mise tools
+    const miseTomlPath = path.join(dir, '.mise.toml')
+    const tools = extractMiseToolsFromFile(miseTomlPath)
+
+    for (const tool of tools) {
+      if (tool.startsWith('npm:')) {
+        allMiseNpmBackendTools.add(tool)
+      } else {
+        allMiseTools.add(tool)
+      }
+    }
+
+    // Extract npm packages
+    const packageJsonPath = path.join(dir, 'package.json')
+    const packages = extractNpmPackagesFromFile(packageJsonPath)
+
+    for (const pkg of packages) {
+      allNpmPackages.add(pkg)
+    }
   }
 
-  const toolsSection = toolsSectionMatch[1]
-
-  // Match tool definitions: key = "version" or "key" = "version"
-  const toolPattern = /^["']?([^"'\s=]+)["']?\s*=\s*["']([^"']+)["']/gm
-  let match: RegExpExecArray | null
-
-  while ((match = toolPattern.exec(toolsSection)) !== null) {
-    tools.push(match[1])
+  return {
+    miseTools: [...allMiseTools].sort(),
+    npmPackages: [...allNpmPackages].sort(),
+    miseNpmBackendTools: [...allMiseNpmBackendTools].sort(),
   }
-
-  return tools
-}
-
-/**
- * Extract mise tools from generated/node/.mise.toml
- */
-function extractMiseTools(tmpDir: string): string[] {
-  const miseTomlPath = path.join(tmpDir, GENERATED_NODE_PATH, '.mise.toml')
-  const content = fs.readFileSync(miseTomlPath, 'utf-8')
-  return parseMiseTomlTools(content).sort()
-}
-
-/**
- * Extract npm backend tools from generated/base/.mise.toml
- * These are tools with 'npm:' prefix that are used in non-node projects
- */
-function extractMiseNpmBackendTools(tmpDir: string): string[] {
-  const miseTomlPath = path.join(tmpDir, GENERATED_BASE_PATH, '.mise.toml')
-  const content = fs.readFileSync(miseTomlPath, 'utf-8')
-  const tools = parseMiseTomlTools(content)
-  return tools.filter((t) => t.startsWith('npm:')).sort()
-}
-
-/**
- * Update matchPackageNames array in a JSON5 file for a specific section
- * Uses regex to preserve comments and formatting
- */
-function updatePackageNamesInSection(
-  content: string,
-  sectionComment: string,
-  newPackages: string[],
-  matchManagersFilter?: string,
-): { updated: boolean; content: string; oldPackages: string[] } {
-  // Find the section by its comment marker
-  const sectionPattern = new RegExp(
-    `(// ${sectionComment}[\\s\\S]*?\\{[\\s\\S]*?matchPackageNames:\\s*\\[)([^\\]]*)(\\][\\s\\S]*?enabled:\\s*false[\\s\\S]*?\\})`,
-    'g',
-  )
-
-  let oldPackages: string[] = []
-  let updated = false
-
-  const updatedContent = content.replace(
-    sectionPattern,
-    (fullMatch, before, packagesStr, after) => {
-      // If matchManagers filter is specified, check if this is the right section
-      if (matchManagersFilter) {
-        const matchManagersCheck = new RegExp(
-          `matchManagers:\\s*\\['${matchManagersFilter}'\\]`,
-        )
-        if (!fullMatch.match(matchManagersCheck)) {
-          return fullMatch
-        }
-      }
-
-      // Extract old packages
-      oldPackages = (packagesStr.match(/'[^']+'/g) || []).map((p: string) =>
-        p.replace(/'/g, ''),
-      )
-
-      // Format new packages with proper indentation
-      const indent = '        '
-      const formattedPackages = newPackages
-        .map((p) => `${indent}'${p}',`)
-        .join('\n')
-
-      const newSection = `${before}\n${formattedPackages}\n      ${after}`
-
-      if (
-        JSON.stringify(oldPackages.sort()) !==
-        JSON.stringify(newPackages.sort())
-      ) {
-        updated = true
-      }
-
-      return newSection
-    },
-  )
-
-  return { updated, content: updatedContent, oldPackages }
 }
 
 /**
@@ -167,7 +144,6 @@ function updateBaseJson5(rootDir: string, miseTools: string[]): SyncResult {
   const content = fs.readFileSync(filePath, 'utf-8')
 
   // Find and update the generic-boilerplate mise section
-  // Looking for the pattern with matchManagers: ['mise'] and enabled: false
   const sectionRegex =
     /(\/\/ generic-boilerplate[\s\S]*?\{[\s\S]*?matchManagers:\s*\['mise'\],[\s\S]*?matchPackageNames:\s*\[)([^\]]*?)(\],[\s\S]*?enabled:\s*false,[\s\S]*?\},)/
 
@@ -184,13 +160,11 @@ function updateBaseJson5(rootDir: string, miseTools: string[]): SyncResult {
     }
   }
 
-  // Extract old packages
   const oldPackagesStr = match[2]
   const oldPackages = (oldPackagesStr.match(/'[^']+'/g) || []).map((p) =>
     p.replace(/'/g, ''),
   )
 
-  // Check if update is needed
   if (JSON.stringify(oldPackages.sort()) === JSON.stringify(miseTools.sort())) {
     console.log('base.json5: No changes needed')
     return {
@@ -201,10 +175,8 @@ function updateBaseJson5(rootDir: string, miseTools: string[]): SyncResult {
     }
   }
 
-  // Format new packages
   const indent = '        '
   const formattedPackages = miseTools.map((p) => `${indent}'${p}',`).join('\n')
-
   const updatedContent = content.replace(
     sectionRegex,
     `$1\n${formattedPackages}\n      $3`,
@@ -229,7 +201,6 @@ function updateNodeJson5(
   const results: SyncResult[] = []
 
   // Update npm devDependencies section
-  // Find the section with the comment "npm devDependencies from template/package.json.jinja"
   const npmSectionRegex =
     /(\/\/ npm devDependencies[\s\S]*?matchPackageNames:\s*\[)([^\]]*?)(\],[\s\S]*?enabled:\s*false,[\s\S]*?\},)/
 
@@ -324,20 +295,16 @@ async function main(): Promise<void> {
   const tmpDir = fs.mkdtempSync('/tmp/generic-boilerplate-')
 
   try {
-    // Clone generic-boilerplate
     cloneRepo(tmpDir)
 
-    // Extract packages
     console.log('\nExtracting packages from generic-boilerplate...')
-    const npmPackages = extractNpmPackages(tmpDir)
-    const miseTools = extractMiseTools(tmpDir)
-    const miseNpmBackendTools = extractMiseNpmBackendTools(tmpDir)
+    const { miseTools, npmPackages, miseNpmBackendTools } =
+      extractAllPackages(tmpDir)
 
-    console.log(`  npm devDependencies: ${npmPackages.join(', ')}`)
     console.log(`  mise tools: ${miseTools.join(', ')}`)
+    console.log(`  npm devDependencies: ${npmPackages.join(', ')}`)
     console.log(`  mise npm backend: ${miseNpmBackendTools.join(', ')}`)
 
-    // Update config files
     console.log('\nUpdating config files...')
     const baseResult = updateBaseJson5(rootDir, miseTools)
     const nodeResults = updateNodeJson5(
@@ -346,7 +313,6 @@ async function main(): Promise<void> {
       miseNpmBackendTools,
     )
 
-    // Summary
     console.log('\n=== Summary ===')
     const allResults = [baseResult, ...nodeResults]
     const updatedCount = allResults.filter((r) => r.updated).length
@@ -364,7 +330,6 @@ async function main(): Promise<void> {
       console.log('No changes needed. All package lists are up to date.')
     }
   } finally {
-    // Cleanup
     fs.rmSync(tmpDir, { recursive: true, force: true })
   }
 }
