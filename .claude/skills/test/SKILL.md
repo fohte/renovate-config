@@ -63,7 +63,6 @@ Available options for `describeWithRenovate`:
 ### 4. dryRunMode Selection
 
 - Use `'lookup'` (default) when testing:
-
   - Dependency detection
   - Skip reasons
   - Update availability
