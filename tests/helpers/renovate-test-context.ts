@@ -54,6 +54,9 @@ export interface MockCrate {
 export interface MockNpmPackage {
   name: string
   versions: string[]
+  // Map of version to release timestamp (ISO 8601 format)
+  // If not specified, defaults to a date old enough to pass minimumReleaseAge
+  releaseTimes?: Record<string, string>
 }
 
 export interface MockGitHubRepo {
@@ -287,6 +290,12 @@ export class RenovateTestContext {
         // Build npm registry response
         const versions: Record<string, object> = {}
         const distTags: Record<string, string> = {}
+        const time: Record<string, string> = {}
+
+        // Default to 30 days ago if no release time specified
+        const defaultReleaseTime = new Date(
+          Date.now() - 30 * 24 * 60 * 60 * 1000,
+        ).toISOString()
 
         for (const version of pkgData.versions) {
           versions[version] = {
@@ -295,6 +304,7 @@ export class RenovateTestContext {
             dependencies: {},
             devDependencies: {},
           }
+          time[version] = pkgData.releaseTimes?.[version] ?? defaultReleaseTime
         }
 
         // Set latest tag to the highest version
@@ -307,6 +317,7 @@ export class RenovateTestContext {
           name: pkgData.name,
           versions,
           'dist-tags': distTags,
+          time,
         }
 
         res.writeHead(200, { 'Content-Type': 'application/json' })

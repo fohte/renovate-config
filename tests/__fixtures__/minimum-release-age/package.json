@@ -1,0 +1,8 @@
+{
+  "name": "test-minimum-release-age",
+  "version": "1.0.0",
+  "dependencies": {
+    "old-package": "1.0.0",
+    "new-package": "1.0.0"
+  }
+}
