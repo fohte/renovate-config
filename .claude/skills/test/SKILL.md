@@ -63,6 +63,7 @@ Available options for `describeWithRenovate`:
 ### 4. dryRunMode Selection
 
 - Use `'lookup'` (default) when testing:
+
   - Dependency detection
   - Skip reasons
   - Update availability
@@ -138,13 +139,13 @@ describeWithRenovate(
     it('should use deps!: prefix for major updates', () => {
       const branch = ctx
         .getBranches()
-        .find((b) => b.upgrades?.some((u) => u.depName?.includes('test-crate')))
+        .find((b) => b.upgrades?.some((u) => u.depName === 'cargo:test-crate'))
 
       expect(branch).toMatchObject({
         prTitle: expect.stringMatching(/^deps!: /),
         upgrades: expect.arrayContaining([
           expect.objectContaining({
-            depName: expect.stringContaining('test-crate'),
+            depName: 'cargo:test-crate',
             updateType: 'major',
           }),
         ]),
