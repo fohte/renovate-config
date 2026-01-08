@@ -2,6 +2,37 @@
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
 
   packageRules: [
+    // ==========================================================================
+    // generic-boilerplate (https://github.com/fohte/generic-boilerplate)
+    // ==========================================================================
+    // Disable updates for packages managed by generic-boilerplate.
+    // These packages are updated in generic-boilerplate and synced via copier.
+    // Note: generic-boilerplate itself does NOT extend node.json5.
+    {
+      // npm devDependencies from template/package.json.jinja
+      matchPackageNames: [
+        '@commitlint/cli',
+        '@fohte/eslint-config',
+        '@tsconfig/bun',
+        '@types/bun',
+        'concurrently',
+        'eslint',
+        'prettier',
+        'typescript',
+        'vitest',
+      ],
+      enabled: false,
+    },
+    {
+      // mise npm backend from template/.mise.toml.jinja (non-node types only)
+      matchManagers: ['mise'],
+      matchPackageNames: ['npm:@commitlint/cli', 'npm:prettier'],
+      enabled: false,
+    },
+
+    // ==========================================================================
+    // automerge
+    // ==========================================================================
     {
       matchManagers: ['npm', 'bun'],
       matchDepTypes: ['devDependencies'],
@@ -14,8 +45,19 @@
       matchUpdateTypes: ['patch', 'pin', 'digest'],
       automerge: true,
     },
+    {
+      // @cloudflare/workers-types uses date-based versioning (<major>.<YYYYMMDD>.<patch>),
+      // but we can safely automerge since CI type checking ensures compatibility
+      matchPackageNames: ['@cloudflare/workers-types'],
+      matchUpdateTypes: ['minor', 'patch'],
+      automerge: true,
+    },
+
+    // ==========================================================================
+    // grouping
+    // ==========================================================================
     // Group Bun runtime and its type definitions together
-    // to ensure compatibility between runtime and types
+    // to ensure compatibility between runtime and types.
     {
       matchManagers: ['mise'],
       matchPackageNames: ['bun'],
@@ -26,13 +68,10 @@
       matchPackageNames: ['@types/bun', 'bun-types'],
       groupName: 'bun',
     },
-    {
-      // @cloudflare/workers-types uses date-based versioning (<major>.<YYYYMMDD>.<patch>),
-      // but we can safely automerge since CI type checking ensures compatibility
-      matchPackageNames: ['@cloudflare/workers-types'],
-      matchUpdateTypes: ['minor', 'patch'],
-      automerge: true,
-    },
+
+    // ==========================================================================
+    // rangeStrategy
+    // ==========================================================================
     {
       // Keep peerDependencies range specifications (e.g., ^6.0.0 || ^7.0.0)
       // to maintain flexibility for consuming projects

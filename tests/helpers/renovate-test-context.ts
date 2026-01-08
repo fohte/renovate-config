@@ -275,7 +275,7 @@ export class RenovateTestContext {
         // For regular packages: /package-name
         // For scoped packages: /@scope%2Fpackage-name
         const url = req.url ?? ''
-        let packageName = decodeURIComponent(url.slice(1)) // Remove leading /
+        const packageName = decodeURIComponent(url.slice(1)) // Remove leading /
 
         const pkgData = this.mockNpmData.get(packageName)
         if (!pkgData) {
@@ -577,8 +577,13 @@ export class RenovateTestContext {
       ...additionalConfigsContent.flatMap((c) => c.customManagers ?? []),
     ]
 
+    // Merge packageRules from base config and additional configs
+    const packageRules = [
+      ...(baseConfig.packageRules ?? []),
+      ...additionalConfigsContent.flatMap((c) => c.packageRules ?? []),
+    ]
+
     // Add packageRule to redirect datasources to mock registries if configured
-    const packageRules = [...(baseConfig.packageRules ?? [])]
     if (this.mockCratesPort) {
       packageRules.unshift({
         matchDatasources: ['crate'],
