@@ -51,12 +51,7 @@
     },
     // Internal packages: skip minimumReleaseAge delay since they are trusted.
     {
-      matchPackageNames: [
-        '/^@fohte\\//',
-        '/^fohte\\//',
-        '/^https:\\/\\/github\\.com\\/fohte\\//',
-        '/^git\\+https:\\/\\/github\\.com\\/fohte\\//',
-      ],
+      matchSourceUrls: ['https://github.com/fohte/**'],
       minimumReleaseAge: null,
       prPriority: 100,
     },
