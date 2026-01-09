@@ -5,11 +5,12 @@
     // ==========================================================================
     // generic-boilerplate (https://github.com/fohte/generic-boilerplate)
     // ==========================================================================
-    // Disable updates for packages managed by generic-boilerplate.
-    // These packages are updated in generic-boilerplate and synced via copier.
-    // Note: generic-boilerplate itself does NOT extend node.json5.
+    // Disable updates for npm packages managed by generic-boilerplate.
+    // These are updated in generic-boilerplate and synced to other repos via copier.
+    // Excluded from generic-boilerplate itself since that's where updates should happen.
     {
       // npm devDependencies from template/package.json.jinja
+      excludeRepositories: ['fohte/generic-boilerplate'],
       matchPackageNames: [
         '@commitlint/cli',
         '@fohte/eslint-config',
