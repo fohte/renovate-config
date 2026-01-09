@@ -195,5 +195,11 @@
       ],
       enabled: false,
     },
+    {
+      excludeRepositories: ['fohte/generic-boilerplate'],
+      matchManagers: ['mise'],
+      matchDepNames: ['npm:@commitlint/cli', 'npm:prettier'],
+      enabled: false,
+    },
   ],
 }

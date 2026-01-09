@@ -24,12 +24,6 @@
       ],
       enabled: false,
     },
-    {
-      // mise npm backend from template/.mise.toml.jinja (non-node types only)
-      matchManagers: ['mise'],
-      matchPackageNames: ['npm:@commitlint/cli', 'npm:prettier'],
-      enabled: false,
-    },
 
     // ==========================================================================
     // automerge
