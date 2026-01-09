@@ -1,0 +1,7 @@
+[tools]
+# generic-boilerplate managed
+lefthook = "2.0.12"
+actionlint = "1.7.9"
+
+# NOT managed by generic-boilerplate
+go-jsonnet = "0.21.0"

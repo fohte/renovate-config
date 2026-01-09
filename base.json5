@@ -184,7 +184,7 @@
     // Note: generic-boilerplate itself should override this with `enabled: true`.
     {
       matchManagers: ['mise'],
-      matchPackageNames: [
+      matchDepNames: [
         'actionlint',
         'bun',
         'cargo:basefmt',
