@@ -13,12 +13,11 @@ describeWithRenovate(
     additionalConfigs: ['node.json5'],
   },
   (ctx) => {
+    const pkgFile = () =>
+      ctx.getPackageFile('npm', 'generic-boilerplate-managed/package.json')
+
     it('should disable updates for managed packages (prettier)', () => {
-      const pkgFile = ctx.getPackageFile(
-        'npm',
-        'generic-boilerplate-managed/package.json',
-      )
-      const prettierDep = pkgFile.deps.find((d) => d.depName === 'prettier')
+      const prettierDep = pkgFile().deps.find((d) => d.depName === 'prettier')
 
       expect(prettierDep).toMatchObject({
         depName: 'prettier',
@@ -27,11 +26,7 @@ describeWithRenovate(
     })
 
     it('should allow updates for unmanaged packages (lodash)', () => {
-      const pkgFile = ctx.getPackageFile(
-        'npm',
-        'generic-boilerplate-managed/package.json',
-      )
-      const lodashDep = pkgFile.deps.find((d) => d.depName === 'lodash')
+      const lodashDep = pkgFile().deps.find((d) => d.depName === 'lodash')
 
       expect(lodashDep).toMatchObject({
         depName: 'lodash',
@@ -55,40 +50,25 @@ describeWithRenovate(
     ],
   },
   (ctx) => {
-    it('should disable updates for managed tools (lefthook)', () => {
-      const miseFile = ctx.getPackageFile(
-        'mise',
-        'generic-boilerplate-managed/.mise.toml',
-      )
-      const lefthookDep = miseFile.deps.find((d) => d.depName === 'lefthook')
+    const miseFile = () =>
+      ctx.getPackageFile('mise', 'generic-boilerplate-managed/.mise.toml')
 
-      expect(lefthookDep).toMatchObject({
-        depName: 'lefthook',
-        skipReason: 'disabled',
-      })
-    })
+    it.each(['lefthook', 'actionlint'])(
+      'should disable updates for managed tools (%s)',
+      (toolName) => {
+        const dep = miseFile().deps.find((d) => d.depName === toolName)
 
-    it('should disable updates for managed tools (actionlint)', () => {
-      const miseFile = ctx.getPackageFile(
-        'mise',
-        'generic-boilerplate-managed/.mise.toml',
-      )
-      const actionlintDep = miseFile.deps.find(
-        (d) => d.depName === 'actionlint',
-      )
-
-      expect(actionlintDep).toMatchObject({
-        depName: 'actionlint',
-        skipReason: 'disabled',
-      })
-    })
+        expect(dep).toMatchObject({
+          depName: toolName,
+          skipReason: 'disabled',
+        })
+      },
+    )
 
     it('should NOT disable updates for unmanaged tools (go-jsonnet)', () => {
-      const miseFile = ctx.getPackageFile(
-        'mise',
-        'generic-boilerplate-managed/.mise.toml',
+      const goJsonnetDep = miseFile().deps.find(
+        (d) => d.depName === 'go-jsonnet',
       )
-      const goJsonnetDep = miseFile.deps.find((d) => d.depName === 'go-jsonnet')
 
       expect(goJsonnetDep).toBeDefined()
       expect(goJsonnetDep?.skipReason).not.toBe('disabled')
