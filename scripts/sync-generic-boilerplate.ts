@@ -243,11 +243,11 @@ async function main(): Promise<void> {
 
     const baseResults = updateConfigFile(path.join(rootDir, 'base.json5'), [
       { key: 'mise-tools', packages: miseTools },
+      { key: 'mise-npm-backend', packages: miseNpmBackendTools },
     ])
 
     const nodeResults = updateConfigFile(path.join(rootDir, 'node.json5'), [
       { key: 'npm-packages', packages: npmPackages },
-      { key: 'mise-npm-backend', packages: miseNpmBackendTools },
     ])
 
     console.log('\n=== Summary ===')

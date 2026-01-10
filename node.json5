@@ -5,10 +5,11 @@
     // ==========================================================================
     // generic-boilerplate (https://github.com/fohte/generic-boilerplate)
     // ==========================================================================
-    // Disable updates for packages managed by generic-boilerplate.
-    // These packages are updated in generic-boilerplate and synced via copier.
-    // Note: generic-boilerplate itself does NOT extend node.json5.
+    // Disable updates for npm packages managed by generic-boilerplate.
+    // These are updated in generic-boilerplate and synced to other repos via copier.
+    // Excluded from generic-boilerplate itself since that's where updates should happen.
     {
+      matchRepositories: ['!fohte/generic-boilerplate'],
       // @auto-generated sync:generic-boilerplate:npm-packages start
       matchPackageNames: [
         '@commitlint/cli',
@@ -22,13 +23,6 @@
         'vitest',
       ],
       // @auto-generated sync:generic-boilerplate:npm-packages end
-      enabled: false,
-    },
-    {
-      matchManagers: ['mise'],
-      // @auto-generated sync:generic-boilerplate:mise-npm-backend start
-      matchPackageNames: ['npm:@commitlint/cli', 'npm:prettier'],
-      // @auto-generated sync:generic-boilerplate:mise-npm-backend end
       enabled: false,
     },
 

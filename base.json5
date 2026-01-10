@@ -6,6 +6,11 @@
   configMigration: true,
   timezone: 'Asia/Tokyo',
 
+  // Wait 7 days after a package release before creating a PR.
+  // This helps mitigate supply chain attacks by allowing time for
+  // security researchers and automated tools to detect malicious packages.
+  minimumReleaseAge: '7 days',
+
   // set this to unlimited to ensure that a new PR is created so
   // we can notice when a version upgrade is available,
   // even if the previous PR hasn't been merged.
@@ -36,22 +41,18 @@
   // Note: packageRules are evaluated in order and later rules override earlier ones.
   packageRules: [
     // ==========================================================================
-    // priority overrides
+    // trusted updates
     // ==========================================================================
-    // Lockfile maintenance PRs unblock Renovate self-healing, so keep them at
-    // the head of the queue even when the global PR concurrency limit is hit.
+    // Prioritize trusted updates to ensure they are processed first.
+    // Lockfile maintenance PRs unblock Renovate self-healing.
     {
       matchUpdateTypes: ['lockFileMaintenance'],
       prPriority: 100,
     },
-    // Updates sourced from the fohte org keep template-based projects
-    // synchronized, so let them skip ahead when Renovate throttles PRs.
+    // Internal packages: skip minimumReleaseAge delay since they are trusted.
     {
-      matchPackageNames: [
-        '/^fohte\\//',
-        '/^https:\\/\\/github\\.com\\/fohte\\//',
-        '/^git\\+https:\\/\\/github\\.com\\/fohte\\//',
-      ],
+      matchSourceUrls: ['https://github.com/fohte/**'],
+      minimumReleaseAge: null,
       prPriority: 100,
     },
 
@@ -178,13 +179,14 @@
     // ==========================================================================
     // generic-boilerplate (https://github.com/fohte/generic-boilerplate)
     // ==========================================================================
-    // Disable updates for mise tools managed by generic-boilerplate.
-    // These tools are updated in generic-boilerplate and synced via copier.
-    // Note: generic-boilerplate itself should override this with `enabled: true`.
+    // Disable updates for tools/packages managed by generic-boilerplate.
+    // These are updated in generic-boilerplate and synced to other repos via copier.
+    // Excluded from generic-boilerplate itself since that's where updates should happen.
     {
+      matchRepositories: ['!fohte/generic-boilerplate'],
       matchManagers: ['mise'],
       // @auto-generated sync:generic-boilerplate:mise-tools start
-      matchPackageNames: [
+      matchDepNames: [
         'actionlint',
         'bun',
         'cargo:basefmt',
@@ -193,6 +195,14 @@
         'shfmt',
       ],
       // @auto-generated sync:generic-boilerplate:mise-tools end
+      enabled: false,
+    },
+    {
+      matchRepositories: ['!fohte/generic-boilerplate'],
+      matchManagers: ['mise'],
+      // @auto-generated sync:generic-boilerplate:mise-npm-backend start
+      matchDepNames: ['npm:@commitlint/cli', 'npm:prettier'],
+      // @auto-generated sync:generic-boilerplate:mise-npm-backend end
       enabled: false,
     },
   ],
