@@ -11,6 +11,7 @@
 
 import { execSync } from 'child_process'
 import * as fs from 'fs'
+import * as os from 'os'
 import * as path from 'path'
 import { parse as parseToml } from 'smol-toml'
 
@@ -140,7 +141,7 @@ function extractAllPackages(tmpDir: string): {
  *
  * Markers format:
  *   // @auto-generated sync:generic-boilerplate:<key> start
- *   matchPackageNames: [...]
+ *   matchPackageNames: [...] or matchDepNames: [...]
  *   // @auto-generated sync:generic-boilerplate:<key> end
  */
 function updateMarkerSection(
@@ -163,6 +164,16 @@ function updateMarkerSection(
   const after = content.slice(endIndex)
   const between = content.slice(startIndex + startMarker.length, endIndex)
 
+  // Detect existing key (matchPackageNames or matchDepNames)
+  const packageKeyMatch = between.match(/match(?:Package|Dep)Names/)
+  if (!packageKeyMatch) {
+    console.error(
+      `Could not find matchPackageNames or matchDepNames for ${key}`,
+    )
+    return { content, oldPackages: [], updated: false }
+  }
+  const packageKey = packageKeyMatch[0]
+
   // Extract old packages from between
   const oldPackages = (between.match(/'[^']+'/g) || []).map((p) =>
     p.replace(/'/g, ''),
@@ -173,12 +184,12 @@ function updateMarkerSection(
     return { content, oldPackages, updated: false }
   }
 
-  // Format new packages
+  // Format new packages, preserving the existing key
   const indent = '        '
   const formattedPackages =
     packages.length > 0
-      ? `\n      matchPackageNames: [\n${packages.map((p) => `${indent}'${p}',`).join('\n')}\n      ],\n      `
-      : `\n      matchPackageNames: [],\n      `
+      ? `\n      ${packageKey}: [\n${packages.map((p) => `${indent}'${p}',`).join('\n')}\n      ],\n      `
+      : `\n      ${packageKey}: [],\n      `
 
   return {
     content: before + formattedPackages + after,
@@ -226,7 +237,7 @@ function updateConfigFile(
  */
 async function main(): Promise<void> {
   const rootDir = process.cwd()
-  const tmpDir = fs.mkdtempSync('/tmp/generic-boilerplate-')
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'generic-boilerplate-'))
 
   try {
     cloneRepo(tmpDir)
