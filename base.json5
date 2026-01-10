@@ -183,7 +183,7 @@
     // These are updated in generic-boilerplate and synced to other repos via copier.
     // Excluded from generic-boilerplate itself since that's where updates should happen.
     {
-      excludeRepositories: ['fohte/generic-boilerplate'],
+      matchRepositories: ['!fohte/generic-boilerplate'],
       matchManagers: ['mise'],
       matchDepNames: [
         'actionlint',
@@ -196,7 +196,7 @@
       enabled: false,
     },
     {
-      excludeRepositories: ['fohte/generic-boilerplate'],
+      matchRepositories: ['!fohte/generic-boilerplate'],
       matchManagers: ['mise'],
       matchDepNames: ['npm:@commitlint/cli', 'npm:prettier'],
       enabled: false,

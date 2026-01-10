@@ -10,7 +10,7 @@
     // Excluded from generic-boilerplate itself since that's where updates should happen.
     {
       // npm devDependencies from template/package.json.jinja
-      excludeRepositories: ['fohte/generic-boilerplate'],
+      matchRepositories: ['!fohte/generic-boilerplate'],
       matchPackageNames: [
         '@commitlint/cli',
         '@fohte/eslint-config',
