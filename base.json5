@@ -25,6 +25,7 @@
   // if it detects commits from unrecognized authors, requiring manual intervention.
   gitIgnoredAuthors: [
     '139195068+fohte-bot[bot]@users.noreply.github.com', // Fohte bot (https://github.com/apps/fohte-bot)
+    '41898282+github-actions[bot]@users.noreply.github.com', // GitHub Actions
   ],
 
   lockFileMaintenance: {
