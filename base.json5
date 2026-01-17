@@ -48,6 +48,11 @@
     // Lockfile maintenance PRs unblock Renovate self-healing.
     {
       matchUpdateTypes: ['lockFileMaintenance'],
+      // Lock file maintenance regenerates lock files without version constraints,
+      // so individual package release timestamps are unavailable. Since Renovate 42+
+      // treats missing timestamps as failing minimumReleaseAge, this would cause
+      // the PR to be pending indefinitely. Disable the check for this update type.
+      minimumReleaseAge: null,
       prPriority: 100,
     },
     // Internal packages: skip minimumReleaseAge delay since they are trusted.
