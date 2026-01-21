@@ -1,0 +1,45 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+
+  packageRules: [
+    // ==========================================================================
+    // generic-boilerplate (https://github.com/fohte/generic-boilerplate)
+    // ==========================================================================
+    // Disable updates for Cargo packages managed by generic-boilerplate.
+    // These are updated in generic-boilerplate and synced to other repos via copier.
+    // Excluded from generic-boilerplate itself since that's where updates should happen.
+    {
+      matchRepositories: ['!fohte/generic-boilerplate'],
+      matchManagers: ['cargo'],
+      matchPackageNames: ['rstest', 'thiserror'],
+      enabled: false,
+    },
+
+    // ==========================================================================
+    // automerge
+    // ==========================================================================
+    {
+      matchManagers: ['cargo'],
+      matchDepTypes: ['dev-dependencies'],
+      matchUpdateTypes: ['patch'],
+      groupName: 'dev-dependencies (non-major)',
+      automerge: true,
+    },
+    {
+      matchManagers: ['cargo'],
+      matchUpdateTypes: ['patch', 'pin', 'digest'],
+      automerge: true,
+    },
+
+    // ==========================================================================
+    // rangeStrategy
+    // ==========================================================================
+    // Cargo.toml typically uses SemVer ranges (e.g., "1.0" or "^1.0.0").
+    // Use 'auto' to preserve the existing range style in Cargo.toml.
+    // This avoids pinning exact versions, which is unusual for Rust projects.
+    {
+      matchManagers: ['cargo'],
+      rangeStrategy: 'auto',
+    },
+  ],
+}
