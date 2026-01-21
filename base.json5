@@ -191,6 +191,7 @@
     {
       matchRepositories: ['!fohte/generic-boilerplate'],
       matchManagers: ['mise'],
+      // @auto-generated sync:generic-boilerplate:mise-tools start
       matchDepNames: [
         'actionlint',
         'bun',
@@ -199,12 +200,15 @@
         'shellcheck',
         'shfmt',
       ],
+      // @auto-generated sync:generic-boilerplate:mise-tools end
       enabled: false,
     },
     {
       matchRepositories: ['!fohte/generic-boilerplate'],
       matchManagers: ['mise'],
+      // @auto-generated sync:generic-boilerplate:mise-npm-backend start
       matchDepNames: ['npm:@commitlint/cli', 'npm:prettier'],
+      // @auto-generated sync:generic-boilerplate:mise-npm-backend end
       enabled: false,
     },
   ],
