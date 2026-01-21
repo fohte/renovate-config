@@ -11,7 +11,9 @@
     {
       matchRepositories: ['!fohte/generic-boilerplate'],
       matchManagers: ['cargo'],
+      // @auto-generated sync:generic-boilerplate:cargo-packages start
       matchPackageNames: ['rstest', 'thiserror'],
+      // @auto-generated sync:generic-boilerplate:cargo-packages end
       enabled: false,
     },
 
