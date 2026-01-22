@@ -32,16 +32,5 @@
       matchUpdateTypes: ['patch', 'pin', 'digest'],
       automerge: true,
     },
-
-    // ==========================================================================
-    // rangeStrategy
-    // ==========================================================================
-    // Cargo.toml typically uses SemVer ranges (e.g., "1.0" or "^1.0.0").
-    // Use 'auto' to preserve the existing range style in Cargo.toml.
-    // This avoids pinning exact versions, which is unusual for Rust projects.
-    {
-      matchManagers: ['cargo'],
-      rangeStrategy: 'auto',
-    },
   ],
 }
