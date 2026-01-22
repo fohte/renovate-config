@@ -94,17 +94,10 @@ function extractCargoPackagesFromFile(filePath: string): string[] {
   const content = fs.readFileSync(filePath, 'utf-8')
   const parsed = parseToml(content) as CargoToml
 
-  const packages: string[] = []
-
-  if (parsed.dependencies) {
-    packages.push(...Object.keys(parsed.dependencies))
-  }
-
-  if (parsed['dev-dependencies']) {
-    packages.push(...Object.keys(parsed['dev-dependencies']))
-  }
-
-  return packages
+  return [
+    ...Object.keys(parsed.dependencies ?? {}),
+    ...Object.keys(parsed['dev-dependencies'] ?? {}),
+  ]
 }
 
 /**
