@@ -35,6 +35,7 @@ interface PackageJson {
 }
 
 interface CargoToml {
+  dependencies?: Record<string, unknown>
   'dev-dependencies'?: Record<string, unknown>
 }
 
@@ -83,7 +84,7 @@ function extractMiseToolsFromFile(filePath: string): string[] {
 }
 
 /**
- * Extract dev-dependencies from a Cargo.toml file
+ * Extract dependencies and dev-dependencies from a Cargo.toml file
  */
 function extractCargoPackagesFromFile(filePath: string): string[] {
   if (!fs.existsSync(filePath)) {
@@ -93,11 +94,17 @@ function extractCargoPackagesFromFile(filePath: string): string[] {
   const content = fs.readFileSync(filePath, 'utf-8')
   const parsed = parseToml(content) as CargoToml
 
-  if (!parsed['dev-dependencies']) {
-    return []
+  const packages: string[] = []
+
+  if (parsed.dependencies) {
+    packages.push(...Object.keys(parsed.dependencies))
   }
 
-  return Object.keys(parsed['dev-dependencies'])
+  if (parsed['dev-dependencies']) {
+    packages.push(...Object.keys(parsed['dev-dependencies']))
+  }
+
+  return packages
 }
 
 /**
@@ -281,7 +288,7 @@ async function main(): Promise<void> {
     console.log(`  mise tools: ${miseTools.join(', ')}`)
     console.log(`  npm devDependencies: ${npmPackages.join(', ')}`)
     console.log(`  mise npm backend: ${miseNpmBackendTools.join(', ')}`)
-    console.log(`  cargo dev-dependencies: ${cargoPackages.join(', ')}`)
+    console.log(`  cargo packages: ${cargoPackages.join(', ')}`)
 
     console.log('\nUpdating config files...')
 
