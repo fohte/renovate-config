@@ -14,18 +14,18 @@
     "sync:generic-boilerplate": "tsx scripts/sync-generic-boilerplate.ts"
   },
   "devDependencies": {
-    "@commitlint/cli": "20.2.0",
-    "@fohte/eslint-config": "0.1.1",
+    "@commitlint/cli": "20.4.0",
+    "@fohte/eslint-config": "0.1.2",
     "@tsconfig/node24": "24.0.3",
     "concurrently": "9.2.1",
-    "eslint": "8.57.1",
+    "eslint": "9.39.2",
     "json5": "2.2.3",
     "nock": "14.0.10",
-    "prettier": "3.7.4",
+    "prettier": "3.8.1",
     "renovate": "latest",
     "smol-toml": "1.6.0",
     "tsx": "4.21.0",
     "typescript": "5.9.3",
-    "vitest": "3.2.4"
+    "vitest": "4.0.18"
   }
 }
