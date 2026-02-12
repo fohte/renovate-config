@@ -1,8 +1,9 @@
 name: Sync generic-boilerplate
 
 on:
-  pull_request:
-    types: [opened, synchronize]
+  push:
+    branches:
+      - 'renovate/**'
   workflow_dispatch:
 
 permissions:
@@ -11,8 +12,8 @@ permissions:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    # Only run for Renovate PRs or manual trigger
-    if: github.actor == 'renovate[bot]' || github.event_name == 'workflow_dispatch'
+    # Only run for pushes to renovate/** branches or manual trigger
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
 
     steps:
       - uses: actions/create-github-app-token@v2
@@ -24,7 +25,6 @@ jobs:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
-          ref: ${{ github.head_ref || github.ref }}
 
       - uses: jdx/mise-action@v2
 
