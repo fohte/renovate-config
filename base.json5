@@ -195,6 +195,7 @@
       matchDepNames: [
         'actionlint',
         'bun',
+        'cargo:ast-grep',
         'cargo:basefmt',
         'lefthook',
         'shellcheck',
