@@ -1,5 +1,5 @@
 [tools]
-node = "24"
+node = "v24.13.1"
 pnpm = "10.27.0"
 lefthook = "2.0.16"
 
