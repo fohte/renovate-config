@@ -3,7 +3,7 @@ name: Sync generic-boilerplate
 on:
   push:
     branches:
-      - 'renovate/**'
+      - 'renovate/https-github.com-fohte-generic-boilerplate-*'
   workflow_dispatch:
 
 permissions:
