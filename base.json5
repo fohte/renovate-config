@@ -181,6 +181,15 @@
       matchDatasources: ['crate'],
       rangeStrategy: 'bump',
     },
+    // Disable pinning for Node.js in mise.
+    // Major-only versions (e.g., "24") let `mise install` pick the latest patch
+    // automatically. Pinning would generate frequent PRs for every patch release
+    // with little benefit.
+    {
+      matchManagers: ['mise'],
+      matchDatasources: ['node-version'],
+      enabled: false,
+    },
 
     // ==========================================================================
     // generic-boilerplate (https://github.com/fohte/generic-boilerplate)
