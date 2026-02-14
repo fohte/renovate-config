@@ -8,28 +8,21 @@ describeWithRenovate(
     fixtures: ['mise-node/.mise.toml'],
   },
   (ctx) => {
-    // With `enabled: false` for mise + node-version datasource,
-    // Renovate should not process node at all, so no pin PR is generated.
-    it('should not generate updates for node', () => {
-      const repoReport = ctx.report?.repositories['local']
-      const miseFiles = repoReport?.packageFiles['mise'] as
-        | Array<{ packageFile: string; deps: Array<{ depName: string }> }>
-        | undefined
+    // With 'bump' rangeStrategy for mise + node-version datasource,
+    // Renovate should not generate a pin update for major-only versions.
+    it('should not generate pin update for major-only version', () => {
+      const miseFile = ctx.getPackageFile('mise', 'mise-node/.mise.toml')
+      const dep = miseFile.deps.find((d) => d.depName === 'node')
 
-      const miseNodeFile = miseFiles?.find(
-        (f) => f.packageFile === 'mise-node/.mise.toml',
-      )
+      expect(dep).toBeDefined()
+      expect(dep).toMatchObject({
+        depName: 'node',
+        currentValue: '24',
+        datasource: 'node-version',
+      })
 
-      if (miseNodeFile) {
-        const nodeDep = miseNodeFile.deps.find((d) => d.depName === 'node')
-        // If the dep exists, it should be disabled (skipReason or no updates)
-        if (nodeDep) {
-          const updates = (nodeDep as Record<string, unknown>).updates as
-            | Array<{ updateType: string }>
-            | undefined
-          expect(updates ?? []).toHaveLength(0)
-        }
-      }
+      const pinUpdate = dep?.updates?.find((u) => u.updateType === 'pin')
+      expect(pinUpdate).toBeUndefined()
     })
   },
 )

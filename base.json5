@@ -181,14 +181,15 @@
       matchDatasources: ['crate'],
       rangeStrategy: 'bump',
     },
-    // Disable pinning for Node.js in mise.
+    // Use 'bump' rangeStrategy for Node.js in mise.
     // Major-only versions (e.g., "24") let `mise install` pick the latest patch
-    // automatically. Pinning would generate frequent PRs for every patch release
-    // with little benefit.
+    // automatically. The global 'pin' strategy would pin to an exact version
+    // (e.g., "24" -> "v24.13.1"), but minor/patch precision is unnecessary
+    // since Node.js is only used for running tests in this repository.
     {
       matchManagers: ['mise'],
       matchDatasources: ['node-version'],
-      enabled: false,
+      rangeStrategy: 'bump',
     },
 
     // ==========================================================================
