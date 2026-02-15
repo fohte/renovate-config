@@ -1,4 +1,6 @@
 [tools]
+# Keep major-only version so `mise install` always picks the latest patch.
+# Node.js is only used for running tests, so minor/patch precision is unnecessary.
 node = "24"
 pnpm = "10.27.0"
 lefthook = "2.0.16"
