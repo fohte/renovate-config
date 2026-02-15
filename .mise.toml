@@ -3,7 +3,7 @@
 # Node.js is only used for running tests, so minor/patch precision is unnecessary.
 node = "24"
 pnpm = "10.27.0"
-lefthook = "2.0.16"
+lefthook = "2.1.0"
 
 # lefthook hooks
 actionlint = "1.7.10"
