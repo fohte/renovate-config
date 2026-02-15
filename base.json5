@@ -198,6 +198,8 @@
         'cargo:ast-grep',
         'cargo:basefmt',
         'lefthook',
+        'node',
+        'pnpm',
         'shellcheck',
         'shfmt',
       ],
