@@ -6,7 +6,7 @@ describeWithRenovate(
   'mise node pinning',
   {
     fixtures: ['mise-node/.mise.toml'],
-    additionalConfigs: ['node.json5'],
+    additionalConfigs: ['node.json5', 'renovate.json5'],
   },
   (ctx) => {
     // With 'bump' rangeStrategy for mise + node-version datasource,
