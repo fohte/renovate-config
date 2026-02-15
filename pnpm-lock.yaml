@@ -8,8 +8,8 @@ importers:
   .:
     devDependencies:
       '@commitlint/cli':
-        specifier: 20.4.0
-        version: 20.4.0(@types/node@25.0.3)(typescript@5.9.3)
+        specifier: 20.4.1
+        version: 20.4.1(@types/node@25.0.3)(typescript@5.9.3)
       '@fohte/eslint-config':
         specifier: 0.1.2
         version: 0.1.2(@typescript-eslint/eslint-plugin@8.51.0(@typescript-eslint/parser@8.51.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(@typescript-eslint/parser@8.51.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint-config-prettier@10.1.8(eslint@9.39.2(jiti@2.6.1)))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.51.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1)))(eslint-plugin-simple-import-sort@12.1.1(eslint@9.39.2(jiti@2.6.1)))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
@@ -471,10 +471,10 @@ packages:
         integrity: sha512-cwX3i/mSJI/cRrtqwEPRfawB7pXgNioriSlkvou8LWiCrrcDe9ZtTbAbu8W1tEJQpe1pnX9VEgpzf/BbM7xF8Q==,
       }
 
-  '@commitlint/cli@20.4.0':
+  '@commitlint/cli@20.4.1':
     resolution:
       {
-        integrity: sha512-2lqrFrYNxjKxgMqeYiO3zNM14XN9v72/5xIJyvdLw7sHEGlfg6sweW01PGNWiqZa6/AuZwsb0uzkgWJy6F4N2w==,
+        integrity: sha512-uuFKKpc7OtQM+6SRqT+a4kV818o1pS+uvv/gsRhyX7g4x495jg+Q7P0+O9VNGyLXBYP0syksS7gMRDJKcekr6A==,
       }
     engines: { node: '>=v18' }
     hasBin: true
@@ -1571,7 +1571,6 @@ packages:
       }
     cpu: [arm]
     os: [linux]
-    libc: [glibc]
 
   '@rollup/rollup-linux-arm-musleabihf@4.54.0':
     resolution:
@@ -1580,7 +1579,6 @@ packages:
       }
     cpu: [arm]
     os: [linux]
-    libc: [musl]
 
   '@rollup/rollup-linux-arm64-gnu@4.54.0':
     resolution:
@@ -1589,7 +1587,6 @@ packages:
       }
     cpu: [arm64]
     os: [linux]
-    libc: [glibc]
 
   '@rollup/rollup-linux-arm64-musl@4.54.0':
     resolution:
@@ -1598,7 +1595,6 @@ packages:
       }
     cpu: [arm64]
     os: [linux]
-    libc: [musl]
 
   '@rollup/rollup-linux-loong64-gnu@4.54.0':
     resolution:
@@ -1607,7 +1603,6 @@ packages:
       }
     cpu: [loong64]
     os: [linux]
-    libc: [glibc]
 
   '@rollup/rollup-linux-ppc64-gnu@4.54.0':
     resolution:
@@ -1616,7 +1611,6 @@ packages:
       }
     cpu: [ppc64]
     os: [linux]
-    libc: [glibc]
 
   '@rollup/rollup-linux-riscv64-gnu@4.54.0':
     resolution:
@@ -1625,7 +1619,6 @@ packages:
       }
     cpu: [riscv64]
     os: [linux]
-    libc: [glibc]
 
   '@rollup/rollup-linux-riscv64-musl@4.54.0':
     resolution:
@@ -1634,7 +1627,6 @@ packages:
       }
     cpu: [riscv64]
     os: [linux]
-    libc: [musl]
 
   '@rollup/rollup-linux-s390x-gnu@4.54.0':
     resolution:
@@ -1643,7 +1635,6 @@ packages:
       }
     cpu: [s390x]
     os: [linux]
-    libc: [glibc]
 
   '@rollup/rollup-linux-x64-gnu@4.54.0':
     resolution:
@@ -1652,7 +1643,6 @@ packages:
       }
     cpu: [x64]
     os: [linux]
-    libc: [glibc]
 
   '@rollup/rollup-linux-x64-musl@4.54.0':
     resolution:
@@ -1661,7 +1651,6 @@ packages:
       }
     cpu: [x64]
     os: [linux]
-    libc: [musl]
 
   '@rollup/rollup-openharmony-arm64@4.54.0':
     resolution:
@@ -6526,14 +6515,6 @@ packages:
       }
     hasBin: true
 
-  semver@7.7.2:
-    resolution:
-      {
-        integrity: sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA==,
-      }
-    engines: { node: '>=10' }
-    hasBin: true
-
   semver@7.7.4:
     resolution:
       {
@@ -8575,7 +8556,7 @@ snapshots:
     dependencies:
       fs-extra: 11.3.0
 
-  '@commitlint/cli@20.4.0(@types/node@25.0.3)(typescript@5.9.3)':
+  '@commitlint/cli@20.4.1(@types/node@25.0.3)(typescript@5.9.3)':
     dependencies:
       '@commitlint/format': 20.4.0
       '@commitlint/lint': 20.4.1
@@ -8612,7 +8593,7 @@ snapshots:
   '@commitlint/is-ignored@20.4.1':
     dependencies:
       '@commitlint/types': 20.4.0
-      semver: 7.7.2
+      semver: 7.7.4
 
   '@commitlint/lint@20.4.1':
     dependencies:
@@ -9808,7 +9789,7 @@ snapshots:
       '@typescript-eslint/visitor-keys': 8.51.0
       debug: 4.4.3
       minimatch: 9.0.5
-      semver: 7.7.2
+      semver: 7.7.4
       tinyglobby: 0.2.15
       ts-api-utils: 2.4.0(typescript@5.9.3)
       typescript: 5.9.3
@@ -12730,8 +12711,6 @@ snapshots:
   semver@5.7.2: {}
 
   semver@6.3.1: {}
-
-  semver@7.7.2: {}
 
   semver@7.7.4: {}
 
