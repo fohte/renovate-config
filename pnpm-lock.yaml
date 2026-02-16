@@ -26,14 +26,14 @@ importers:
         specifier: 2.2.3
         version: 2.2.3
       nock:
-        specifier: 14.0.10
-        version: 14.0.10
+        specifier: 14.0.11
+        version: 14.0.11
       prettier:
         specifier: 3.8.1
         version: 3.8.1
       renovate:
         specifier: latest
-        version: 43.15.0(encoding@0.1.13)(typanion@3.14.0)
+        version: 43.19.1(encoding@0.1.13)(typanion@3.14.0)
       smol-toml:
         specifier: 1.6.0
         version: 1.6.0
@@ -982,10 +982,10 @@ packages:
         integrity: sha512-GaHYm+c0O9MjZRu0ongGBRbinu8gVAMd2UZjji6jVmqKtZluZnptXGWhz1E8j8D2HJ3f/yMxKAUC0b+57wncIw==,
       }
 
-  '@mswjs/interceptors@0.39.8':
+  '@mswjs/interceptors@0.41.3':
     resolution:
       {
-        integrity: sha512-2+BzZbjRO7Ct61k8fMNHEtoKjeWI9pIlHFTqBwZ5icHpqszIgEZbjb1MW5Z0+bITTCTl3gk4PDBxs9tA/csXvA==,
+        integrity: sha512-cXu86tF4VQVfwz8W1SPbhoRyHJkti6mjH/XJIxp40jhO4j2k1m4KYrEykxqWPkFF3vrK4rgQppBh//AwyGSXPA==,
       }
     engines: { node: '>=18' }
 
@@ -1571,6 +1571,7 @@ packages:
       }
     cpu: [arm]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-arm-musleabihf@4.54.0':
     resolution:
@@ -1579,6 +1580,7 @@ packages:
       }
     cpu: [arm]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-linux-arm64-gnu@4.54.0':
     resolution:
@@ -1587,6 +1589,7 @@ packages:
       }
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-arm64-musl@4.54.0':
     resolution:
@@ -1595,6 +1598,7 @@ packages:
       }
     cpu: [arm64]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-linux-loong64-gnu@4.54.0':
     resolution:
@@ -1603,6 +1607,7 @@ packages:
       }
     cpu: [loong64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-ppc64-gnu@4.54.0':
     resolution:
@@ -1611,6 +1616,7 @@ packages:
       }
     cpu: [ppc64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-riscv64-gnu@4.54.0':
     resolution:
@@ -1619,6 +1625,7 @@ packages:
       }
     cpu: [riscv64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-riscv64-musl@4.54.0':
     resolution:
@@ -1627,6 +1634,7 @@ packages:
       }
     cpu: [riscv64]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-linux-s390x-gnu@4.54.0':
     resolution:
@@ -1635,6 +1643,7 @@ packages:
       }
     cpu: [s390x]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-x64-gnu@4.54.0':
     resolution:
@@ -1643,6 +1652,7 @@ packages:
       }
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-x64-musl@4.54.0':
     resolution:
@@ -1651,6 +1661,7 @@ packages:
       }
     cpu: [x64]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-openharmony-arm64@4.54.0':
     resolution:
@@ -3094,10 +3105,10 @@ packages:
       }
     engines: { node: '>=18.0' }
 
-  cronstrue@3.11.0:
+  cronstrue@3.12.0:
     resolution:
       {
-        integrity: sha512-nXST7NEkjPF6loOTJtCwbLHB6cOVR5Ofuq/VZ4UGsZw/0HTvxy6mRCrDHOJ4xoLPcuS3ooruBLyUk3INaidKwg==,
+        integrity: sha512-k9oiM4G7U1GEEktOGfZabldP0gtFWTsaRVqq9X06ifytr73mpSYYdt+zGZBeS5lRCsqMfq0y7oSHycWGIJSo6g==,
       }
     hasBin: true
 
@@ -3411,16 +3422,16 @@ packages:
         integrity: sha512-L18DaJsXSUk2+42pv8mLs5jJT2hqFkFE4j21wOmgbUqsZ2hL72NsUU785g9RXgo3s0ZNgVl42TiHp3ZtOv/Vyg==,
       }
 
-  emojibase-regex@16.0.0:
+  emojibase-regex@17.0.0:
     resolution:
       {
-        integrity: sha512-ZMp31BkzBWNW+T73of6NURL6nXQa5GkfKneOkr3cEwBDVllbW/2nuva7NO0J3RjaQ07+SZQNgPTGZ4JlIhmM2Q==,
+        integrity: sha512-iWlqiz2l2zNf2lDqgN/7qjqKHVUX6H4D+8F5vDZkgjyWyRFXcA5K4rxkoTl7AJmyjHnoytw0m/do2SrGByui+g==,
       }
 
-  emojibase@16.0.0:
+  emojibase@17.0.0:
     resolution:
       {
-        integrity: sha512-Nw2m7JLIO4Ou2X/yZPRNscHQXVbbr6SErjkJ7EooG7MbR3yDZszCv9KTizsXFc7yZl0n3WF+qUKIC/Lw6H9xaQ==,
+        integrity: sha512-bXdpf4HPY3p41zK5swVKZdC/VynsMZ4LoLxdYDE+GucqkFwzcM1GVc4ODfYAlwoKaf2U2oNNUoOO78N96ovpBA==,
       }
     engines: { node: '>=18.12.0' }
 
@@ -5646,10 +5657,10 @@ packages:
       }
     engines: { node: '>= 10' }
 
-  nock@14.0.10:
+  nock@14.0.11:
     resolution:
       {
-        integrity: sha512-Q7HjkpyPeLa0ZVZC5qpxBt5EyLczFJ91MEewQiIi9taWuA0KB/MDJlUWtON+7dGouVdADTQsf9RA7TZk6D8VMw==,
+        integrity: sha512-u5xUnYE+UOOBA6SpELJheMCtj2Laqx15Vl70QxKo43Wz/6nMHXS7PrEioXLjXAwhmawdEMNImwKCcPhBJWbKVw==,
       }
     engines: { node: '>=18.20.0 <20 || >=20.12.1' }
 
@@ -6298,10 +6309,10 @@ packages:
         integrity: sha512-Eht5w30ruCXgFmxVUSlNWQ9iiimq07URKeFS3hNc8cUWy1llX4KDWfyEDZRycMc+znsN9Ux5/tJ/BFdgdOwA3A==,
       }
 
-  renovate@43.15.0:
+  renovate@43.19.1:
     resolution:
       {
-        integrity: sha512-1jXefF0Z1wfZNumlR3ENFZYcwu2hJ7kBBR6x9mkJmK8Q1U5K1iK38wPGr5YOb3j8zHdIZ0GIHxIKi2XUN0MzpQ==,
+        integrity: sha512-yLYCvb2qleMHffCszTe30ym5xjoc8LfYAoU7MFE7udFV5SC0LxG+VPPQt2SVIJ1YXnyCfHmAMdBNrAnPuRE45Q==,
       }
     engines: { node: ^24.11.0, pnpm: ^10.0.0 }
     hasBin: true
@@ -8838,7 +8849,7 @@ snapshots:
 
   '@kwsites/promise-deferred@1.1.1': {}
 
-  '@mswjs/interceptors@0.39.8':
+  '@mswjs/interceptors@0.41.3':
     dependencies:
       '@open-draft/deferred-promise': 2.2.0
       '@open-draft/logger': 0.3.0
@@ -10265,7 +10276,7 @@ snapshots:
 
   croner@9.1.0: {}
 
-  cronstrue@3.11.0: {}
+  cronstrue@3.12.0: {}
 
   cross-spawn@7.0.6:
     dependencies:
@@ -10433,9 +10444,9 @@ snapshots:
 
   emoji-regex@9.2.2: {}
 
-  emojibase-regex@16.0.0: {}
+  emojibase-regex@17.0.0: {}
 
-  emojibase@16.0.0: {}
+  emojibase@17.0.0: {}
 
   encoding@0.1.13:
     dependencies:
@@ -11996,9 +12007,9 @@ snapshots:
 
   neotraverse@0.6.18: {}
 
-  nock@14.0.10:
+  nock@14.0.11:
     dependencies:
-      '@mswjs/interceptors': 0.39.8
+      '@mswjs/interceptors': 0.41.3
       json-stringify-safe: 5.0.1
       propagate: 2.0.1
 
@@ -12449,7 +12460,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  renovate@43.15.0(encoding@0.1.13)(typanion@3.14.0):
+  renovate@43.19.1(encoding@0.1.13)(typanion@3.14.0):
     dependencies:
       '@aws-sdk/client-codecommit': 3.980.0
       '@aws-sdk/client-ec2': 3.980.0
@@ -12500,7 +12511,7 @@ snapshots:
       commander: 14.0.3
       conventional-commits-detector: 1.0.3
       croner: 9.1.0
-      cronstrue: 3.11.0
+      cronstrue: 3.12.0
       deepmerge: 4.3.1
       dequal: 2.0.3
       detect-indent: 7.0.2
@@ -12508,8 +12519,8 @@ snapshots:
       editorconfig: 3.0.1
       email-addresses: 5.0.0
       emoji-regex: 10.6.0
-      emojibase: 16.0.0
-      emojibase-regex: 16.0.0
+      emojibase: 17.0.0
+      emojibase-regex: 17.0.0
       execa: 8.0.1
       extract-zip: 2.0.1
       find-packages: 10.0.4
