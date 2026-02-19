@@ -7,6 +7,12 @@ lefthook = "2.1.0"
 
 # lefthook hooks
 actionlint = "1.7.10"
+<<<<<<< before updating
 "cargo:basefmt" = "0.1.0"
+=======
+node = "24.13.0"
+pnpm = "10.28.2"
+"github:fohte/basefmt" = "0.1.0"
+>>>>>>> after updating
 shellcheck = "0.11.0"
 shfmt = "3.12.0"
