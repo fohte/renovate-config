@@ -195,8 +195,8 @@
       matchDepNames: [
         'actionlint',
         'bun',
-        'cargo:ast-grep',
-        'cargo:basefmt',
+        'github:ast-grep/ast-grep',
+        'github:fohte/basefmt',
         'lefthook',
         'node',
         'pnpm',
