@@ -16,7 +16,9 @@
   "devDependencies": {
     "@commitlint/cli": "20.4.1",
     "@fohte/eslint-config": "0.1.2",
-    "@tsconfig/node24": "24.0.4",
+    "@tsconfig/node-lts": "22.0.1",
+    "@tsconfig/strictest": "2.0.8",
+    "@types/node": "24.10.12",
     "concurrently": "9.2.1",
     "eslint": "9.39.2",
     "json5": "2.2.3",
