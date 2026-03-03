@@ -102,13 +102,13 @@
     //   - !     -> major bump (breaking change)
     //
     // Resulting semantic commit types:
-    //   | Target          | major    | minor  | patch  | pin    |
-    //   |-----------------|----------|--------|--------|--------|
-    //   | dependencies    | deps!:   | deps:  | deps:  | chore: |
-    //   | devDependencies | chore:   | chore: | chore: | chore: |
-    //   | github-actions  | ci:      | ci:    | ci:    | ci:    |
+    //   | Target          | major        | minor        | patch        | pin          |
+    //   |-----------------|--------------|--------------|--------------|--------------|
+    //   | dependencies    | deps!:       | deps:        | deps:        | chore:       |
+    //   | devDependencies | chore:       | chore:       | chore:       | chore:       |
+    //   | github-actions  | ci:          | ci:          | ci:          | ci:          |
     //   | copier          | chore(deps): | chore(deps): | chore(deps): | chore(deps): |
-    //   | mise            | chore:   | chore: | chore: | chore: |
+    //   | mise            | chore:       | chore:       | chore:       | chore:       |
     {
       matchUpdateTypes: ['major'],
       commitMessagePrefix: 'deps!:',
