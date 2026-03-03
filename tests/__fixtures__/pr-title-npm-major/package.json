@@ -1,0 +1,7 @@
+{
+  "name": "test-major",
+  "version": "1.0.0",
+  "dependencies": {
+    "test-pkg-major": "1.0.0"
+  }
+}

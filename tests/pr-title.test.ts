@@ -12,6 +12,7 @@ import {
 //   | devDependencies | chore:       | chore:       | chore:       | chore:       |
 //   | github-actions  | ci:          | ci:          | ci:          | ci:          |
 //   | copier          | chore(deps): | chore(deps): | chore(deps): | chore(deps): |
+//   | mise            | chore:       | chore:       | chore:       | chore:       |
 
 interface TestCase {
   category: string
@@ -28,10 +29,12 @@ const testCases: TestCase[] = [
     category: 'dependencies',
     description: 'major update',
     options: {
-      fixtures: ['pr-title-major/.mise.toml'],
-      mockCrates: [{ name: 'test-major', versions: ['1.0.0', '2.0.0'] }],
+      fixtures: ['pr-title-npm-major/package.json'],
+      mockNpmPackages: [
+        { name: 'test-pkg-major', versions: ['1.0.0', '2.0.0'] },
+      ],
     },
-    depName: 'cargo:test-major',
+    depName: 'test-pkg-major',
     expectedPrefix: /^deps!: /,
     updateType: 'major',
   },
@@ -39,10 +42,12 @@ const testCases: TestCase[] = [
     category: 'dependencies',
     description: 'minor update',
     options: {
-      fixtures: ['.mise.toml'],
-      mockCrates: [{ name: 'example-crate', versions: ['1.0.0', '1.1.0'] }],
+      fixtures: ['pr-title-npm-minor/package.json'],
+      mockNpmPackages: [
+        { name: 'test-pkg-minor', versions: ['1.0.0', '1.1.0'] },
+      ],
     },
-    depName: 'cargo:example-crate',
+    depName: 'test-pkg-minor',
     expectedPrefix: /^deps: /,
     updateType: 'minor',
   },
@@ -50,10 +55,12 @@ const testCases: TestCase[] = [
     category: 'dependencies',
     description: 'patch update',
     options: {
-      fixtures: ['pr-title-patch/.mise.toml'],
-      mockCrates: [{ name: 'test-patch', versions: ['1.0.0', '1.0.1'] }],
+      fixtures: ['pr-title-npm-patch/package.json'],
+      mockNpmPackages: [
+        { name: 'test-pkg-patch', versions: ['1.0.0', '1.0.1'] },
+      ],
     },
-    depName: 'cargo:test-patch',
+    depName: 'test-pkg-patch',
     expectedPrefix: /^deps: /,
     updateType: 'patch',
   },
@@ -105,6 +112,40 @@ const testCases: TestCase[] = [
     depName: 'actions/checkout',
     expectedPrefix: /^ci: /,
     updateType: 'minor',
+  },
+  // mise
+  {
+    category: 'mise',
+    description: 'major update',
+    options: {
+      fixtures: ['pr-title-major/.mise.toml'],
+      mockCrates: [{ name: 'test-major', versions: ['1.0.0', '2.0.0'] }],
+    },
+    depName: 'cargo:test-major',
+    expectedPrefix: /^chore: /,
+    updateType: 'major',
+  },
+  {
+    category: 'mise',
+    description: 'minor update',
+    options: {
+      fixtures: ['.mise.toml'],
+      mockCrates: [{ name: 'example-crate', versions: ['1.0.0', '1.1.0'] }],
+    },
+    depName: 'cargo:example-crate',
+    expectedPrefix: /^chore: /,
+    updateType: 'minor',
+  },
+  {
+    category: 'mise',
+    description: 'patch update',
+    options: {
+      fixtures: ['pr-title-patch/.mise.toml'],
+      mockCrates: [{ name: 'test-patch', versions: ['1.0.0', '1.0.1'] }],
+    },
+    depName: 'cargo:test-patch',
+    expectedPrefix: /^chore: /,
+    updateType: 'patch',
   },
 ]
 

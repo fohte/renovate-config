@@ -102,12 +102,13 @@
     //   - !     -> major bump (breaking change)
     //
     // Resulting semantic commit types:
-    //   | Target          | major    | minor  | patch  | pin    |
-    //   |-----------------|----------|--------|--------|--------|
-    //   | dependencies    | deps!:   | deps:  | deps:  | chore: |
-    //   | devDependencies | chore:   | chore: | chore: | chore: |
-    //   | github-actions  | ci:      | ci:    | ci:    | ci:    |
-    //   | copier          | chore:   | chore: | chore: | chore: |
+    //   | Target          | major        | minor        | patch        | pin          |
+    //   |-----------------|--------------|--------------|--------------|--------------|
+    //   | dependencies    | deps!:       | deps:        | deps:        | chore(deps): |
+    //   | devDependencies | chore:       | chore:       | chore:       | chore:       |
+    //   | github-actions  | ci:          | ci:          | ci:          | ci:          |
+    //   | copier          | chore(deps): | chore(deps): | chore(deps): | chore(deps): |
+    //   | mise            | chore:       | chore:       | chore:       | chore:       |
     {
       matchUpdateTypes: ['major'],
       commitMessagePrefix: 'deps!:',
@@ -180,6 +181,13 @@
       matchManagers: ['mise'],
       matchDatasources: ['crate'],
       rangeStrategy: 'bump',
+    },
+    // mise tools are development-only (not runtime dependencies), so use 'chore:'
+    // to prevent release-please from triggering unnecessary patch bumps.
+    {
+      matchManagers: ['mise'],
+      commitMessagePrefix: 'chore:',
+      semanticCommitScope: null,
     },
 
     // ==========================================================================
