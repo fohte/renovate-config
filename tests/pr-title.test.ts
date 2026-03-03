@@ -12,6 +12,7 @@ import {
 //   | devDependencies | chore:       | chore:       | chore:       | chore:       |
 //   | github-actions  | ci:          | ci:          | ci:          | ci:          |
 //   | copier          | chore(deps): | chore(deps): | chore(deps): | chore(deps): |
+//   | mise            | chore:       | chore:       | chore:       | chore:       |
 
 interface TestCase {
   category: string
@@ -24,39 +25,6 @@ interface TestCase {
 
 const testCases: TestCase[] = [
   // dependencies
-  {
-    category: 'dependencies',
-    description: 'major update',
-    options: {
-      fixtures: ['pr-title-major/.mise.toml'],
-      mockCrates: [{ name: 'test-major', versions: ['1.0.0', '2.0.0'] }],
-    },
-    depName: 'cargo:test-major',
-    expectedPrefix: /^deps!: /,
-    updateType: 'major',
-  },
-  {
-    category: 'dependencies',
-    description: 'minor update',
-    options: {
-      fixtures: ['.mise.toml'],
-      mockCrates: [{ name: 'example-crate', versions: ['1.0.0', '1.1.0'] }],
-    },
-    depName: 'cargo:example-crate',
-    expectedPrefix: /^deps: /,
-    updateType: 'minor',
-  },
-  {
-    category: 'dependencies',
-    description: 'patch update',
-    options: {
-      fixtures: ['pr-title-patch/.mise.toml'],
-      mockCrates: [{ name: 'test-patch', versions: ['1.0.0', '1.0.1'] }],
-    },
-    depName: 'cargo:test-patch',
-    expectedPrefix: /^deps: /,
-    updateType: 'patch',
-  },
   {
     category: 'dependencies',
     description: 'pin update',
@@ -105,6 +73,40 @@ const testCases: TestCase[] = [
     depName: 'actions/checkout',
     expectedPrefix: /^ci: /,
     updateType: 'minor',
+  },
+  // mise
+  {
+    category: 'mise',
+    description: 'major update',
+    options: {
+      fixtures: ['pr-title-major/.mise.toml'],
+      mockCrates: [{ name: 'test-major', versions: ['1.0.0', '2.0.0'] }],
+    },
+    depName: 'cargo:test-major',
+    expectedPrefix: /^chore: /,
+    updateType: 'major',
+  },
+  {
+    category: 'mise',
+    description: 'minor update',
+    options: {
+      fixtures: ['.mise.toml'],
+      mockCrates: [{ name: 'example-crate', versions: ['1.0.0', '1.1.0'] }],
+    },
+    depName: 'cargo:example-crate',
+    expectedPrefix: /^chore: /,
+    updateType: 'minor',
+  },
+  {
+    category: 'mise',
+    description: 'patch update',
+    options: {
+      fixtures: ['pr-title-patch/.mise.toml'],
+      mockCrates: [{ name: 'test-patch', versions: ['1.0.0', '1.0.1'] }],
+    },
+    depName: 'cargo:test-patch',
+    expectedPrefix: /^chore: /,
+    updateType: 'patch',
   },
 ]
 
