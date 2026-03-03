@@ -104,7 +104,7 @@
     // Resulting semantic commit types:
     //   | Target          | major        | minor        | patch        | pin          |
     //   |-----------------|--------------|--------------|--------------|--------------|
-    //   | dependencies    | deps!:       | deps:        | deps:        | chore:       |
+    //   | dependencies    | deps!:       | deps:        | deps:        | chore(deps): |
     //   | devDependencies | chore:       | chore:       | chore:       | chore:       |
     //   | github-actions  | ci:          | ci:          | ci:          | ci:          |
     //   | copier          | chore(deps): | chore(deps): | chore(deps): | chore(deps): |
