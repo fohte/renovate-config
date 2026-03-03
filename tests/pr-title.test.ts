@@ -27,6 +27,45 @@ const testCases: TestCase[] = [
   // dependencies
   {
     category: 'dependencies',
+    description: 'major update',
+    options: {
+      fixtures: ['pr-title-npm-major/package.json'],
+      mockNpmPackages: [
+        { name: 'test-pkg-major', versions: ['1.0.0', '2.0.0'] },
+      ],
+    },
+    depName: 'test-pkg-major',
+    expectedPrefix: /^deps!: /,
+    updateType: 'major',
+  },
+  {
+    category: 'dependencies',
+    description: 'minor update',
+    options: {
+      fixtures: ['pr-title-npm-minor/package.json'],
+      mockNpmPackages: [
+        { name: 'test-pkg-minor', versions: ['1.0.0', '1.1.0'] },
+      ],
+    },
+    depName: 'test-pkg-minor',
+    expectedPrefix: /^deps: /,
+    updateType: 'minor',
+  },
+  {
+    category: 'dependencies',
+    description: 'patch update',
+    options: {
+      fixtures: ['pr-title-npm-patch/package.json'],
+      mockNpmPackages: [
+        { name: 'test-pkg-patch', versions: ['1.0.0', '1.0.1'] },
+      ],
+    },
+    depName: 'test-pkg-patch',
+    expectedPrefix: /^deps: /,
+    updateType: 'patch',
+  },
+  {
+    category: 'dependencies',
     description: 'pin update',
     options: {
       fixtures: ['pr-title-npm-pin/package.json'],

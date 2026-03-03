@@ -107,7 +107,7 @@
     //   | dependencies    | deps!:   | deps:  | deps:  | chore: |
     //   | devDependencies | chore:   | chore: | chore: | chore: |
     //   | github-actions  | ci:      | ci:    | ci:    | ci:    |
-    //   | copier          | chore:   | chore: | chore: | chore: |
+    //   | copier          | chore(deps): | chore(deps): | chore(deps): | chore(deps): |
     //   | mise            | chore:   | chore: | chore: | chore: |
     {
       matchUpdateTypes: ['major'],

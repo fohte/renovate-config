@@ -1,0 +1,7 @@
+{
+  "name": "test-minor",
+  "version": "1.0.0",
+  "dependencies": {
+    "test-pkg-minor": "1.0.0"
+  }
+}
