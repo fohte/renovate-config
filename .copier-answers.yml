@@ -7,3 +7,5 @@ node_package_manager: pnpm
 project_name: renovate-config
 type: node
 use_release_please: false
+
+#copier updated
