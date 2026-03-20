@@ -14,15 +14,20 @@
     "sync:generic-boilerplate": "tsx scripts/sync-generic-boilerplate.ts"
   },
   "devDependencies": {
-    "@commitlint/cli": "20.4.1",
-    "@fohte/eslint-config": "0.1.2",
-    "@tsconfig/node-lts": "22.0.1",
+    "@commitlint/cli": "20.4.3",
+    "@eslint/eslintrc": "3.3.5",
+    "@fohte/eslint-config": "0.2.0",
+    "@tsconfig/node-lts": "24.0.0",
     "@tsconfig/strictest": "2.0.8",
     "@types/node": "24.10.12",
     "concurrently": "9.2.1",
+<<<<<<< before updating
     "eslint": "9.39.2",
     "json5": "2.2.3",
     "nock": "14.0.11",
+=======
+    "eslint": "10.0.3",
+>>>>>>> after updating
     "prettier": "3.8.1",
     "renovate": "latest",
     "smol-toml": "1.6.0",
