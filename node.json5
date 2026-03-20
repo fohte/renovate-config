@@ -13,6 +13,7 @@
       // @auto-generated sync:generic-boilerplate:npm-packages start
       matchPackageNames: [
         '@commitlint/cli',
+        '@eslint/eslintrc',
         '@fohte/eslint-config',
         '@tsconfig/bun',
         '@tsconfig/node-lts',
