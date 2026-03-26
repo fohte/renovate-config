@@ -1,9 +1,14 @@
-import { mainConfig, typescriptConfig } from '@fohte/eslint-config'
+import { config } from '@fohte/eslint-config'
 
+<<<<<<< before updating
 const config = [
   ...mainConfig,
   ...typescriptConfig,
   // Ignore CommonJS files (commitlint config)
+=======
+export default config(
+  { typescript: { typeChecked: true } },
+>>>>>>> after updating
   {
     ignores: ['**/*.cjs'],
   },
@@ -19,6 +24,4 @@ const config = [
       ],
     },
   },
-]
-
-export default config
+)
