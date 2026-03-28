@@ -38,26 +38,30 @@ describeWithRenovate(
     it('should allow old releases (not pending)', () => {
       const branch = ctx
         .getBranches()
-        .find((b) => b.upgrades?.some((u) => u.depName === 'old-package'))
+        .find(
+          (b) => b.upgrades?.some((u) => u.depName === 'old-package') ?? false,
+        )
 
       expect(branch).toMatchObject({
-        result: expect.not.stringMatching(/^pending$/),
+        result: expect.not.stringMatching(/^pending$/) as unknown,
         upgrades: expect.arrayContaining([
           expect.objectContaining({ depName: 'old-package' }),
-        ]),
+        ]) as unknown,
       })
     })
 
     it('should delay recent releases (marked as pending)', () => {
       const branch = ctx
         .getBranches()
-        .find((b) => b.upgrades?.some((u) => u.depName === 'new-package'))
+        .find(
+          (b) => b.upgrades?.some((u) => u.depName === 'new-package') ?? false,
+        )
 
       expect(branch).toMatchObject({
         result: 'pending',
         upgrades: expect.arrayContaining([
           expect.objectContaining({ depName: 'new-package' }),
-        ]),
+        ]) as unknown,
       })
     })
   },

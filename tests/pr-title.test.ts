@@ -165,18 +165,21 @@ describe('PR title format for release-please', () => {
             it(`should use ${tc.expectedPrefix.source} prefix`, () => {
               const branch = ctx
                 .getBranches()
-                .find((b) =>
-                  b.upgrades?.some((u) => u.depName?.includes(tc.depName)),
+                .find(
+                  (b) =>
+                    b.upgrades?.some(
+                      (u) => u.depName?.includes(tc.depName) === true,
+                    ) ?? false,
                 )
 
               expect(branch).toMatchObject({
-                prTitle: expect.stringMatching(tc.expectedPrefix),
+                prTitle: expect.stringMatching(tc.expectedPrefix) as unknown,
                 upgrades: expect.arrayContaining([
                   expect.objectContaining({
-                    depName: expect.stringContaining(tc.depName),
+                    depName: expect.stringContaining(tc.depName) as unknown,
                     updateType: tc.updateType,
                   }),
-                ]),
+                ]) as unknown,
               })
             })
           },

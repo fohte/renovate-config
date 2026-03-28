@@ -30,10 +30,6 @@ interface MiseToml {
   tools?: Record<string, unknown>
 }
 
-interface PackageJson {
-  devDependencies?: Record<string, string>
-}
-
 interface CargoToml {
   dependencies?: Record<string, unknown>
   'dev-dependencies'?: Record<string, unknown>
@@ -109,13 +105,18 @@ function extractNpmPackagesFromFile(filePath: string): string[] {
   }
 
   const content = fs.readFileSync(filePath, 'utf-8')
-  const pkg = JSON.parse(content) as PackageJson
-
-  if (!pkg.devDependencies) {
+  const parsed: unknown = JSON.parse(content)
+  if (
+    typeof parsed !== 'object' ||
+    parsed === null ||
+    !('devDependencies' in parsed) ||
+    typeof parsed.devDependencies !== 'object' ||
+    parsed.devDependencies === null
+  ) {
     return []
   }
 
-  return Object.keys(pkg.devDependencies)
+  return Object.keys(parsed.devDependencies)
 }
 
 /**
@@ -267,7 +268,7 @@ function updateConfigFile(
 /**
  * Main function
  */
-async function main(): Promise<void> {
+function main(): void {
   const rootDir = process.cwd()
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'generic-boilerplate-'))
 
@@ -303,7 +304,7 @@ async function main(): Promise<void> {
     const updatedCount = allResults.filter((r) => r.updated).length
 
     if (updatedCount > 0) {
-      console.log(`Updated ${updatedCount} section(s):`)
+      console.log(`Updated ${String(updatedCount)} section(s):`)
       for (const result of allResults) {
         if (result.updated) {
           console.log(`  - ${path.basename(result.file)} (${result.key})`)
@@ -319,7 +320,9 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((error) => {
+try {
+  main()
+} catch (error: unknown) {
   console.error('Error:', error)
   process.exit(1)
-})
+}

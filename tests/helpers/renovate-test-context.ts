@@ -151,13 +151,16 @@ export class RenovateTestContext {
 
       let content = readFileSync(srcPath, 'utf-8')
       // Replace {{MOCK_REPO:name}} placeholders with file:// URLs
-      content = content.replace(/\{\{MOCK_REPO:([\w-]+)\}\}/g, (_, name) => {
-        const repoPath = this.mockRepoPaths.get(name)
-        if (!repoPath) {
-          throw new Error(`Mock repo '${name}' not found`)
-        }
-        return `file://${repoPath}`
-      })
+      content = content.replace(
+        /\{\{MOCK_REPO:([\w-]+)\}\}/g,
+        (_, name: string) => {
+          const repoPath = this.mockRepoPaths.get(name)
+          if (repoPath === undefined) {
+            throw new Error(`Mock repo '${name}' not found`)
+          }
+          return `file://${repoPath}`
+        },
+      )
       writeFileSync(destPath, content)
     }
 
@@ -219,7 +222,7 @@ export class RenovateTestContext {
         // The crate name is always the last part
         const crateName = parts[parts.length - 1] ?? null
 
-        if (!crateName) {
+        if (crateName === null || crateName.length === 0) {
           res.writeHead(404)
           res.end('Not Found')
           return
@@ -250,7 +253,12 @@ export class RenovateTestContext {
       })
 
       this.mockCratesServer.listen(0, '127.0.0.1', () => {
-        const address = this.mockCratesServer!.address()
+        const server = this.mockCratesServer
+        if (server === null) {
+          reject(new Error('Server was closed before it started'))
+          return
+        }
+        const address = server.address()
         if (typeof address === 'object' && address) {
           this.mockCratesPort = address.port
           resolve()
@@ -325,7 +333,12 @@ export class RenovateTestContext {
       })
 
       this.mockNpmServer.listen(0, '127.0.0.1', () => {
-        const address = this.mockNpmServer!.address()
+        const server = this.mockNpmServer
+        if (server === null) {
+          reject(new Error('Server was closed before it started'))
+          return
+        }
+        const address = server.address()
         if (typeof address === 'object' && address) {
           this.mockNpmPort = address.port
           resolve()
@@ -354,15 +367,21 @@ export class RenovateTestContext {
         // Handle GraphQL endpoint
         if (url === '/api/graphql' || url === '/graphql') {
           let body = ''
-          req.on('data', (chunk) => {
-            body += chunk
+          req.on('data', (chunk: Buffer) => {
+            body += chunk.toString()
           })
           req.on('end', () => {
             try {
-              const query = JSON.parse(body)
+              interface GraphQLQuery {
+                variables?: { owner?: string; name?: string }
+              }
+              // Use JSON5.parse with type parameter to avoid unsafe any assignment
+              const query = JSON5.parse<GraphQLQuery>(body)
 
               // Extract repo name from query variables
-              const repoName = `${query.variables?.owner}/${query.variables?.name}`
+              const owner = query.variables?.owner ?? ''
+              const name = query.variables?.name ?? ''
+              const repoName = `${owner}/${name}`
               const repoData = this.mockGitHubData.get(repoName)
 
               if (!repoData) {
@@ -422,7 +441,12 @@ export class RenovateTestContext {
           return
         }
 
-        const repoName = match[1]!
+        const repoName = match[1]
+        if (repoName === undefined) {
+          res.writeHead(404)
+          res.end('Not Found')
+          return
+        }
         const repoData = this.mockGitHubData.get(repoName)
         if (!repoData) {
           res.writeHead(404)
@@ -431,14 +455,15 @@ export class RenovateTestContext {
         }
 
         // Build GitHub API tags response
+        const port = this.mockGitHubPort ?? 0
         const tags = repoData.tags.map((tag) => ({
           name: tag,
           commit: {
             sha: '0'.repeat(40),
-            url: `http://127.0.0.1:${this.mockGitHubPort}/repos/${repoName}/commits/${'0'.repeat(40)}`,
+            url: `http://127.0.0.1:${String(port)}/repos/${repoName}/commits/${'0'.repeat(40)}`,
           },
-          zipball_url: `http://127.0.0.1:${this.mockGitHubPort}/repos/${repoName}/zipball/${tag}`,
-          tarball_url: `http://127.0.0.1:${this.mockGitHubPort}/repos/${repoName}/tarball/${tag}`,
+          zipball_url: `http://127.0.0.1:${String(port)}/repos/${repoName}/zipball/${tag}`,
+          tarball_url: `http://127.0.0.1:${String(port)}/repos/${repoName}/tarball/${tag}`,
         }))
 
         res.writeHead(200, { 'Content-Type': 'application/json' })
@@ -446,7 +471,12 @@ export class RenovateTestContext {
       })
 
       this.mockGitHubServer.listen(0, '127.0.0.1', () => {
-        const address = this.mockGitHubServer!.address()
+        const server = this.mockGitHubServer
+        if (server === null) {
+          reject(new Error('Server was closed before it started'))
+          return
+        }
+        const address = server.address()
         if (typeof address === 'object' && address) {
           this.mockGitHubPort = address.port
           resolve()
@@ -463,7 +493,7 @@ export class RenovateTestContext {
    * Clean up the temporary directory and mock repos.
    */
   async cleanup(): Promise<void> {
-    if (this.workDir) {
+    if (this.workDir !== null) {
       try {
         rmSync(this.workDir, { recursive: true, force: true })
       } catch (error) {
@@ -481,9 +511,12 @@ export class RenovateTestContext {
     this.mockRepoPaths.clear()
 
     // Stop mock crates server
-    if (this.mockCratesServer) {
+    if (this.mockCratesServer !== null) {
+      const server = this.mockCratesServer
       await new Promise<void>((resolve) => {
-        this.mockCratesServer!.close(() => resolve())
+        server.close(() => {
+          resolve()
+        })
       })
       this.mockCratesServer = null
       this.mockCratesPort = null
@@ -491,9 +524,12 @@ export class RenovateTestContext {
     }
 
     // Stop mock npm server
-    if (this.mockNpmServer) {
+    if (this.mockNpmServer !== null) {
+      const server = this.mockNpmServer
       await new Promise<void>((resolve) => {
-        this.mockNpmServer!.close(() => resolve())
+        server.close(() => {
+          resolve()
+        })
       })
       this.mockNpmServer = null
       this.mockNpmPort = null
@@ -501,9 +537,12 @@ export class RenovateTestContext {
     }
 
     // Stop mock GitHub API server
-    if (this.mockGitHubServer) {
+    if (this.mockGitHubServer !== null) {
+      const server = this.mockGitHubServer
       await new Promise<void>((resolve) => {
-        this.mockGitHubServer!.close(() => resolve())
+        server.close(() => {
+          resolve()
+        })
       })
       this.mockGitHubServer = null
       this.mockGitHubPort = null
@@ -526,9 +565,7 @@ export class RenovateTestContext {
       throw new Error('Repository report not found')
     }
 
-    const managerFiles = repoReport.packageFiles[manager] as
-      | PackageFile[]
-      | undefined
+    const managerFiles = repoReport.packageFiles[manager]
     if (!managerFiles) {
       throw new Error(`No package files found for manager: ${manager}`)
     }
@@ -562,66 +599,85 @@ export class RenovateTestContext {
   }
 
   private async dryRun(): Promise<Report> {
-    if (!this.workDir) {
+    if (this.workDir === null) {
       throw new Error('Work directory not set. Did you call setup()?')
     }
 
-    const reportPath = join(this.workDir, 'report.json')
+    // Capture in local variable so TypeScript can narrow the type in closures
+    const workDir = this.workDir
+    const reportPath = join(workDir, 'report.json')
+
+    // Parsed JSON5 config shape used for type-safe property access
+    interface ParsedConfig {
+      extends?: unknown[]
+      $schema?: string
+      customManagers?: unknown[]
+      packageRules?: unknown[]
+      [key: string]: unknown
+    }
 
     // Read base.json5 and create a test renovate config
-    const baseConfig = JSON5.parse(readFileSync(BASE_CONFIG_PATH, 'utf-8'))
+    const baseConfig = JSON5.parse<ParsedConfig>(
+      readFileSync(BASE_CONFIG_PATH, 'utf-8'),
+    )
 
     // Read and merge additional config files
     const additionalConfigsContent = this.additionalConfigs.map(
       (configFile) => {
         const configPath = join(import.meta.dirname, '..', '..', configFile)
-        return JSON5.parse(readFileSync(configPath, 'utf-8'))
+        return JSON5.parse<ParsedConfig>(readFileSync(configPath, 'utf-8'))
       },
     )
 
     // Exclude presets that require network access
-    const { extends: _, $schema: __, ...baseConfigWithoutPresets } = baseConfig
+    const {
+      extends: _,
+      $schema: __,
+      ...baseConfigWithoutPresets
+    }: ParsedConfig = baseConfig
 
     // Merge customManagers from additional configs
-    const customManagers = [
+    const customManagers: unknown[] = [
       ...(baseConfig.customManagers ?? []),
       ...additionalConfigsContent.flatMap((c) => c.customManagers ?? []),
     ]
 
     // Merge packageRules from base config and additional configs
-    const packageRules = [
+    const packageRules: unknown[] = [
       ...(baseConfig.packageRules ?? []),
       ...additionalConfigsContent.flatMap((c) => c.packageRules ?? []),
     ]
 
     // Add packageRule to redirect datasources to mock registries if configured
-    if (this.mockCratesPort) {
+    if (this.mockCratesPort !== null) {
       packageRules.unshift({
         matchDatasources: ['crate'],
-        registryUrls: [`sparse+http://127.0.0.1:${this.mockCratesPort}/`],
+        registryUrls: [
+          `sparse+http://127.0.0.1:${String(this.mockCratesPort)}/`,
+        ],
       })
     }
-    if (this.mockNpmPort) {
+    if (this.mockNpmPort !== null) {
       packageRules.unshift({
         matchDatasources: ['npm'],
-        registryUrls: [`http://127.0.0.1:${this.mockNpmPort}/`],
+        registryUrls: [`http://127.0.0.1:${String(this.mockNpmPort)}/`],
       })
     }
 
     // Add packageRule for github-tags datasource
-    if (this.mockGitHubPort) {
+    if (this.mockGitHubPort !== null) {
       packageRules.unshift({
         matchDatasources: ['github-tags'],
-        registryUrls: [`http://127.0.0.1:${this.mockGitHubPort}/`],
+        registryUrls: [`http://127.0.0.1:${String(this.mockGitHubPort)}/`],
       })
     }
 
     // Build hostRules for authentication
     const hostRules: object[] = []
-    if (this.mockGitHubPort) {
+    if (this.mockGitHubPort !== null) {
       // Provide a fake token to satisfy github-token-required check
       hostRules.push({
-        matchHost: `127.0.0.1:${this.mockGitHubPort}`,
+        matchHost: `127.0.0.1:${String(this.mockGitHubPort)}`,
         token: 'fake-token-for-testing',
       })
     }
@@ -636,15 +692,21 @@ export class RenovateTestContext {
       // and auto-detection won't work without real commit history
       semanticCommits: 'enabled',
       // Allow custom crate registries for mock server
-      allowCustomCrateRegistries: this.mockCratesPort ? true : undefined,
+      allowCustomCrateRegistries:
+        this.mockCratesPort !== null ? true : undefined,
       // Override default registry URL for crate datasource
-      defaultRegistryUrls: this.mockCratesPort
-        ? { crate: [`sparse+http://127.0.0.1:${this.mockCratesPort}/`] }
-        : undefined,
+      defaultRegistryUrls:
+        this.mockCratesPort !== null
+          ? {
+              crate: [
+                `sparse+http://127.0.0.1:${String(this.mockCratesPort)}/`,
+              ],
+            }
+          : undefined,
     }
 
     writeFileSync(
-      join(this.workDir, 'renovate.json'),
+      join(workDir, 'renovate.json'),
       JSON.stringify(testConfig, null, 2),
     )
 
@@ -661,15 +723,16 @@ export class RenovateTestContext {
           `--report-path=${reportPath}`,
         ],
         {
-          cwd: this.workDir!,
+          cwd: workDir,
           env: {
             ...process.env,
             LOG_LEVEL: 'warn',
-            RENOVATE_CONFIG_FILE: join(this.workDir!, 'renovate.json'),
+            RENOVATE_CONFIG_FILE: join(workDir, 'renovate.json'),
             // Provide fake token for github-actions tests
-            GITHUB_COM_TOKEN: this.mockGitHubPort
-              ? 'fake-token-for-testing'
-              : undefined,
+            GITHUB_COM_TOKEN:
+              this.mockGitHubPort !== null
+                ? 'fake-token-for-testing'
+                : undefined,
           },
           stdio: ['ignore', 'pipe', 'pipe'],
         },
@@ -677,10 +740,10 @@ export class RenovateTestContext {
 
       let stdout = ''
       let stderr = ''
-      child.stdout?.on('data', (data) => {
+      child.stdout.on('data', (data: Buffer) => {
         stdout += data.toString()
       })
-      child.stderr?.on('data', (data) => {
+      child.stderr.on('data', (data: Buffer) => {
         stderr += data.toString()
       })
 
@@ -713,6 +776,7 @@ export class RenovateTestContext {
     })
 
     const reportContent = readFileSync(reportPath, 'utf-8')
-    return JSON.parse(reportContent) as Report
+    // The report file is produced by renovate and conforms to the Report interface
+    return JSON5.parse<Report>(reportContent)
   }
 }
