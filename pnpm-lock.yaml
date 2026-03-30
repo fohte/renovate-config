@@ -42,10 +42,10 @@ importers:
         version: 3.8.1
       renovate:
         specifier: latest
-        version: 43.95.0(typanion@3.14.0)
+        version: 43.101.0(typanion@3.14.0)
       smol-toml:
-        specifier: 1.6.0
-        version: 1.6.0
+        specifier: 1.6.1
+        version: 1.6.1
       tsx:
         specifier: 4.21.0
         version: 4.21.0
@@ -1455,11 +1455,12 @@ packages:
       '@node-rs/xxhash':
         optional: true
 
-  '@renovatebot/detect-tools@1.2.9':
+  '@renovatebot/detect-tools@2.0.0':
     resolution:
       {
-        integrity: sha512-GKkts6FCkyUwBeRXrUfkPIAwACoE64y8EH66em5wZ9+KkRBi8YdC4jpY8lPrDgj5cgTzfsyArHETeavKzmmLBg==,
+        integrity: sha512-bdf6QcWyfXqBl4/8l96XCzyR+u28tIgKFnR+sJFeGht8u+e9fOWf5ZAZ+Mkq3qSXT4xBRwbYYE3udZC0wU2UIw==,
       }
+    engines: { node: '>=22.12.0' }
 
   '@renovatebot/good-enough-parser@1.2.0':
     resolution:
@@ -3412,10 +3413,10 @@ packages:
       }
     engines: { node: '>=0.3.1' }
 
-  diff@8.0.3:
+  diff@8.0.4:
     resolution:
       {
-        integrity: sha512-qejHi7bcSD4hQAZE0tNAawRK1ZtafHDmMTMkrrIGgSLl7hTnQHmKCeB45xAcbfTqK2zowkM3j3bHt/4b/ARbYQ==,
+        integrity: sha512-DPi0FmjiSU5EvQV0++GFDOJ9ASQUVFh5kD+OzOnYdi7n3Wpm9hWWGfB/O2blfHcMVTL5WkQXSnRiK9makhrcnw==,
       }
     engines: { node: '>=0.3.1' }
 
@@ -5994,10 +5995,10 @@ packages:
         integrity: sha512-Eht5w30ruCXgFmxVUSlNWQ9iiimq07URKeFS3hNc8cUWy1llX4KDWfyEDZRycMc+znsN9Ux5/tJ/BFdgdOwA3A==,
       }
 
-  renovate@43.95.0:
+  renovate@43.101.0:
     resolution:
       {
-        integrity: sha512-Z3mbZDkNj4Y1zW5TtLhYr6rmF72ui1NOZT1mVVhyOONLElHFWPlZLXFjJZCehuzgCgKpNfKCNgDT49schGKrDw==,
+        integrity: sha512-cGXCk2atvVOhxCuKhcSwVV8mb+8tnbagdAbU6NssD0NVGHLghfr4DpqYdozyJ5GV7qPhLTTmlciNVWaw6STczw==,
       }
     engines: { node: ^24.11.0, pnpm: ^10.0.0 }
     hasBin: true
@@ -6304,10 +6305,10 @@ packages:
       }
     engines: { node: '>= 6.0.0', npm: '>= 3.0.0' }
 
-  smol-toml@1.6.0:
+  smol-toml@1.6.1:
     resolution:
       {
-        integrity: sha512-4zemZi0HvTnYwLfrpk/CF9LOd9Lt87kAt50GnqhMpyF9U3poDAP2+iukq2bZsO/ufegbYehBkqINbsWxj4l4cw==,
+        integrity: sha512-dWUG8F5sIIARXih1DTaQAX4SsiTXhInKf1buxdY9DIg4ZYPZK5nGM1VRIYmEbDbsHt7USo99xSLFu5Q1IqTmsg==,
       }
     engines: { node: '>= 18' }
 
@@ -8563,7 +8564,7 @@ snapshots:
     dependencies:
       cluster-key-slot: 1.1.2
 
-  '@renovatebot/detect-tools@1.2.9':
+  '@renovatebot/detect-tools@2.0.0':
     dependencies:
       fs-extra: 11.3.4
       toml-eslint-parser: 0.12.0
@@ -9784,7 +9785,7 @@ snapshots:
 
   diff@5.2.2: {}
 
-  diff@8.0.3: {}
+  diff@8.0.4: {}
 
   dom-serializer@2.0.0:
     dependencies:
@@ -11508,7 +11509,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  renovate@43.95.0(typanion@3.14.0):
+  renovate@43.101.0(typanion@3.14.0):
     dependencies:
       '@aws-sdk/client-codecommit': 3.1000.0
       '@aws-sdk/client-ec2': 3.1000.0
@@ -11538,7 +11539,7 @@ snapshots:
       '@pnpm/parse-overrides': 1001.0.3
       '@qnighy/marshal': 0.1.3
       '@redis/client': 5.11.0
-      '@renovatebot/detect-tools': 1.2.9
+      '@renovatebot/detect-tools': 2.0.0
       '@renovatebot/good-enough-parser': 1.2.0
       '@renovatebot/osv-offline': 2.4.0
       '@renovatebot/pep440': 4.2.2
@@ -11563,7 +11564,7 @@ snapshots:
       deepmerge: 4.3.1
       dequal: 2.0.3
       detect-indent: 7.0.2
-      diff: 8.0.3
+      diff: 8.0.4
       editorconfig: 3.0.2
       email-addresses: 5.0.0
       emoji-regex: 10.6.0
@@ -11824,7 +11825,7 @@ snapshots:
   smart-buffer@4.2.0:
     optional: true
 
-  smol-toml@1.6.0: {}
+  smol-toml@1.6.1: {}
 
   socks-proxy-agent@8.0.5:
     dependencies:
