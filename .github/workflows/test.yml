@@ -48,7 +48,7 @@ jobs:
       - name: Cache pnpm store
         uses: actions/cache@v5
         with:
-          path: ~/.local/share/pnpm/store
+          path: ${{ steps.pnpm-store.outputs.path }}
           key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: pnpm-${{ runner.os }}-
 
@@ -96,7 +96,7 @@ jobs:
       - name: Cache pnpm store
         uses: actions/cache@v5
         with:
-          path: ~/.local/share/pnpm/store
+          path: ${{ steps.pnpm-store.outputs.path }}
           key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: pnpm-${{ runner.os }}-
 
