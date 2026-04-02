@@ -34,7 +34,7 @@ describeWithRenovate(
           expect.objectContaining({
             newValue: '4.18.0',
           }),
-        ]),
+        ]) as unknown,
       })
     })
   },

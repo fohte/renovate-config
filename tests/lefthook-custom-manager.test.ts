@@ -22,7 +22,7 @@ describeWithRenovate(
             newValue: 'v1.1.0',
             updateType: 'minor',
           }),
-        ]),
+        ]) as unknown,
       })
     })
 
@@ -38,7 +38,7 @@ describeWithRenovate(
             newValue: 'v1.1.0',
             updateType: 'minor',
           }),
-        ]),
+        ]) as unknown,
       })
     })
   },

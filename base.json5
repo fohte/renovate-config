@@ -202,12 +202,10 @@
       // @auto-generated sync:generic-boilerplate:mise-tools start
       matchDepNames: [
         'actionlint',
-        'bun',
         'github:ast-grep/ast-grep',
         'github:fohte/basefmt',
         'lefthook',
         'node',
-        'pnpm',
         'shellcheck',
         'shfmt',
       ],
