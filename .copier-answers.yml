@@ -1,9 +1,8 @@
 # Changes here will be overwritten by Copier
-_commit: v0.4.2
+_commit: v0.5.2
 _src_path: https://github.com/fohte/generic-boilerplate
 description: ''
 is_public: false
-node_package_manager: pnpm
 project_name: renovate-config
 type: node
 use_release_please: false
