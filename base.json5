@@ -72,7 +72,7 @@
     // Automerge low-risk updates to reduce PR noise.
     {
       matchManagers: ['github-actions'],
-      matchUpdateTypes: ['patch'],
+      matchUpdateTypes: ['patch', 'digest'],
       automerge: true,
     },
 
