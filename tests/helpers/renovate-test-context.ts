@@ -73,6 +73,11 @@ export interface SetupOptions {
   mockGitHubRepos?: MockGitHubRepo[]
   // Additional config files to merge with base.json5 (e.g., ['lefthook.json5'])
   additionalConfigs?: string[]
+  // Presets from base.json5's `extends` to re-include in the test config.
+  // Presets are excluded by default because most of them require network
+  // access to resolve. Use this to opt in to network-free presets (e.g.
+  // `helpers:pinGitHubActionDigests`) whose behavior needs verification.
+  allowedExtends?: string[]
   // Dry-run mode: 'lookup' (default) for fast dependency detection,
   // 'full' for complete branch/PR simulation including prTitle
   dryRunMode?: 'lookup' | 'full'
@@ -92,6 +97,7 @@ export class RenovateTestContext {
   private mockGitHubPort: number | null = null
   private mockGitHubData: Map<string, MockGitHubRepo> = new Map()
   private additionalConfigs: string[] = []
+  private allowedExtends: string[] = []
   private dryRunMode: 'lookup' | 'full' = 'lookup'
 
   /**
@@ -109,9 +115,11 @@ export class RenovateTestContext {
       mockNpmPackages = [],
       mockGitHubRepos = [],
       additionalConfigs = [],
+      allowedExtends = [],
       dryRunMode = 'lookup',
     } = options
     this.additionalConfigs = additionalConfigs
+    this.allowedExtends = allowedExtends
     this.dryRunMode = dryRunMode
 
     // Set up mock crates server if needed
@@ -629,12 +637,20 @@ export class RenovateTestContext {
       },
     )
 
-    // Exclude presets that require network access
+    // Exclude presets that require network access. Opt-in presets listed in
+    // `allowedExtends` are re-added below so tests can verify their behavior.
     const {
-      extends: _,
+      extends: baseExtends,
       $schema: __,
       ...baseConfigWithoutPresets
     }: ParsedConfig = baseConfig
+
+    // Filter base extends to only the opt-in presets. This guards against
+    // typos in `allowedExtends` that do not actually appear in base.json5.
+    const baseExtendsArray = Array.isArray(baseExtends) ? baseExtends : []
+    const filteredExtends = this.allowedExtends.filter((preset) =>
+      baseExtendsArray.includes(preset),
+    )
 
     // Merge customManagers from additional configs
     const customManagers: unknown[] = [
@@ -685,6 +701,7 @@ export class RenovateTestContext {
     const testConfig: Record<string, unknown> = {
       $schema: 'https://docs.renovatebot.com/renovate-schema.json',
       ...baseConfigWithoutPresets,
+      extends: filteredExtends.length > 0 ? filteredExtends : undefined,
       customManagers: customManagers.length > 0 ? customManagers : undefined,
       packageRules,
       hostRules: hostRules.length > 0 ? hostRules : undefined,
