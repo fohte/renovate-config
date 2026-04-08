@@ -45,7 +45,7 @@ jobs:
         run: pnpm sync:generic-boilerplate
 
       - name: Commit changes
-        uses: suzuki-shunsuke/commit-action@v0.0.14
+        uses: suzuki-shunsuke/commit-action@f12e2d628a4ab72dcefe7890ae07e8dbf1e201b9 # v0.1.1
         with:
           commit_message: 'chore: sync generic-boilerplate package list'
           workflow: deny
