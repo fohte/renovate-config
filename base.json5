@@ -4,7 +4,17 @@
   extends: [
     'config:recommended',
     ':enablePreCommit',
-    'helpers:pinGitHubActionDigests',
+    // Pin GitHub Action `uses:` to immutable SHA digests, and emit the
+    // accompanying version comment as a full SemVer (e.g. `# v3.1.0`) instead
+    // of the floating major tag Renovate would otherwise pick (`# v3`). This
+    // matches the "pinact" style (suzuki-shunsuke/pinact) so downstream repos
+    // can read the exact version at a glance while still resolving to a SHA.
+    //
+    // `helpers:pinGitHubActionDigestsToSemver` extends
+    // `helpers:pinGitHubActionDigests` internally and adds an `extractVersion`
+    // that only matches `vX.Y.Z` tags, filtering out floating tags like `v3`.
+    // See https://docs.renovatebot.com/presets-helpers/#helperspingithubactiondigeststosemver
+    'helpers:pinGitHubActionDigestsToSemver',
   ],
 
   configMigration: true,
