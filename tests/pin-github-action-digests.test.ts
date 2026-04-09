@@ -42,17 +42,10 @@ describeWithRenovate(
     })
 
     it('should pin to the full SemVer tag, not the floating major tag', () => {
-      const branch = ctx
+      const upgrade = ctx
         .getBranches()
-        .find(
-          (b) =>
-            b.upgrades?.some(
-              (u) => u.depName?.includes('actions/checkout') === true,
-            ) ?? false,
-        )
-      const upgrade = branch?.upgrades?.find(
-        (u) => u.depName?.includes('actions/checkout') === true,
-      )
+        .flatMap((b) => b.upgrades ?? [])
+        .find((u) => u.depName?.includes('actions/checkout') ?? false)
 
       // `newValue` is the version that will be written as a comment next to
       // the pinned SHA. With `extractVersion`, the floating `v1` tag is
