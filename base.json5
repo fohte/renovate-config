@@ -220,6 +220,7 @@
         'github:fohte/basefmt',
         'lefthook',
         'node',
+        'pinact',
         'shellcheck',
         'shfmt',
       ],
