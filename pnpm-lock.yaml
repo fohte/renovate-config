@@ -43,7 +43,7 @@ importers:
         version: 3.8.1
       renovate:
         specifier: latest
-        version: 43.127.3(typanion@3.14.0)
+        version: 43.128.1(typanion@3.14.0)
       smol-toml:
         specifier: 1.6.1
         version: 1.6.1
@@ -3362,8 +3362,8 @@ packages:
   remark@15.0.1:
     resolution: {integrity: sha512-Eht5w30ruCXgFmxVUSlNWQ9iiimq07URKeFS3hNc8cUWy1llX4KDWfyEDZRycMc+znsN9Ux5/tJ/BFdgdOwA3A==}
 
-  renovate@43.127.3:
-    resolution: {integrity: sha512-zhYwVo6UkcdiOUt/KGniZxG1Pb+GW61B4LZ2Hs+nZLR+b8P7ZnFVA9MWBKpXfNDjPYm924UzLfHvKdzwpnSMuA==}
+  renovate@43.128.1:
+    resolution: {integrity: sha512-AGqCHpyKy4DyWoMq1tfJoL15kE3ekkpVFdVFE4FNiPnK85On6QdLsTv7niAukLOKlkUDdU2o9lzFp88swiJzXw==}
     engines: {node: ^24.11.0, pnpm: ^10.0.0}
     hasBin: true
 
@@ -8194,7 +8194,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  renovate@43.127.3(typanion@3.14.0):
+  renovate@43.128.1(typanion@3.14.0):
     dependencies:
       '@aws-sdk/client-codecommit': 3.1021.0
       '@aws-sdk/client-ec2': 3.1021.0
