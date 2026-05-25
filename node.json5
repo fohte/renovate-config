@@ -71,10 +71,8 @@
       matchPackageNames: ['@types/bun', 'bun-types'],
       groupName: 'bun',
     },
-    // Group Node.js runtime and @types/node together for major/minor updates.
-    // DefinitelyTyped aligns @types/node's major/minor with Node, but patch is
-    // an independent DefinitelyTyped revision counter unrelated to Node patches,
-    // so grouping patches would block one side waiting on the other.
+    // Group Node.js and @types/node major/minor updates; patches are excluded as
+    // DefinitelyTyped patch versions are independent revision counters.
     // https://github.com/DefinitelyTyped/DefinitelyTyped#how-do-definitely-typed-package-versions-relate-to-versions-of-the-corresponding-library
     {
       matchManagers: ['mise'],
