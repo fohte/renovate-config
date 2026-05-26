@@ -1,27 +1,27 @@
 # CLAUDE.md
 
-## プリセットファイルの責務
+## Preset file responsibilities
 
-新しい packageRule やマネージャー設定を追加する際は、対象が依存する**エコシステム**に基づいて配置先を決めること。
+When adding a new `packageRule` or manager configuration, decide where to place it based on the **ecosystem** the target depends on.
 
-| File             | 責務                                                                                                                                                                                                                           |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `base.json5`     | 全プロジェクト共通・**言語非依存**の設定。`github-actions` / `pre-commit` / `mise` / `copier` / lockFileMaintenance などエコシステム横断のルール、および全体に効くデフォルト (timezone, minimumReleaseAge, rangeStrategy など) |
-| `node.json5`     | Node.js (npm/bun) 専用ルール。`@types/*` (DefinitelyTyped) のような npm レジストリ固有のパッケージもここ                                                                                                                       |
-| `go.json5`       | Go (gomod) 専用ルール                                                                                                                                                                                                          |
-| `rust.json5`     | Rust (cargo) 専用ルール                                                                                                                                                                                                        |
-| `lefthook.json5` | lefthook remotes の customManager                                                                                                                                                                                              |
-| `renovate.json5` | このリポジトリ自身の Renovate 設定。共有プリセットには含めない                                                                                                                                                                 |
+| File             | Responsibility                                                                                                                                                                                                                                   |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `base.json5`     | Settings common to all projects, **language-agnostic**. Cross-ecosystem rules for `github-actions` / `pre-commit` / `mise` / `copier` / `lockFileMaintenance`, and global defaults (`timezone`, `minimumReleaseAge`, `rangeStrategy`, and so on) |
+| `node.json5`     | Rules specific to Node.js (`npm` / `bun`). Packages exclusive to the npm registry such as `@types/*` (DefinitelyTyped) also belong here                                                                                                          |
+| `go.json5`       | Rules specific to Go (`gomod`)                                                                                                                                                                                                                   |
+| `rust.json5`     | Rules specific to Rust (`cargo`)                                                                                                                                                                                                                 |
+| `lefthook.json5` | `customManager` for `lefthook` remotes                                                                                                                                                                                                           |
+| `renovate.json5` | Renovate config for this repository itself. Not part of the shared presets                                                                                                                                                                       |
 
-## packageRule 配置の判断基準
+## Placement criterion for `packageRule`
 
-ルールが対象とするパッケージが**特定言語のパッケージマネージャー経由でしか流通しない**なら、その言語のファイルに置く。`base.json5` に置いてよいのは、その言語を一切使わないリポジトリで extend されても無害なルールだけ。
+If a rule targets packages distributed **only through a specific language's package manager**, place it in that language's file. `base.json5` should only contain rules that remain harmless when extended by a repository that does not use the language at all.
 
-例:
+Examples:
 
-- `@types/*` の automerge → `node.json5` (npm 専用。Go-only リポジトリには無関係)
-- `github-actions` の patch automerge → `base.json5` (GitHub 上の任意リポジトリで使う)
-- `gomod` のルール → `go.json5`
-- `cargo` のルール → `rust.json5`
+- Automerge for `@types/*` → `node.json5` (npm-only; irrelevant for Go-only repos)
+- Automerge for `github-actions` patch updates → `base.json5` (applies to any repo on GitHub)
+- Rules for `gomod` → `go.json5`
+- Rules for `cargo` → `rust.json5`
 
-迷ったら「`base.json5` のみを extend している Go-only / Rust-only リポジトリで、このルールが評価されても問題ないか?」を自問する。問題があるなら言語別ファイルに置く。
+When in doubt, ask: "If a Go-only or Rust-only repo extends only `base.json5`, is it acceptable for this rule to be evaluated there?" If not, put it in the language-specific file.
