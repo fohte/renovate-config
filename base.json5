@@ -85,6 +85,13 @@
       matchUpdateTypes: ['patch', 'digest'],
       automerge: true,
     },
+    // DefinitelyTyped pins `@types/*` major.minor to the upstream library's major.minor, so a patch bump
+    // only ships type-definition fixes; any resulting type-level breakage is caught by downstream `tsc` in CI.
+    {
+      matchPackageNames: ['@types/*'],
+      matchUpdateTypes: ['patch'],
+      automerge: true,
+    },
 
     // ==========================================================================
     // labels
