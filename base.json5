@@ -85,11 +85,7 @@
       matchUpdateTypes: ['patch', 'digest'],
       automerge: true,
     },
-    // DefinitelyTyped guarantees `@types/*` patch bumps only update type
-    // definitions for the same major.minor of the upstream library, so they
-    // carry no runtime risk. The only failure mode is stricter types breaking
-    // compilation, which downstream `tsc` in CI will catch before automerge.
-    // See https://github.com/DefinitelyTyped/DefinitelyTyped#how-do-definitely-typed-package-versions-relate-to-versions-of-the-corresponding-library
+    // `@types/*` patch updates carry no runtime risk; type-level breakage is caught by downstream `tsc` in CI.
     {
       matchPackageNames: ['@types/**'],
       matchUpdateTypes: ['patch'],
