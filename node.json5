@@ -71,6 +71,21 @@
       matchPackageNames: ['@types/bun', 'bun-types'],
       groupName: 'bun',
     },
+    // Group Node.js and @types/node major/minor updates; patches are excluded as
+    // DefinitelyTyped patch versions are independent revision counters.
+    // https://github.com/DefinitelyTyped/DefinitelyTyped#how-do-definitely-typed-package-versions-relate-to-versions-of-the-corresponding-library
+    {
+      matchManagers: ['mise'],
+      matchPackageNames: ['node'],
+      matchUpdateTypes: ['major', 'minor'],
+      groupName: 'node',
+    },
+    {
+      matchManagers: ['npm', 'bun'],
+      matchPackageNames: ['@types/node'],
+      matchUpdateTypes: ['major', 'minor'],
+      groupName: 'node',
+    },
 
     // ==========================================================================
     // rangeStrategy
