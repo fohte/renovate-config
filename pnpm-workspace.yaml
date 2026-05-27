@@ -1,0 +1,12 @@
+allowBuilds:
+  # required by vitest's transformer
+  esbuild: true
+  # required by @fohte/eslint-config -> eslint-plugin-import-x for "@/*" resolution
+  unrs-resolver: true
+  # renovate transitive native deps; required at runtime when running renovate in tests
+  better-sqlite3: true
+  re2: true
+  # no native build needed
+  core-js-pure: false
+  dtrace-provider: false
+  protobufjs: false
