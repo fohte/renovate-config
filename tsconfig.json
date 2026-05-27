@@ -8,7 +8,14 @@
     "module": "preserve",
     "moduleResolution": "bundler",
     "noEmit": true,
+<<<<<<< before updating
     "types": ["vitest/globals"]
   },
   "include": ["tests/**/*.ts", "vitest.config.ts", "scripts/**/*.ts"]
+=======
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+>>>>>>> after updating
 }
