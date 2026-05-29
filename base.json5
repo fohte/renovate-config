@@ -20,6 +20,16 @@
   configMigration: true,
   timezone: 'Asia/Tokyo',
 
+  // Strip special characters (including parentheses) from branch names.
+  // octo-sts rejects OIDC token subjects containing any of `"'`\<>;&$(){}[]`
+  // (see IsValidSubject in octo-sts/app pkg/oidcvalidate/validate.go), so a
+  // branch like `renovate/devdependencies-(non-major)` produces the subject
+  // `repo:owner/repo:ref:refs/heads/renovate/devdependencies-(non-major)`,
+  // which fails token exchange with `invalid subject in token` and blocks the
+  // PR's required status checks. The default branch-name cleanup keeps `()`;
+  // strict mode replaces them with `-`, keeping subjects valid.
+  branchNameStrict: true,
+
   // Wait 7 days after a package release before creating a PR.
   // This helps mitigate supply chain attacks by allowing time for
   // security researchers and automated tools to detect malicious packages.
