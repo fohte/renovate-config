@@ -20,6 +20,12 @@
   configMigration: true,
   timezone: 'Asia/Tokyo',
 
+  // octo-sts rejects OIDC token subjects containing any of `"'`\<>;&$(){}[]`,
+  // so a branch like `renovate/devdependencies-(non-major)` produces a subject
+  // that fails token exchange with `invalid subject in token` and blocks the
+  // PR's required status checks.
+  branchNameStrict: true,
+
   // Wait 7 days after a package release before creating a PR.
   // This helps mitigate supply chain attacks by allowing time for
   // security researchers and automated tools to detect malicious packages.
