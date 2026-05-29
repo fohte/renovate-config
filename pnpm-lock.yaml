@@ -36,8 +36,8 @@ importers:
         specifier: 2.2.3
         version: 2.2.3
       nock:
-        specifier: 14.0.12
-        version: 14.0.12
+        specifier: 14.0.15
+        version: 14.0.15
       prettier:
         specifier: 3.8.3
         version: 3.8.3
@@ -2973,8 +2973,8 @@ packages:
     resolution: {integrity: sha512-Z4SmBUweYa09+o6pG+eASabEpP6QkQ70yHj351pQoEXIs8uHbaU2DWVmzBANKgflPa47A50PtB2+NgRpQvr7vA==}
     engines: {node: '>= 10'}
 
-  nock@14.0.12:
-    resolution: {integrity: sha512-kZM3bHV0KzhHH6E2eRszHyML/w87AUzLBwupNTHohtYWP9fZYgUPmCbSKq6ITfEEmHqN4/p0MscvUipT4P5Qsg==}
+  nock@14.0.15:
+    resolution: {integrity: sha512-S0a47C9pLvcYx/Ugf0H30BVBEcUgMMBDk9VJIDlJ8XGrfH2QDUD4Tgdp45qDIiHttokBG+IbsOtsvIjGR/j3bg==}
     engines: {node: '>=18.20.0 <20 || >=20.12.1'}
 
   node-abi@3.92.0:
@@ -7443,7 +7443,7 @@ snapshots:
 
   neotraverse@0.6.18: {}
 
-  nock@14.0.12:
+  nock@14.0.15:
     dependencies:
       '@mswjs/interceptors': 0.41.9
       json-stringify-safe: 5.0.1

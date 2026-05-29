@@ -24,7 +24,7 @@
     "concurrently": "9.2.1",
     "eslint": "10.4.0",
     "json5": "2.2.3",
-    "nock": "14.0.12",
+    "nock": "14.0.15",
     "prettier": "3.8.3",
     "renovate": "43.128.1",
     "smol-toml": "1.6.1",
