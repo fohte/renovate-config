@@ -23,8 +23,7 @@
   // octo-sts rejects OIDC token subjects containing any of `"'`\<>;&$(){}[]`,
   // so a branch like `renovate/devdependencies-(non-major)` produces a subject
   // that fails token exchange with `invalid subject in token` and blocks the
-  // PR's required status checks. The default branch-name cleanup keeps `()`;
-  // strict mode replaces them with `-`, keeping subjects valid.
+  // PR's required status checks.
   branchNameStrict: true,
 
   // Wait 7 days after a package release before creating a PR.
