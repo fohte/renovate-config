@@ -18,6 +18,17 @@
     },
 
     // ==========================================================================
+    // monorepo grouping
+    // ==========================================================================
+    // clap-rs/clap is not included in Renovate's built-in `group:monorepos`
+    // preset, so group it manually by sourceUrl.
+    {
+      matchManagers: ['cargo'],
+      matchSourceUrls: ['https://github.com/clap-rs/clap'],
+      groupName: 'clap monorepo',
+    },
+
+    // ==========================================================================
     // automerge
     // ==========================================================================
     {
