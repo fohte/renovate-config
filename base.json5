@@ -124,17 +124,13 @@
     // Resulting semantic commit types:
     //   | Target          | major        | minor        | patch        | pin          |
     //   |-----------------|--------------|--------------|--------------|--------------|
-    //   | dependencies    | deps!:       | deps:        | deps:        | chore(deps): |
+    //   | dependencies    | deps:        | deps:        | deps:        | chore(deps): |
     //   | devDependencies | chore:       | chore:       | chore:       | chore:       |
     //   | github-actions  | ci:          | ci:          | ci:          | ci:          |
     //   | copier          | chore(deps): | chore(deps): | chore(deps): | chore(deps): |
     //   | mise            | chore:       | chore:       | chore:       | chore:       |
     {
-      matchUpdateTypes: ['major'],
-      commitMessagePrefix: 'deps!:',
-    },
-    {
-      matchUpdateTypes: ['minor', 'patch'],
+      matchUpdateTypes: ['major', 'minor', 'patch'],
       semanticCommitType: 'deps',
       semanticCommitScope: null,
     },
@@ -146,8 +142,6 @@
     },
     {
       matchDepTypes: ['devDependencies'],
-      // Use commitMessagePrefix (not semanticCommitType) to override the
-      // 'deps!:' prefix set above for major updates.
       commitMessagePrefix: 'chore:',
       semanticCommitScope: null,
     },
