@@ -13,6 +13,7 @@ import {
 //   | github-actions  | ci:          | ci:          | ci:          | ci:          |
 //   | copier          | chore(deps): | chore(deps): | chore(deps): | chore(deps): |
 //   | mise            | chore:       | chore:       | chore:       | chore:       |
+//   | packageManager  | chore:       | chore:       | chore:       | chore:       |
 
 interface TestCase {
   category: string
@@ -84,6 +85,19 @@ const testCases: TestCase[] = [
       mockNpmPackages: [{ name: 'test-pkg-dev', versions: ['1.0.0', '1.1.0'] }],
     },
     depName: 'test-pkg-dev',
+    expectedPrefix: /^chore: /,
+    updateType: 'minor',
+  },
+  // packageManager (corepack)
+  {
+    category: 'packageManager',
+    description: 'minor update',
+    options: {
+      fixtures: ['pr-title-npm-package-manager/package.json'],
+      mockNpmPackages: [{ name: 'pnpm', versions: ['1.0.0', '1.1.0'] }],
+      additionalConfigs: ['node.json5'],
+    },
+    depName: 'pnpm',
     expectedPrefix: /^chore: /,
     updateType: 'minor',
   },

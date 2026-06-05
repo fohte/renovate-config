@@ -88,6 +88,18 @@
     },
 
     // ==========================================================================
+    // release-please integration
+    // ==========================================================================
+    // The `packageManager` field is corepack-only and never reaches the published
+    // package, so override the default `deps:` prefix from base.json5.
+    {
+      matchManagers: ['npm'],
+      matchDepTypes: ['packageManager'],
+      commitMessagePrefix: 'chore:',
+      semanticCommitScope: null,
+    },
+
+    // ==========================================================================
     // rangeStrategy
     // ==========================================================================
     {
