@@ -88,6 +88,18 @@
     },
 
     // ==========================================================================
+    // release-please integration
+    // ==========================================================================
+    // The `packageManager` field is corepack-only and never reaches the published
+    // package, so updates should not trigger a release bump.
+    {
+      matchManagers: ['npm'],
+      matchDepTypes: ['packageManager'],
+      commitMessagePrefix: 'chore:',
+      semanticCommitScope: null,
+    },
+
+    // ==========================================================================
     // rangeStrategy
     // ==========================================================================
     {
