@@ -91,7 +91,7 @@
     // release-please integration
     // ==========================================================================
     // The `packageManager` field is corepack-only and never reaches the published
-    // package, so override the default `deps:` prefix from base.json5.
+    // package, so updates should not trigger a release bump.
     {
       matchManagers: ['npm'],
       matchDepTypes: ['packageManager'],
