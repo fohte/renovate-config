@@ -8,7 +8,7 @@ import {
 // Test PR title format according to release-please configuration in base.json5:
 //   | Target          | major        | minor        | patch        | pin          |
 //   |-----------------|--------------|--------------|--------------|--------------|
-//   | dependencies    | deps!:       | deps:        | deps:        | chore(deps): |
+//   | dependencies    | deps:        | deps:        | deps:        | chore(deps): |
 //   | devDependencies | chore:       | chore:       | chore:       | chore:       |
 //   | github-actions  | ci:          | ci:          | ci:          | ci:          |
 //   | copier          | chore(deps): | chore(deps): | chore(deps): | chore(deps): |
@@ -36,7 +36,7 @@ const testCases: TestCase[] = [
       ],
     },
     depName: 'test-pkg-major',
-    expectedPrefix: /^deps!: /,
+    expectedPrefix: /^deps: /,
     updateType: 'major',
   },
   {
