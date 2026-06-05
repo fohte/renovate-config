@@ -129,9 +129,6 @@
     //   | github-actions  | ci:          | ci:          | ci:          | ci:          |
     //   | copier          | chore(deps): | chore(deps): | chore(deps): | chore(deps): |
     //   | mise            | chore:       | chore:       | chore:       | chore:       |
-    //
-    // Libraries whose public API exposes a dependency should override
-    // `deps:` with `deps!:` for major updates in their own renovate config.
     {
       matchUpdateTypes: ['major', 'minor', 'patch'],
       semanticCommitType: 'deps',
