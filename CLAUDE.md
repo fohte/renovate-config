@@ -1,6 +1,5 @@
 # CLAUDE.md
 
-<<<<<<< before updating
 ## Preset file responsibilities
 
 When adding a new `packageRule` or manager configuration, decide where to place it based on the **ecosystem** the target depends on.
@@ -26,7 +25,7 @@ Examples:
 - Rules for `cargo` → `rust.json5`
 
 When in doubt, ask: "If a Go-only or Rust-only repo extends only `base.json5`, is it acceptable for this rule to be evaluated there?" If not, put it in the language-specific file.
-=======
+
 ## Test code rules
 
 ### Assert on the whole output with a single equality check
@@ -49,4 +48,3 @@ expect(run()).toEqual({
 ```
 
 For dynamic fields (timestamps, UUIDs, random IDs), normalize them in a helper before the comparison (e.g. replace with a fixed placeholder) so the full output can still be asserted in one equality check. Do not weaken the assertion to dodge the dynamic value.
->>>>>>> after updating
