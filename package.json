@@ -17,11 +17,11 @@
   "devDependencies": {
     "@commitlint/cli": "21.0.2",
     "@eslint/eslintrc": "3.3.5",
-    "@fohte/eslint-config": "0.3.2",
+    "@fohte/eslint-config": "0.3.3",
     "@tsconfig/node-lts": "24.0.0",
     "@tsconfig/strictest": "2.0.8",
     "@types/node": "24.12.4",
-    "concurrently": "10.0.0",
+    "concurrently": "10.0.3",
     "eslint": "10.4.1",
     "json5": "2.2.3",
     "nock": "14.0.15",
@@ -30,6 +30,6 @@
     "smol-toml": "1.6.1",
     "tsx": "4.21.0",
     "typescript": "6.0.3",
-    "vitest": "4.1.7"
+    "vitest": "4.1.8"
   }
 }
