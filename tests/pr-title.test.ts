@@ -168,6 +168,7 @@ describe('PR title format for release-please', () => {
   const categories = [...new Set(testCases.map((tc) => tc.category))]
 
   for (const category of categories) {
+    // eslint-disable-next-line vitest/valid-title
     describe(category, () => {
       const cases = testCases.filter((tc) => tc.category === category)
 
