@@ -167,39 +167,36 @@ describe('PR title format for release-please', () => {
   // Group test cases by category
   const categories = [...new Set(testCases.map((tc) => tc.category))]
 
-  for (const category of categories) {
-    // eslint-disable-next-line vitest/valid-title
-    describe(category, () => {
-      const cases = testCases.filter((tc) => tc.category === category)
+  describe.each(categories)('%s', (category) => {
+    const cases = testCases.filter((tc) => tc.category === category)
 
-      for (const tc of cases) {
-        describeWithRenovate(
-          tc.description,
-          { ...tc.options, dryRunMode: 'full' },
-          (ctx) => {
-            it(`should use ${tc.expectedPrefix.source} prefix`, () => {
-              const branch = ctx
-                .getBranches()
-                .find(
-                  (b) =>
-                    b.upgrades?.some(
-                      (u) => u.depName?.includes(tc.depName) === true,
-                    ) ?? false,
-                )
+    for (const tc of cases) {
+      describeWithRenovate(
+        tc.description,
+        { ...tc.options, dryRunMode: 'full' },
+        (ctx) => {
+          it(`should use ${tc.expectedPrefix.source} prefix`, () => {
+            const branch = ctx
+              .getBranches()
+              .find(
+                (b) =>
+                  b.upgrades?.some(
+                    (u) => u.depName?.includes(tc.depName) === true,
+                  ) ?? false,
+              )
 
-              expect(branch).toMatchObject({
-                prTitle: expect.stringMatching(tc.expectedPrefix) as unknown,
-                upgrades: expect.arrayContaining([
-                  expect.objectContaining({
-                    depName: expect.stringContaining(tc.depName) as unknown,
-                    updateType: tc.updateType,
-                  }),
-                ]) as unknown,
-              })
+            expect(branch).toMatchObject({
+              prTitle: expect.stringMatching(tc.expectedPrefix) as unknown,
+              upgrades: expect.arrayContaining([
+                expect.objectContaining({
+                  depName: expect.stringContaining(tc.depName) as unknown,
+                  updateType: tc.updateType,
+                }),
+              ]) as unknown,
             })
-          },
-        )
-      }
-    })
-  }
+          })
+        },
+      )
+    }
+  })
 })
