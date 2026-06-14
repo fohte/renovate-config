@@ -67,6 +67,8 @@ export interface MockGitHubRepo {
 
 export interface SetupOptions {
   fixtures: string[]
+  // `{{MOCK_REPO:name}}` placeholders are substituted, matching fixtures behavior.
+  inlineFiles?: Record<string, string>
   mockRepos?: MockRepo[]
   mockCrates?: MockCrate[]
   mockNpmPackages?: MockNpmPackage[]
@@ -110,6 +112,7 @@ export class RenovateTestContext {
 
     const {
       fixtures,
+      inlineFiles = {},
       mockRepos = [],
       mockCrates = [],
       mockNpmPackages = [],
@@ -149,27 +152,31 @@ export class RenovateTestContext {
     // Initialize git repo (required for renovate --platform=local)
     initGitRepo(this.workDir)
 
+    const substituteMockRepos = (content: string): string =>
+      content.replace(/\{\{MOCK_REPO:([\w-]+)\}\}/g, (_, name: string) => {
+        const repoPath = this.mockRepoPaths.get(name)
+        if (repoPath === undefined) {
+          throw new Error(`Mock repo '${name}' not found`)
+        }
+        return `file://${repoPath}`
+      })
+
     // Copy test fixtures and replace placeholders
     for (const fixture of fixtures) {
       const srcPath = join(FIXTURES_DIR, fixture)
       const destPath = join(this.workDir, fixture)
-
-      // Create parent directories if needed
       mkdirSync(dirname(destPath), { recursive: true })
-
-      let content = readFileSync(srcPath, 'utf-8')
-      // Replace {{MOCK_REPO:name}} placeholders with file:// URLs
-      content = content.replace(
-        /\{\{MOCK_REPO:([\w-]+)\}\}/g,
-        (_, name: string) => {
-          const repoPath = this.mockRepoPaths.get(name)
-          if (repoPath === undefined) {
-            throw new Error(`Mock repo '${name}' not found`)
-          }
-          return `file://${repoPath}`
-        },
+      writeFileSync(
+        destPath,
+        substituteMockRepos(readFileSync(srcPath, 'utf-8')),
       )
-      writeFileSync(destPath, content)
+    }
+
+    // Write inline files (heredoc-style payloads) into workDir
+    for (const [relPath, content] of Object.entries(inlineFiles)) {
+      const destPath = join(this.workDir, relPath)
+      mkdirSync(dirname(destPath), { recursive: true })
+      writeFileSync(destPath, substituteMockRepos(content))
     }
 
     // Create initial commit
@@ -587,6 +594,25 @@ export class RenovateTestContext {
     }
 
     return packageFile
+  }
+
+  // Returns `undefined` when the manager produced no package files or the
+  // file was not picked up, instead of throwing. Use this when a test
+  // expects "no match" rather than a hit.
+  tryGetPackageFile(
+    manager: string,
+    filePath: string,
+  ): PackageFile | undefined {
+    if (!this.report) {
+      throw new Error('Report not available. Did you call setup()?')
+    }
+    const repoReport = this.report.repositories['local']
+    if (!repoReport) {
+      return undefined
+    }
+    return repoReport.packageFiles[manager]?.find(
+      (f) => f.packageFile === filePath,
+    )
   }
 
   /**

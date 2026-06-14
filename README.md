@@ -15,6 +15,17 @@ Create a `renovate.json5` file in your repository with the following content:
 }
 ```
 
+`base.json5` includes a `customManager` that tracks `jdx/mise-action`'s
+`with: version:` as a `jdx/mise` release, so a workflow such as
+
+```yaml
+- uses: jdx/mise-action@v2
+  with:
+    version: 2026.6.6
+```
+
+is bumped automatically without any per-repository configuration.
+
 ### Node.js projects
 
 ```json5

@@ -20,6 +20,33 @@
   configMigration: true,
   timezone: 'Asia/Tokyo',
 
+  customManagers: [
+    {
+      // Track `jdx/mise-action`'s `with: version:` as a `jdx/mise` release.
+      // mise-action has no equivalent of `actions/setup-node`'s `.nvmrc`
+      // support, so a pinned mise version drifts silently without this
+      // manager. The regex is scoped to the `with:` block of a
+      // `jdx/mise-action@...` step so it only matches version keys belonging
+      // to that action.
+      customType: 'regex',
+      managerFilePatterns: ['/(^|/)\\.github/workflows/[^/]+\\.ya?ml$/'],
+      // Anchored to a `uses:` line so a stray `jdx/mise-action@…` mention
+      // inside a `run:` script or comment cannot trigger extraction. The
+      // continuation pattern `[ \t]+[^-\s]` stops at the next step boundary;
+      // a YAML list value inside `with:` (line starting with `-`) also
+      // terminates the match, so a sibling `version:` placed after such a
+      // list would be missed.
+      matchStrings: [
+        '[ \\t]+(?:- )?uses:[ \\t]+jdx/mise-action@\\S+[^\\n]*\\n[ \\t]+with:[ \\t]*\\n(?:[ \\t]+[^-\\s][^\\n]*\\n)*?[ \\t]+version:\\s*(?<currentValue>\\S+)',
+      ],
+      datasourceTemplate: 'github-releases',
+      depNameTemplate: 'jdx/mise',
+      // mise tags are `vX.Y.Z` but `with: version:` is consumed without the
+      // leading `v`, so strip it from the looked-up version.
+      extractVersionTemplate: '^v(?<version>.+)$',
+    },
+  ],
+
   // octo-sts rejects OIDC token subjects containing any of `"'`\<>;&$(){}[]`,
   // so a branch like `renovate/devdependencies-(non-major)` produces a subject
   // that fails token exchange with `invalid subject in token` and blocks the
