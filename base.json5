@@ -30,18 +30,14 @@
       // to that action.
       customType: 'regex',
       managerFilePatterns: ['/(^|/)\\.github/workflows/[^/]+\\.ya?ml$/'],
-      // The continuation pattern is `[ \t]+[^-\s]` (indent then a non-dash
-      // non-space first char). A naive `\s+[^\n]*` form bleeds past the
-      // `with:` block into a following step and would tag e.g.
-      // `pnpm/action-setup`'s `version:` as a `jdx/mise` release.
-      // Renovate's regex manager uses re2, which lacks back-references and
-      // look-around, so the cleaner "indent-pinned" form is not available.
-      // Known limitation: a YAML list value inside `with:` (lines starting
-      // with `-`) terminates the lazy run, which would cause a sibling
-      // `version:` after such a list to be missed. mise-action's inputs are
-      // all scalar so this does not arise in practice today.
+      // Anchored to a `uses:` line so a stray `jdx/mise-action@…` mention
+      // inside a `run:` script or comment cannot trigger extraction. The
+      // continuation pattern `[ \t]+[^-\s]` stops at the next step boundary;
+      // a YAML list value inside `with:` (line starting with `-`) also
+      // terminates the match, so a sibling `version:` placed after such a
+      // list would be missed.
       matchStrings: [
-        'jdx/mise-action@\\S+[^\\n]*\\n[ \\t]+with:[ \\t]*\\n(?:[ \\t]+[^-\\s][^\\n]*\\n)*?[ \\t]+version:\\s*(?<currentValue>\\S+)',
+        '[ \\t]+(?:- )?uses:[ \\t]+jdx/mise-action@\\S+[^\\n]*\\n[ \\t]+with:[ \\t]*\\n(?:[ \\t]+[^-\\s][^\\n]*\\n)*?[ \\t]+version:\\s*(?<currentValue>\\S+)',
       ],
       datasourceTemplate: 'github-releases',
       depNameTemplate: 'jdx/mise',
