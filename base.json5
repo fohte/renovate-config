@@ -240,37 +240,5 @@
       matchManagers: ['mise'],
       automerge: true,
     },
-
-    // ==========================================================================
-    // generic-boilerplate (https://github.com/fohte/generic-boilerplate)
-    // ==========================================================================
-    // Disable updates for tools/packages managed by generic-boilerplate.
-    // These are updated in generic-boilerplate and synced to other repos via copier.
-    // Excluded from generic-boilerplate itself since that's where updates should happen.
-    {
-      matchRepositories: ['!fohte/generic-boilerplate'],
-      matchManagers: ['mise'],
-      // @auto-generated sync:generic-boilerplate:mise-tools start
-      matchDepNames: [
-        'actionlint',
-        'github:ast-grep/ast-grep',
-        'github:fohte/basefmt',
-        'lefthook',
-        'node',
-        'pinact',
-        'shellcheck',
-        'shfmt',
-      ],
-      // @auto-generated sync:generic-boilerplate:mise-tools end
-      enabled: false,
-    },
-    {
-      matchRepositories: ['!fohte/generic-boilerplate'],
-      matchManagers: ['mise'],
-      // @auto-generated sync:generic-boilerplate:mise-npm-backend start
-      matchDepNames: ['npm:@commitlint/cli', 'npm:prettier'],
-      // @auto-generated sync:generic-boilerplate:mise-npm-backend end
-      enabled: false,
-    },
   ],
 }
