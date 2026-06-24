@@ -15,6 +15,11 @@
     // that only matches `vX.Y.Z` tags, filtering out floating tags like `v3`.
     // See https://docs.renovatebot.com/presets-helpers/#helperspingithubactiondigeststosemver
     'helpers:pinGitHubActionDigestsToSemver',
+    // Pick up `# renovate: datasource=... depName=...` magic comments on env
+    // variables in GitHub Actions workflows so pinned tool versions
+    // (e.g. `MERGIRAF_VERSION: v0.17.0`) are updated automatically.
+    // See https://docs.renovatebot.com/presets-customManagers/#custommanagersgithubactionsversions
+    'customManagers:githubActionsVersions',
   ],
 
   configMigration: true,
