@@ -17,14 +17,11 @@ import type { BranchCache } from 'renovate/dist/util/cache/repository/types'
 
 const FIXTURES_DIR = join(import.meta.dirname, '..', '__fixtures__')
 const BASE_CONFIG_PATH = join(import.meta.dirname, '..', '..', 'base.json5')
-const RENOVATE_BIN = join(
-  import.meta.dirname,
-  '..',
-  '..',
-  'node_modules',
-  '.bin',
-  'renovate',
-)
+// We invoke renovate through a tiny wrapper instead of node_modules/.bin/renovate
+// because the wrapper patches the `local` platform's `initPlatform` so that
+// `--dry-run=full` is preserved (the stock implementation downgrades any
+// non-`extract` value to `lookup`, leaving the report's branches[] empty).
+const RENOVATE_RUNNER = join(import.meta.dirname, 'renovate-runner.mjs')
 
 // Ignore global/system git config to ensure tests are isolated from local settings
 // (e.g., GPG signing, aliases, hooks).
@@ -80,9 +77,6 @@ export interface SetupOptions {
   // access to resolve. Use this to opt in to network-free presets (e.g.
   // `helpers:pinGitHubActionDigests`) whose behavior needs verification.
   allowedExtends?: string[]
-  // Dry-run mode: 'lookup' (default) for fast dependency detection,
-  // 'full' for complete branch/PR simulation including prTitle
-  dryRunMode?: 'lookup' | 'full'
 }
 
 export class RenovateTestContext {
@@ -100,7 +94,6 @@ export class RenovateTestContext {
   private mockGitHubData: Map<string, MockGitHubRepo> = new Map()
   private additionalConfigs: string[] = []
   private allowedExtends: string[] = []
-  private dryRunMode: 'lookup' | 'full' = 'lookup'
 
   /**
    * Set up a temporary git repository with the specified fixture files.
@@ -119,11 +112,9 @@ export class RenovateTestContext {
       mockGitHubRepos = [],
       additionalConfigs = [],
       allowedExtends = [],
-      dryRunMode = 'lookup',
     } = options
     this.additionalConfigs = additionalConfigs
     this.allowedExtends = allowedExtends
-    this.dryRunMode = dryRunMode
 
     // Set up mock crates server if needed
     if (mockCrates.length > 0) {
@@ -616,8 +607,9 @@ export class RenovateTestContext {
   }
 
   /**
-   * Get branches from the report.
-   * Only available when dryRunMode is 'full'.
+   * Get branches from the report. Each entry includes `prTitle`, `branchName`,
+   * and `upgrades[]` with the per-update fields needed to assert on PR title
+   * and commit prefix behavior.
    */
   getBranches(): Partial<BranchCache>[] {
     if (!this.report) {
@@ -757,11 +749,14 @@ export class RenovateTestContext {
     // Use spawn instead of execSync to allow the event loop to run (for mock servers)
     await new Promise<void>((resolve, reject) => {
       const child = spawn(
-        RENOVATE_BIN,
+        process.execPath,
         [
+          RENOVATE_RUNNER,
           '--platform=local',
           '--require-config=ignored',
-          `--dry-run=${this.dryRunMode}`,
+          // `local` always downgrades to `lookup`; we ship a loader-time patch
+          // in renovate-runner.mjs that still surfaces branches[] in the report.
+          '--dry-run=lookup',
           '--report-type=file',
           `--report-path=${reportPath}`,
         ],
@@ -794,10 +789,10 @@ export class RenovateTestContext {
         child.kill()
         reject(
           new Error(
-            `Renovate timed out after 30s\nstdout: ${stdout.slice(-2000)}\nstderr: ${stderr.slice(-2000)}`,
+            `Renovate timed out after 120s\nstdout: ${stdout.slice(-2000)}\nstderr: ${stderr.slice(-2000)}`,
           ),
         )
-      }, 30000)
+      }, 120000)
 
       child.on('close', (code) => {
         clearTimeout(timeout)

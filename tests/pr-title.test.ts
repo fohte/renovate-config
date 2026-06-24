@@ -18,7 +18,7 @@ import {
 interface TestCase {
   category: string
   description: string
-  options: Omit<SetupOptions, 'dryRunMode'>
+  options: SetupOptions
   depName: string
   expectedPrefix: RegExp
   updateType: string
@@ -171,32 +171,28 @@ describe('PR title format for release-please', () => {
     const cases = testCases.filter((tc) => tc.category === category)
 
     for (const tc of cases) {
-      describeWithRenovate(
-        tc.description,
-        { ...tc.options, dryRunMode: 'full' },
-        (ctx) => {
-          it(`should use ${tc.expectedPrefix.source} prefix`, () => {
-            const branch = ctx
-              .getBranches()
-              .find(
-                (b) =>
-                  b.upgrades?.some(
-                    (u) => u.depName?.includes(tc.depName) === true,
-                  ) ?? false,
-              )
+      describeWithRenovate(tc.description, tc.options, (ctx) => {
+        it(`should use ${tc.expectedPrefix.source} prefix`, () => {
+          const branch = ctx
+            .getBranches()
+            .find(
+              (b) =>
+                b.upgrades?.some(
+                  (u) => u.depName?.includes(tc.depName) === true,
+                ) ?? false,
+            )
 
-            expect(branch).toMatchObject({
-              prTitle: expect.stringMatching(tc.expectedPrefix) as unknown,
-              upgrades: expect.arrayContaining([
-                expect.objectContaining({
-                  depName: expect.stringContaining(tc.depName) as unknown,
-                  updateType: tc.updateType,
-                }),
-              ]) as unknown,
-            })
+          expect(branch).toMatchObject({
+            prTitle: expect.stringMatching(tc.expectedPrefix) as unknown,
+            upgrades: expect.arrayContaining([
+              expect.objectContaining({
+                depName: expect.stringContaining(tc.depName) as unknown,
+                updateType: tc.updateType,
+              }),
+            ]) as unknown,
           })
-        },
-      )
+        })
+      })
     }
   })
 })

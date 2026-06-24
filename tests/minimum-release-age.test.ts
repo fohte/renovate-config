@@ -32,36 +32,34 @@ describeWithRenovate(
         },
       },
     ],
-    dryRunMode: 'full',
   },
   (ctx) => {
-    it('should allow old releases (not pending)', () => {
-      const branch = ctx
-        .getBranches()
-        .find(
-          (b) => b.upgrades?.some((u) => u.depName === 'old-package') ?? false,
-        )
+    // We assert on the update's `pendingChecks` flag rather than the branch's
+    // `result`, because the harness runs Renovate in lookup mode (the only
+    // mode `--platform=local` actually honors). `result` is set by the branch
+    // worker, which lookup mode skips; `pendingChecks` is set in lookup mode
+    // by `filterInternalChecks` when minimumReleaseAge holds a release back.
+    const pendingSummary = (depName: string) => {
+      const update = ctx
+        .getPackageFile('npm', 'minimum-release-age/package.json')
+        .deps.find((d) => d.depName === depName)?.updates?.[0]
+      return {
+        newVersion: update?.newVersion,
+        pendingChecks: update?.pendingChecks ?? false,
+      }
+    }
 
-      expect(branch).toMatchObject({
-        result: expect.not.stringMatching(/^pending$/) as unknown,
-        upgrades: expect.arrayContaining([
-          expect.objectContaining({ depName: 'old-package' }),
-        ]) as unknown,
+    it('should allow old releases (not pending)', () => {
+      expect(pendingSummary('old-package')).toEqual({
+        newVersion: '2.0.0',
+        pendingChecks: false,
       })
     })
 
     it('should delay recent releases (marked as pending)', () => {
-      const branch = ctx
-        .getBranches()
-        .find(
-          (b) => b.upgrades?.some((u) => u.depName === 'new-package') ?? false,
-        )
-
-      expect(branch).toMatchObject({
-        result: 'pending',
-        upgrades: expect.arrayContaining([
-          expect.objectContaining({ depName: 'new-package' }),
-        ]) as unknown,
+      expect(pendingSummary('new-package')).toEqual({
+        newVersion: '2.0.0',
+        pendingChecks: true,
       })
     })
   },

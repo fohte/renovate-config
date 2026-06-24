@@ -18,7 +18,6 @@ describeWithRenovate(
     // floating tag and Renovate selects the SemVer one as the comment.
     mockGitHubRepos: [{ name: 'actions/checkout', tags: ['v1', 'v1.0.0'] }],
     allowedExtends: ['helpers:pinGitHubActionDigestsToSemver'],
-    dryRunMode: 'full',
   },
   (ctx) => {
     it('should propose a pinDigest update for tag-referenced actions', () => {
