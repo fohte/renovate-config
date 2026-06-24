@@ -15,6 +15,7 @@
     // that only matches `vX.Y.Z` tags, filtering out floating tags like `v3`.
     // See https://docs.renovatebot.com/presets-helpers/#helperspingithubactiondigeststosemver
     'helpers:pinGitHubActionDigestsToSemver',
+    'customManagers:githubActionsVersions',
   ],
 
   configMigration: true,
