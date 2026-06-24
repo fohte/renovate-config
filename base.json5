@@ -16,6 +16,8 @@
     // See https://docs.renovatebot.com/presets-helpers/#helperspingithubactiondigeststosemver
     'helpers:pinGitHubActionDigestsToSemver',
     'customManagers:githubActionsVersions',
+    // https://docs.renovatebot.com/presets-group/#groupmonorepos
+    'group:monorepos',
   ],
 
   configMigration: true,
