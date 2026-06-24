@@ -16,9 +16,7 @@
     // See https://docs.renovatebot.com/presets-helpers/#helperspingithubactiondigeststosemver
     'helpers:pinGitHubActionDigestsToSemver',
     'customManagers:githubActionsVersions',
-    // Aggregates known monorepo packages across ecosystems (npm, Go, Rust, etc.)
-    // into a single PR per monorepo.
-    // See https://docs.renovatebot.com/presets-group/#groupmonorepos
+    // https://docs.renovatebot.com/presets-group/#groupmonorepos
     'group:monorepos',
   ],
 
