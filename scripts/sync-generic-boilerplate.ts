@@ -3,8 +3,10 @@
  *
  * This script:
  * 1. Clones generic-boilerplate (shallow)
- * 2. Scans all generated/* directories for package.json and .mise.toml
- * 3. Updates base.json5 and node.json5 with the extracted package names
+ * 2. Scans all generated/* directories for package.json and Cargo.toml
+ * 3. Updates node.json5 and rust.json5 with the extracted package names
+ *
+ * For npm, only packages in NPM_ALLOWLIST are tracked.
  *
  * Run with: pnpm sync:generic-boilerplate
  */
@@ -18,16 +20,21 @@ import { parse as parseToml } from 'smol-toml'
 const GENERIC_BOILERPLATE_REPO =
   'https://github.com/fohte/generic-boilerplate.git'
 
+// npm packages coupled to the boilerplate's `eslint.config.js` template
+// (the config re-exports `@fohte/eslint-config` and pulls in these peers).
+const NPM_ALLOWLIST: ReadonlySet<string> = new Set([
+  '@eslint/eslintrc',
+  '@fohte/eslint-config',
+  'eslint',
+  'eslint-plugin-storybook',
+])
+
 interface SyncResult {
   updated: boolean
   key: string
   file: string
   oldPackages: string[]
   newPackages: string[]
-}
-
-interface MiseToml {
-  tools?: Record<string, unknown>
 }
 
 interface CargoToml {
@@ -59,24 +66,6 @@ function getGeneratedDirs(tmpDir: string): string[] {
     .readdirSync(generatedPath, { withFileTypes: true })
     .filter((dirent) => dirent.isDirectory())
     .map((dirent) => path.join(generatedPath, dirent.name))
-}
-
-/**
- * Extract mise tools from a .mise.toml file
- */
-function extractMiseToolsFromFile(filePath: string): string[] {
-  if (!fs.existsSync(filePath)) {
-    return []
-  }
-
-  const content = fs.readFileSync(filePath, 'utf-8')
-  const parsed = parseToml(content) as MiseToml
-
-  if (!parsed.tools) {
-    return []
-  }
-
-  return Object.keys(parsed.tools)
 }
 
 /**
@@ -123,48 +112,29 @@ function extractNpmPackagesFromFile(filePath: string): string[] {
  * Scan all generated/* directories and extract packages
  */
 function extractAllPackages(tmpDir: string): {
-  miseTools: string[]
   npmPackages: string[]
-  miseNpmBackendTools: string[]
   cargoPackages: string[]
 } {
   const dirs = getGeneratedDirs(tmpDir)
-  const allMiseTools = new Set<string>()
   const allNpmPackages = new Set<string>()
-  const allMiseNpmBackendTools = new Set<string>()
   const allCargoPackages = new Set<string>()
 
   for (const dir of dirs) {
-    const miseTomlPath = path.join(dir, '.mise.toml')
-    const tools = extractMiseToolsFromFile(miseTomlPath)
-
-    for (const tool of tools) {
-      if (tool.startsWith('npm:')) {
-        allMiseNpmBackendTools.add(tool)
-      } else {
-        allMiseTools.add(tool)
+    const packageJsonPath = path.join(dir, 'package.json')
+    for (const pkg of extractNpmPackagesFromFile(packageJsonPath)) {
+      if (NPM_ALLOWLIST.has(pkg)) {
+        allNpmPackages.add(pkg)
       }
     }
 
-    const packageJsonPath = path.join(dir, 'package.json')
-    const packages = extractNpmPackagesFromFile(packageJsonPath)
-
-    for (const pkg of packages) {
-      allNpmPackages.add(pkg)
-    }
-
     const cargoTomlPath = path.join(dir, 'Cargo.toml')
-    const cargoPackages = extractCargoPackagesFromFile(cargoTomlPath)
-
-    for (const pkg of cargoPackages) {
+    for (const pkg of extractCargoPackagesFromFile(cargoTomlPath)) {
       allCargoPackages.add(pkg)
     }
   }
 
   return {
-    miseTools: [...allMiseTools].sort(),
     npmPackages: [...allNpmPackages].sort(),
-    miseNpmBackendTools: [...allMiseNpmBackendTools].sort(),
     cargoPackages: [...allCargoPackages].sort(),
   }
 }
@@ -276,20 +246,14 @@ function main(): void {
     cloneRepo(tmpDir)
 
     console.log('\nExtracting packages from generic-boilerplate...')
-    const { miseTools, npmPackages, miseNpmBackendTools, cargoPackages } =
-      extractAllPackages(tmpDir)
+    const { npmPackages, cargoPackages } = extractAllPackages(tmpDir)
 
-    console.log(`  mise tools: ${miseTools.join(', ')}`)
-    console.log(`  npm devDependencies: ${npmPackages.join(', ')}`)
-    console.log(`  mise npm backend: ${miseNpmBackendTools.join(', ')}`)
+    console.log(
+      `  npm devDependencies (allowlisted): ${npmPackages.join(', ')}`,
+    )
     console.log(`  cargo packages: ${cargoPackages.join(', ')}`)
 
     console.log('\nUpdating config files...')
-
-    const baseResults = updateConfigFile(path.join(rootDir, 'base.json5'), [
-      { key: 'mise-tools', packages: miseTools },
-      { key: 'mise-npm-backend', packages: miseNpmBackendTools },
-    ])
 
     const nodeResults = updateConfigFile(path.join(rootDir, 'node.json5'), [
       { key: 'npm-packages', packages: npmPackages },
@@ -300,7 +264,7 @@ function main(): void {
     ])
 
     console.log('\n=== Summary ===')
-    const allResults = [...baseResults, ...nodeResults, ...rustResults]
+    const allResults = [...nodeResults, ...rustResults]
     const updatedCount = allResults.filter((r) => r.updated).length
 
     if (updatedCount > 0) {
