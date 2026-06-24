@@ -233,5 +233,12 @@
       commitMessagePrefix: 'chore:',
       semanticCommitScope: null,
     },
+    // mise releases use CalVer (`YYYY.M.PATCH`), so Renovate's
+    // patch/minor/major classification does not reflect risk.
+    // See https://mise.jdx.dev/faq.html
+    {
+      matchManagers: ['mise'],
+      automerge: true,
+    },
   ],
 }
