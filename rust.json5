@@ -5,15 +5,10 @@
     // ==========================================================================
     // generic-boilerplate (https://github.com/fohte/generic-boilerplate)
     // ==========================================================================
-    // Disable updates for Cargo packages managed by generic-boilerplate.
-    // These are updated in generic-boilerplate and synced to other repos via copier.
-    // Excluded from generic-boilerplate itself since that's where updates should happen.
     {
       matchRepositories: ['!fohte/generic-boilerplate'],
       matchManagers: ['cargo'],
-      // @auto-generated sync:generic-boilerplate:cargo-packages start
       matchPackageNames: ['rstest', 'thiserror'],
-      // @auto-generated sync:generic-boilerplate:cargo-packages end
       enabled: false,
     },
 

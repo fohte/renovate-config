@@ -5,18 +5,14 @@
     // ==========================================================================
     // generic-boilerplate (https://github.com/fohte/generic-boilerplate)
     // ==========================================================================
-    // Disable updates for the eslint config and its peer dependencies, which
-    // must stay in sync with the boilerplate's `eslint.config.js` template.
     {
       matchRepositories: ['!fohte/generic-boilerplate'],
-      // @auto-generated sync:generic-boilerplate:npm-packages start
       matchPackageNames: [
         '@eslint/eslintrc',
         '@fohte/eslint-config',
         'eslint',
         'eslint-plugin-storybook',
       ],
-      // @auto-generated sync:generic-boilerplate:npm-packages end
       enabled: false,
     },
 
