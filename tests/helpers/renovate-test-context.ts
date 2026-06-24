@@ -54,6 +54,9 @@ export interface MockNpmPackage {
   // Map of version to release timestamp (ISO 8601 format)
   // If not specified, defaults to a date old enough to pass minimumReleaseAge
   releaseTimes?: Record<string, string>
+  // Source repository URL injected into each version's `repository.url`.
+  // Required for `matchSourceUrls`-based presets (e.g. `monorepo:storybook`).
+  sourceUrl?: string
 }
 
 export interface MockGitHubRepo {
@@ -317,6 +320,9 @@ export class RenovateTestContext {
             version,
             dependencies: {},
             devDependencies: {},
+            ...(pkgData.sourceUrl !== undefined
+              ? { repository: { type: 'git', url: pkgData.sourceUrl } }
+              : {}),
           }
           time[version] = pkgData.releaseTimes?.[version] ?? defaultReleaseTime
         }
