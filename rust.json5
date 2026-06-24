@@ -3,16 +3,6 @@
 
   packageRules: [
     // ==========================================================================
-    // generic-boilerplate (https://github.com/fohte/generic-boilerplate)
-    // ==========================================================================
-    {
-      matchRepositories: ['!fohte/generic-boilerplate'],
-      matchManagers: ['cargo'],
-      matchPackageNames: ['rstest', 'thiserror'],
-      enabled: false,
-    },
-
-    // ==========================================================================
     // monorepo grouping
     // ==========================================================================
     // clap-rs/clap is not included in Renovate's built-in `group:monorepos`
