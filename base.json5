@@ -159,6 +159,7 @@
     //   | github-actions  | ci:          | ci:          | ci:          | ci:          |
     //   | copier          | chore(deps): | chore(deps): | chore(deps): | chore(deps): |
     //   | mise            | chore:       | chore:       | chore:       | chore:       |
+    //   | jdx/mise        | ci:          | ci:          | ci:          | ci:          |
     {
       matchUpdateTypes: ['major', 'minor', 'patch'],
       semanticCommitType: 'deps',
@@ -233,11 +234,19 @@
       commitMessagePrefix: 'chore:',
       semanticCommitScope: null,
     },
-    // jdx/mise itself releases under CalVer (`YYYY.M.PATCH`), so Renovate's
-    // patch/minor/major classification does not reflect risk.
-    // See https://mise.jdx.dev/faq.html
+    // jdx/mise is extracted by our customManager from `jdx/mise-action`'s
+    // `with: version:` and is effectively a GitHub Actions workflow input, not
+    // a runtime or dev dependency. The customManager's manager name is `regex`,
+    // so the `github-actions` rule above does not match it; declare the `ci:`
+    // prefix here to keep release-please from emitting patch bumps for it.
+    //
+    // It also releases under CalVer (`YYYY.M.PATCH`), so Renovate's
+    // patch/minor/major classification does not reflect risk; automerge all
+    // updates. See https://mise.jdx.dev/faq.html
     {
       matchPackageNames: ['jdx/mise'],
+      commitMessagePrefix: 'ci:',
+      semanticCommitScope: null,
       automerge: true,
     },
   ],
