@@ -189,10 +189,7 @@
     // (invoked from `boilerplate-update.yml`) instead of Renovate's copier manager.
     {
       matchManagers: ['copier'],
-      matchPackageNames: [
-        'https://github.com/fohte/generic-boilerplate',
-        'https://github.com/fohte/generic-boilerplate.git',
-      ],
+      matchPackageNames: ['/fohte\\/generic-boilerplate(?:\\.git)?$/'],
       enabled: false,
     },
 
