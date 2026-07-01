@@ -157,7 +157,6 @@
     //   | dependencies    | deps:        | deps:        | deps:        | chore(deps): |
     //   | devDependencies | chore:       | chore:       | chore:       | chore:       |
     //   | github-actions  | ci:          | ci:          | ci:          | ci:          |
-    //   | copier          | chore(deps): | chore(deps): | chore(deps): | chore(deps): |
     //   | mise            | chore:       | chore:       | chore:       | chore:       |
     //   | jdx/mise        | ci:          | ci:          | ci:          | ci:          |
     {
@@ -181,11 +180,17 @@
       commitMessagePrefix: 'ci:',
       semanticCommitScope: null,
     },
-    // Copier templates are boilerplate references, not runtime/dev dependencies.
+
+    // ==========================================================================
+    // copier
+    // ==========================================================================
+    // Disable Renovate-managed updates for `fohte/generic-boilerplate`.
+    // Consumer repositories update this template via `fohte/copier-update-action`
+    // (invoked from `boilerplate-update.yml`) instead of Renovate's copier manager.
     {
       matchManagers: ['copier'],
-      commitMessagePrefix: 'chore(deps):',
-      semanticCommitScope: null,
+      matchPackageNames: ['/fohte\\/generic-boilerplate(?:\\.git)?$/'],
+      enabled: false,
     },
 
     // ==========================================================================
@@ -201,18 +206,6 @@
       matchManagers: ['pre-commit'],
       matchUpdateTypes: ['minor', 'patch'],
       automerge: true,
-    },
-
-    // ==========================================================================
-    // copier
-    // ==========================================================================
-    // For copier templates with GitHub URL package names,
-    // use only the repository name in commit messages instead of the full URL.
-    // Handles both https://github.com/owner/repo and https://github.com/owner/repo.git
-    {
-      matchManagers: ['copier'],
-      matchPackageNames: ['/^https:\\/\\/github\\.com\\//'],
-      commitMessageTopic: '{{{replace "\\.git$" "" (replace "https://github\\.com/[^/]+/" "" packageName)}}}',
     },
 
     // ==========================================================================

@@ -11,7 +11,6 @@ import {
 //   | dependencies    | deps:        | deps:        | deps:        | chore(deps): |
 //   | devDependencies | chore:       | chore:       | chore:       | chore:       |
 //   | github-actions  | ci:          | ci:          | ci:          | ci:          |
-//   | copier          | chore(deps): | chore(deps): | chore(deps): | chore(deps): |
 //   | mise            | chore:       | chore:       | chore:       | chore:       |
 //   | packageManager  | chore:       | chore:       | chore:       | chore:       |
 
@@ -99,18 +98,6 @@ const testCases: TestCase[] = [
     },
     depName: 'pnpm',
     expectedPrefix: /^chore: /,
-    updateType: 'minor',
-  },
-  // copier
-  {
-    category: 'copier',
-    description: 'minor update',
-    options: {
-      fixtures: ['.copier-answers.yml'],
-      mockRepos: [{ name: 'test-template', tags: ['v1.0.0', 'v1.1.0'] }],
-    },
-    depName: 'test-template',
-    expectedPrefix: /^chore\(deps\): /,
     updateType: 'minor',
   },
   // github-actions
