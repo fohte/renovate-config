@@ -1,8 +1,9 @@
 # Changes here will be overwritten by Copier
-_commit: v0.8.4
+_commit: v0.8.11
 _src_path: https://github.com/fohte/generic-boilerplate
 description: ''
 is_public: false
+is_web_app: false
 project_name: renovate-config
 repo_language: ja
 subpackages: []
