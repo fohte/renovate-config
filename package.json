@@ -1,7 +1,7 @@
 {
   "name": "renovate-config",
   "private": true,
-  "packageManager": "pnpm@11.7.0",
+  "packageManager": "pnpm@11.9.0",
   "type": "module",
   "scripts": {
     "lint": "eslint .",
@@ -14,17 +14,17 @@
     "test:watch": "vitest"
   },
   "devDependencies": {
-    "@commitlint/cli": "21.0.2",
+    "@commitlint/cli": "21.1.0",
     "@eslint/eslintrc": "3.3.5",
-    "@fohte/eslint-config": "0.3.4",
+    "@fohte/eslint-config": "0.3.5",
     "@tsconfig/node-lts": "24.0.0",
     "@tsconfig/strictest": "2.0.8",
     "@types/node": "24.13.2",
     "concurrently": "10.0.3",
-    "eslint": "10.5.0",
+    "eslint": "10.6.0",
     "json5": "2.2.3",
     "nock": "14.0.15",
-    "prettier": "3.8.4",
+    "prettier": "3.9.4",
     "renovate": "43.227.1",
     "tsx": "4.22.4",
     "typescript": "6.0.3",
