@@ -23,10 +23,10 @@
     "concurrently": "10.0.3",
     "eslint": "10.6.0",
     "json5": "2.2.3",
-    "nock": "14.0.15",
+    "nock": "14.0.16",
     "prettier": "3.9.4",
     "renovate": "43.227.1",
-    "tsx": "4.22.4",
+    "tsx": "4.22.5",
     "typescript": "6.0.3",
     "vitest": "4.1.9"
   }
