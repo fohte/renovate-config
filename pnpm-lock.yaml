@@ -9,14 +9,14 @@ importers:
   .:
     devDependencies:
       '@commitlint/cli':
-        specifier: 21.1.0
-        version: 21.1.0(@types/node@24.13.2)(conventional-commits-parser@6.4.0)(typescript@6.0.3)
+        specifier: 21.2.0
+        version: 21.2.0(@types/node@24.13.2)(conventional-commits-parser@6.4.0)(typescript@6.0.3)
       '@eslint/eslintrc':
         specifier: 3.3.5
         version: 3.3.5
       '@fohte/eslint-config':
-        specifier: 0.3.5
-        version: 0.3.5(c867bbcc2bb1696c7ef1023de02d61c0)
+        specifier: 0.3.6
+        version: 0.3.6(f271534715977a390be3ef39bfe70f9e)
       '@tsconfig/node-lts':
         specifier: 24.0.0
         version: 24.0.0
@@ -32,6 +32,9 @@ importers:
       eslint:
         specifier: 10.6.0
         version: 10.6.0(jiti@2.6.1)
+      eslint-plugin-simple-import-sort:
+        specifier: 13.0.0
+        version: 13.0.0(eslint@10.6.0(jiti@2.6.1))
       json5:
         specifier: 2.2.3
         version: 2.2.3
@@ -240,8 +243,8 @@ packages:
   '@cdktf/hcl2json@0.21.0':
     resolution: {integrity: sha512-cwX3i/mSJI/cRrtqwEPRfawB7pXgNioriSlkvou8LWiCrrcDe9ZtTbAbu8W1tEJQpe1pnX9VEgpzf/BbM7xF8Q==}
 
-  '@commitlint/cli@21.1.0':
-    resolution: {integrity: sha512-CVwY6TxGv5naEaWxBdgNHko1xgL95Mb4WcIqp9iik33H0ctVqRv6YtekCntayhEP0T/apuiGvHu5HcCwFuVxEA==}
+  '@commitlint/cli@21.2.0':
+    resolution: {integrity: sha512-4GLVIhUaT3c3GBlQ0GB80/5H3xXdn/Tgw4lrsuoOQVDu2wl4Xw0GuzSar8xZKSMv4H3xaKaQXmvH91GmdyYBZA==}
     engines: {node: '>=22.12.0'}
     hasBin: true
 
@@ -530,8 +533,8 @@ packages:
     resolution: {integrity: sha512-+CNAzxglkrpNf/kKywqQfk74QjtceuOE7Qm+AF8miRvPF/wmmK5+OJOgVh3AVTT3RP2mH3+FOaxlE5v72owk0A==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
 
-  '@fohte/eslint-config@0.3.5':
-    resolution: {integrity: sha512-NlTGII39ongoVKC/6lN5xtuljc2O12BeL+05Ey/f6yAhJi3i1dqAOwwliIUEFFZcdRMoCZhlqs0hQZOLAwlpag==}
+  '@fohte/eslint-config@0.3.6':
+    resolution: {integrity: sha512-artqgPAhZy2Xxmkz7/teRYmbXPwAYXsRC5+Bl+rXmHxhMxM6MlJB5TGzjHCKqq9JLHEfWWNcZLQ3PWeuNW1/FA==}
     engines: {node: '>=20.19.0 || >=22.13.0'}
     peerDependencies:
       '@eslint-community/eslint-plugin-eslint-comments': ^4.0.0
@@ -1924,8 +1927,8 @@ packages:
       eslint-import-resolver-node:
         optional: true
 
-  eslint-plugin-simple-import-sort@12.1.1:
-    resolution: {integrity: sha512-6nuzu4xwQtE3332Uz0to+TxDQYRLTKRESSc2hefVT48Zc8JthmN23Gx9lnYhu0FtkRSL1oxny3kJ2aveVhmOVA==}
+  eslint-plugin-simple-import-sort@13.0.0:
+    resolution: {integrity: sha512-McAc+/Nlvcg4byY/CABGH8kqnefWBj8s3JA2okEtz8ixbECQgU46p0HkTUKa4YS7wvgGceimlc34p1nXqbWqtA==}
     peerDependencies:
       eslint: '>=5.0.0'
 
@@ -4129,7 +4132,7 @@ snapshots:
     dependencies:
       fs-extra: 11.3.0
 
-  '@commitlint/cli@21.1.0(@types/node@24.13.2)(conventional-commits-parser@6.4.0)(typescript@6.0.3)':
+  '@commitlint/cli@21.2.0(@types/node@24.13.2)(conventional-commits-parser@6.4.0)(typescript@6.0.3)':
     dependencies:
       '@commitlint/config-conventional': 21.2.0
       '@commitlint/format': 21.2.0
@@ -4392,7 +4395,7 @@ snapshots:
       '@eslint/core': 1.2.1
       levn: 0.4.1
 
-  '@fohte/eslint-config@0.3.5(c867bbcc2bb1696c7ef1023de02d61c0)':
+  '@fohte/eslint-config@0.3.6(f271534715977a390be3ef39bfe70f9e)':
     dependencies:
       '@eslint-community/eslint-plugin-eslint-comments': 4.7.2(eslint@10.6.0(jiti@2.6.1))
       '@typescript-eslint/eslint-plugin': 8.60.1(@typescript-eslint/parser@8.60.1(eslint@10.6.0(jiti@2.6.1))(typescript@6.0.3))(eslint@10.6.0(jiti@2.6.1))(typescript@6.0.3)
@@ -4401,7 +4404,7 @@ snapshots:
       eslint: 10.6.0(jiti@2.6.1)
       eslint-config-prettier: 10.1.8(eslint@10.6.0(jiti@2.6.1))
       eslint-plugin-import-x: 4.16.2(@typescript-eslint/utils@8.60.1(eslint@10.6.0(jiti@2.6.1))(typescript@6.0.3))(eslint@10.6.0(jiti@2.6.1))
-      eslint-plugin-simple-import-sort: 12.1.1(eslint@10.6.0(jiti@2.6.1))
+      eslint-plugin-simple-import-sort: 13.0.0(eslint@10.6.0(jiti@2.6.1))
     optionalDependencies:
       typescript: 6.0.3
 
@@ -5776,7 +5779,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-simple-import-sort@12.1.1(eslint@10.6.0(jiti@2.6.1)):
+  eslint-plugin-simple-import-sort@13.0.0(eslint@10.6.0(jiti@2.6.1)):
     dependencies:
       eslint: 10.6.0(jiti@2.6.1)
 
