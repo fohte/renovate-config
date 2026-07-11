@@ -1,5 +1,6 @@
 # CLAUDE.md
 
+<<<<<<< before updating
 ## Preset file responsibilities
 
 When adding a new `packageRule` or manager configuration, decide where to place it based on the **ecosystem** the target depends on.
@@ -25,6 +26,16 @@ Examples:
 - Rules for `cargo` → `rust.json5`
 
 When in doubt, ask: "If a Go-only or Rust-only repo extends only `base.json5`, is it acceptable for this rule to be evaluated there?" If not, put it in the language-specific file.
+||||||| last update
+=======
+## Code organization rules
+
+### Split files before they grow past ~500 lines of production code
+
+When a change would push a file's non-test code past ~500 lines, split it along responsibility seams before adding more. Splits must be move-only commits: no logic changes, renames, or reformatting mixed in. Keep external import paths unchanged by keeping the entrypoint file in place and re-exporting the pieces you split out into new files (e.g. `index.ts` re-exports from the new files). Tests move together with the code they verify.
+
+Prefer creating a new focused file over appending to the largest existing one.
+>>>>>>> after updating
 
 ## Test code rules
 
