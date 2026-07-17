@@ -242,5 +242,31 @@
       semanticCommitScope: null,
       automerge: true,
     },
+    // Automerge minor/patch for mise-managed formatter/linter/git-hook CLIs:
+    // narrowly-scoped, deterministic tools whose only effect is on the
+    // repository's own lint/format/commit-hook workflow, so a regression
+    // surfaces immediately as a CI or lefthook failure rather than silently
+    // changing runtime or infrastructure behavior. Same rationale as the
+    // `pre-commit` automerge rule above. Excludes tools with broad blast
+    // radius (language runtimes, package managers, infra/cluster CLIs) and
+    // security scanners (e.g. betterleaks) whose regressions can fail silently.
+    //
+    // Matched by upstream packageName (not the mise.toml key) so both short
+    // registry names (e.g. `lefthook`) and explicit backend-prefixed names
+    // (e.g. `aqua:evilmartians/lefthook`) resolve to the same rule.
+    {
+      matchManagers: ['mise'],
+      matchPackageNames: [
+        'evilmartians/lefthook', // lefthook
+        'rhysd/actionlint', // actionlint
+        'suzuki-shunsuke/pinact', // pinact
+        'koalaman/shellcheck', // shellcheck
+        'mvdan/sh', // shfmt
+        'prettier', // npm:prettier
+        '@commitlint/cli', // npm:@commitlint/cli
+      ],
+      matchUpdateTypes: ['minor', 'patch'],
+      automerge: true,
+    },
   ],
 }
