@@ -69,6 +69,16 @@
       matchUpdateTypes: ['major', 'minor'],
       groupName: 'node',
     },
+    // Group langchainjs monorepo packages together, since they have peer
+    // dependency constraints on each other (e.g. @langchain/openai requires
+    // a matching @langchain/core range) that Renovate cannot detect on its
+    // own; this monorepo isn't registered in Renovate's group:monorepos
+    // preset (only the unrelated Java langchain4j is).
+    {
+      matchManagers: ['npm', 'bun'],
+      matchPackageNames: ['@langchain/**'],
+      groupName: 'langchain monorepo',
+    },
 
     // ==========================================================================
     // release-please integration

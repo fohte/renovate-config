@@ -1,0 +1,8 @@
+{
+  "name": "test-langchain-monorepo",
+  "version": "1.0.0",
+  "dependencies": {
+    "@langchain/core": "1.2.1",
+    "@langchain/openai": "1.5.4"
+  }
+}
