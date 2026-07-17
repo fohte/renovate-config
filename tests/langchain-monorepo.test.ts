@@ -2,11 +2,10 @@ import { expect, it } from 'vitest'
 
 import { describeWithRenovate } from './helpers/with-renovate'
 
-// @langchain/* packages come from the langchainjs monorepo and are not
-// registered in Renovate's built-in group:monorepos preset, so without a
-// custom groupName they would be updated in separate PRs and could break
-// peer dependency constraints between them (e.g. @langchain/openai requires
-// a matching @langchain/core range).
+// Verify the langchain monorepo packageRule groups scoped (@langchain/*) and
+// unscoped (langchain) packages into a single PR. This guards against the
+// peer dependency breakage that happens when @langchain/core and a dependent
+// package (e.g. @langchain/openai or langchain) update in separate PRs.
 
 describeWithRenovate(
   'langchain monorepo grouping',
@@ -16,18 +15,20 @@ describeWithRenovate(
       {
         name: '@langchain/core',
         versions: ['1.2.1', '1.2.2'],
-        sourceUrl: 'https://github.com/langchain-ai/langchainjs',
       },
       {
         name: '@langchain/openai',
         versions: ['1.5.4', '1.5.5'],
-        sourceUrl: 'https://github.com/langchain-ai/langchainjs',
+      },
+      {
+        name: 'langchain',
+        versions: ['1.5.2', '1.5.3'],
       },
     ],
     additionalConfigs: ['node.json5'],
   },
   (ctx) => {
-    it('groups @langchain/core and @langchain/openai into the same PR', () => {
+    it('groups @langchain/core, @langchain/openai, and langchain into the same PR', () => {
       const langchainBranch = ctx
         .getBranches()
         .find((b) => b.branchName?.includes('langchain-monorepo') === true)
@@ -37,6 +38,7 @@ describeWithRenovate(
         upgrades: expect.arrayContaining([
           expect.objectContaining({ depName: '@langchain/core' }),
           expect.objectContaining({ depName: '@langchain/openai' }),
+          expect.objectContaining({ depName: 'langchain' }),
         ]) as unknown,
       })
     })

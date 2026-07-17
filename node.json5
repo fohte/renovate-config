@@ -76,7 +76,7 @@
     // preset (only the unrelated Java langchain4j is).
     {
       matchManagers: ['npm', 'bun'],
-      matchPackageNames: ['@langchain/**'],
+      matchPackageNames: ['@langchain/**', 'langchain'],
       groupName: 'langchain monorepo',
     },
 
