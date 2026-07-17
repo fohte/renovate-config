@@ -31,6 +31,12 @@ const GIT_ENV = {
   GIT_CONFIG_SYSTEM: '/dev/null',
 }
 
+// Default release time for mock packages, old enough to satisfy
+// `minimumReleaseAge: '7 days'` in base.json5 without per-test overrides.
+function defaultMockReleaseTime(): string {
+  return new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+}
+
 function initGitRepo(dir: string): void {
   const opts = { cwd: dir, stdio: 'pipe' as const, env: GIT_ENV }
   execSync('git init', opts)
@@ -310,9 +316,7 @@ export class RenovateTestContext {
         const time: Record<string, string> = {}
 
         // Default to 30 days ago if no release time specified
-        const defaultReleaseTime = new Date(
-          Date.now() - 30 * 24 * 60 * 60 * 1000,
-        ).toISOString()
+        const defaultReleaseTime = defaultMockReleaseTime()
 
         for (const version of pkgData.versions) {
           versions[version] = {
@@ -408,12 +412,7 @@ export class RenovateTestContext {
                 return
               }
 
-              // Default to 30 days old so mocked releases satisfy the
-              // `minimumReleaseAge: '7 days'` default in base.json5, matching
-              // the mock npm server's default release time.
-              const releaseTimestamp = new Date(
-                Date.now() - 30 * 24 * 60 * 60 * 1000,
-              ).toISOString()
+              const releaseTimestamp = defaultMockReleaseTime()
 
               // github-releases datasource (queryReleases) sends a `releases(...)`
               // query, distinct from the `refs(...)` query used by the
