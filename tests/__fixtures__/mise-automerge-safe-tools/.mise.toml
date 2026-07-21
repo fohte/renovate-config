@@ -1,0 +1,7 @@
+[tools]
+"npm:prettier" = "3.0.0"
+prettier = "3.0.0"
+"npm:@commitlint/cli" = "21.0.0"
+shfmt = "3.12.0"
+"aqua:mvdan/sh" = "3.12.0"
+"aqua:jqlang/jq" = "1.8.0"

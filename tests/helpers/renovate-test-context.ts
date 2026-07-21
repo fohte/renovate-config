@@ -31,6 +31,12 @@ const GIT_ENV = {
   GIT_CONFIG_SYSTEM: '/dev/null',
 }
 
+// Default release time for mock packages, old enough to satisfy
+// `minimumReleaseAge: '7 days'` in base.json5 without per-test overrides.
+function defaultMockReleaseTime(): string {
+  return new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+}
+
 function initGitRepo(dir: string): void {
   const opts = { cwd: dir, stdio: 'pipe' as const, env: GIT_ENV }
   execSync('git init', opts)
@@ -310,9 +316,7 @@ export class RenovateTestContext {
         const time: Record<string, string> = {}
 
         // Default to 30 days ago if no release time specified
-        const defaultReleaseTime = new Date(
-          Date.now() - 30 * 24 * 60 * 60 * 1000,
-        ).toISOString()
+        const defaultReleaseTime = defaultMockReleaseTime()
 
         for (const version of pkgData.versions) {
           versions[version] = {
@@ -385,6 +389,7 @@ export class RenovateTestContext {
           req.on('end', () => {
             try {
               interface GraphQLQuery {
+                query?: string
                 variables?: { owner?: string; name?: string }
               }
               // Use JSON5.parse with type parameter to avoid unsafe any assignment
@@ -407,15 +412,35 @@ export class RenovateTestContext {
                 return
               }
 
-              // Build GraphQL response for refs query
-              const nodes = repoData.tags.map((tag) => ({
-                version: tag,
-                target: {
-                  type: 'Commit',
-                  oid: '0'.repeat(40),
-                  releaseTimestamp: new Date().toISOString(),
-                },
-              }))
+              const releaseTimestamp = defaultMockReleaseTime()
+
+              // github-releases datasource (queryReleases) sends a `releases(...)`
+              // query, distinct from the `refs(...)` query used by the
+              // github-tags datasource (queryTags). Detect which one was sent
+              // and shape the response nodes to match, since the two use
+              // different field sets.
+              const isReleasesQuery =
+                query.query?.includes('releases(') ?? false
+
+              const nodes = isReleasesQuery
+                ? repoData.tags.map((tag, index) => ({
+                    version: tag,
+                    releaseTimestamp,
+                    isDraft: false,
+                    isPrerelease: false,
+                    url: `https://github.com/${repoName}/releases/tag/${tag}`,
+                    id: index,
+                    name: tag,
+                    description: null,
+                  }))
+                : repoData.tags.map((tag) => ({
+                    version: tag,
+                    target: {
+                      type: 'Commit',
+                      oid: '0'.repeat(40),
+                      releaseTimestamp,
+                    },
+                  }))
 
               res.writeHead(200, { 'Content-Type': 'application/json' })
               res.end(
@@ -704,10 +729,10 @@ export class RenovateTestContext {
       })
     }
 
-    // Add packageRule for github-tags datasource
+    // Add packageRule for github-tags/github-releases datasources
     if (this.mockGitHubPort !== null) {
       packageRules.unshift({
-        matchDatasources: ['github-tags'],
+        matchDatasources: ['github-tags', 'github-releases'],
         registryUrls: [`http://127.0.0.1:${String(this.mockGitHubPort)}/`],
       })
     }

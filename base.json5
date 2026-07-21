@@ -242,5 +242,31 @@
       semanticCommitScope: null,
       automerge: true,
     },
+    // Automerge minor/patch for mise-managed formatter/linter/git-hook CLIs.
+    // Excludes tools with broad blast radius (language runtimes, package
+    // managers, infra/cluster CLIs) and security scanners (e.g. betterleaks)
+    // whose regressions can fail silently.
+    //
+    // Matched by upstream packageName (not the mise.toml key) so both short
+    // registry names (e.g. `lefthook`) and explicit backend-prefixed names
+    // (e.g. `aqua:evilmartians/lefthook`) resolve to the same rule.
+    {
+      matchManagers: ['mise'],
+      matchPackageNames: [
+        'evilmartians/lefthook', // lefthook
+        'rhysd/actionlint', // actionlint
+        'suzuki-shunsuke/pinact', // pinact
+        'koalaman/shellcheck', // shellcheck
+        'mvdan/sh', // shfmt
+        '@commitlint/cli', // npm:@commitlint/cli
+        'prettier', // npm:prettier
+        // mise's registry resolves the bare `prettier` short name (no
+        // `npm:` prefix) to the prettier/prettier GitHub repo via
+        // github-releases, not the npm package.
+        'prettier/prettier', // prettier
+      ],
+      matchUpdateTypes: ['minor', 'patch'],
+      automerge: true,
+    },
   ],
 }
