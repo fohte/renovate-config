@@ -38,6 +38,16 @@
       matchUpdateTypes: ['minor', 'patch'],
       automerge: true,
     },
+    // `packageManager` is corepack-only and never reaches the published
+    // package. pnpm reserves breaking changes for major releases, and
+    // `packageManager` updates are enforced via corepack in CI, so a
+    // minor/patch regression would surface through the CI run itself.
+    {
+      matchManagers: ['npm'],
+      matchDepTypes: ['packageManager'],
+      matchUpdateTypes: ['minor', 'patch'],
+      automerge: true,
+    },
 
     // ==========================================================================
     // grouping
