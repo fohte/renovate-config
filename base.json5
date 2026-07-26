@@ -121,6 +121,15 @@
       matchUpdateTypes: ['patch', 'digest'],
       automerge: true,
     },
+    // GitHub-official actions (`actions/*`) reserve breaking changes for major
+    // releases; minor releases only add features or inputs. Third-party
+    // actions don't guarantee this, so this rule is scoped to `actions/*` only.
+    {
+      matchManagers: ['github-actions'],
+      matchPackageNames: ['actions/**'],
+      matchUpdateTypes: ['minor'],
+      automerge: true,
+    },
 
     // ==========================================================================
     // labels

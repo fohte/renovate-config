@@ -1,0 +1,5 @@
+{
+  "name": "test-package-manager-yarn",
+  "version": "1.0.0",
+  "packageManager": "yarn@1.0.0"
+}
