@@ -7,8 +7,17 @@
   "compilerOptions": {
     "module": "preserve",
     "moduleResolution": "bundler",
+<<<<<<< before updating
     "noEmit": true,
     "types": ["vitest/globals"]
+||||||| last update
+    "noEmit": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+=======
+    "noEmit": true
+>>>>>>> after updating
   },
   "include": ["tests/**/*.ts", "vitest.config.ts", "scripts/**/*.ts"]
 }
