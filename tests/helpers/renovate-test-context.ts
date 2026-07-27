@@ -156,6 +156,7 @@ export class RenovateTestContext {
       content.replace(/\{\{MOCK_REPO:([\w-]+)\}\}/g, (_, name: string) => {
         const repoPath = this.mockRepoPaths.get(name)
         if (repoPath === undefined) {
+          // eslint-disable-next-line no-restricted-syntax -- String.prototype.replace's callback must return synchronously
           throw new Error(`Mock repo '${name}' not found`)
         }
         return `file://${repoPath}`
@@ -387,6 +388,7 @@ export class RenovateTestContext {
             body += chunk.toString()
           })
           req.on('end', () => {
+            // eslint-disable-next-line no-restricted-syntax -- mock HTTP handler parses an untrusted request body inline; a parse failure just returns 400
             try {
               interface GraphQLQuery {
                 query?: string
@@ -531,6 +533,7 @@ export class RenovateTestContext {
    */
   async cleanup(): Promise<void> {
     if (this.workDir !== null) {
+      // eslint-disable-next-line no-restricted-syntax -- best-effort cleanup; a failure here must not abort the rest of cleanup()
       try {
         rmSync(this.workDir, { recursive: true, force: true })
       } catch (error) {
@@ -539,6 +542,7 @@ export class RenovateTestContext {
       this.workDir = null
     }
     for (const repoPath of this.mockRepoPaths.values()) {
+      // eslint-disable-next-line no-restricted-syntax -- best-effort cleanup; a failure here must not abort cleanup of the remaining repos
       try {
         rmSync(repoPath, { recursive: true, force: true })
       } catch (error) {
@@ -594,21 +598,25 @@ export class RenovateTestContext {
    */
   getPackageFile(manager: string, filePath: string): PackageFile {
     if (!this.report) {
+      // eslint-disable-next-line no-restricted-syntax -- test helper misuse guard; fail fast instead of threading a Result through every call site
       throw new Error('Report not available. Did you call setup()?')
     }
 
     const repoReport = this.report.repositories['local']
     if (!repoReport) {
+      // eslint-disable-next-line no-restricted-syntax -- test helper misuse guard; fail fast instead of threading a Result through every call site
       throw new Error('Repository report not found')
     }
 
     const managerFiles = repoReport.packageFiles[manager]
     if (!managerFiles) {
+      // eslint-disable-next-line no-restricted-syntax -- test helper misuse guard; fail fast instead of threading a Result through every call site
       throw new Error(`No package files found for manager: ${manager}`)
     }
 
     const packageFile = managerFiles.find((f) => f.packageFile === filePath)
     if (!packageFile) {
+      // eslint-disable-next-line no-restricted-syntax -- test helper misuse guard; fail fast instead of threading a Result through every call site
       throw new Error(
         `${filePath} not found in ${manager} package files. ` +
           `Available: ${managerFiles.map((f) => f.packageFile).join(', ')}`,
@@ -626,6 +634,7 @@ export class RenovateTestContext {
     filePath: string,
   ): PackageFile | undefined {
     if (!this.report) {
+      // eslint-disable-next-line no-restricted-syntax -- test helper misuse guard; fail fast instead of threading a Result through every call site
       throw new Error('Report not available. Did you call setup()?')
     }
     const repoReport = this.report.repositories['local']
@@ -644,11 +653,13 @@ export class RenovateTestContext {
    */
   getBranches(): Partial<BranchCache>[] {
     if (!this.report) {
+      // eslint-disable-next-line no-restricted-syntax -- test helper misuse guard; fail fast instead of threading a Result through every call site
       throw new Error('Report not available. Did you call setup()?')
     }
 
     const repoReport = this.report.repositories['local']
     if (!repoReport) {
+      // eslint-disable-next-line no-restricted-syntax -- test helper misuse guard; fail fast instead of threading a Result through every call site
       throw new Error('Repository report not found')
     }
 
@@ -657,6 +668,7 @@ export class RenovateTestContext {
 
   private async dryRun(): Promise<Report> {
     if (this.workDir === null) {
+      // eslint-disable-next-line no-restricted-syntax -- test helper misuse guard; fail fast instead of threading a Result through every call site
       throw new Error('Work directory not set. Did you call setup()?')
     }
 
