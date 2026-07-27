@@ -1,6 +1,5 @@
 import { defineConfig } from 'vitest/config'
 
-<<<<<<< before updating
 export default defineConfig({
   test: {
     globals: true,
@@ -9,14 +8,3 @@ export default defineConfig({
     setupFiles: ['./tests/setup.ts'],
   },
 })
-||||||| last update
-export default defineConfig({
-  resolve: {
-    alias: {
-      '@': '/src',
-    },
-  },
-})
-=======
-export default defineConfig({})
->>>>>>> after updating
