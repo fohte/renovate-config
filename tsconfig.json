@@ -10,5 +10,10 @@
     "noEmit": true,
     "types": ["vitest/globals"]
   },
-  "include": ["tests/**/*.ts", "vitest.config.ts", "scripts/**/*.ts"]
+  "include": [
+    "src/**/*.ts",
+    "tests/**/*.ts",
+    "vitest.config.ts",
+    "scripts/**/*.ts"
+  ]
 }
