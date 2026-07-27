@@ -11,6 +11,7 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 
 import JSON5 from 'json5'
+import { Result } from 'neverthrow'
 import type { Report } from 'renovate/dist/instrumentation/types'
 import type { PackageFile } from 'renovate/dist/modules/manager/types'
 import type { BranchCache } from 'renovate/dist/util/cache/repository/types'
@@ -141,7 +142,8 @@ export class RenovateTestContext {
     }
 
     // Create a temporary working directory
-    this.workDir = mkdtempSync(join(tmpdir(), 'renovate-test-'))
+    const workDir = mkdtempSync(join(tmpdir(), 'renovate-test-'))
+    this.workDir = workDir
 
     // Create mock repos first (so we can replace placeholders in fixtures)
     for (const mockRepo of mockRepos) {
@@ -188,7 +190,7 @@ export class RenovateTestContext {
     })
 
     // Run renovate and get report
-    this.report = await this.dryRun()
+    this.report = await this.dryRun(workDir)
   }
 
   /**
@@ -388,83 +390,86 @@ export class RenovateTestContext {
             body += chunk.toString()
           })
           req.on('end', () => {
-            // eslint-disable-next-line no-restricted-syntax -- mock HTTP handler parses an untrusted request body inline; a parse failure just returns 400
-            try {
-              interface GraphQLQuery {
-                query?: string
-                variables?: { owner?: string; name?: string }
-              }
-              // Use JSON5.parse with type parameter to avoid unsafe any assignment
-              const query = JSON5.parse<GraphQLQuery>(body)
+            interface GraphQLQuery {
+              query?: string
+              variables?: { owner?: string; name?: string }
+            }
+            // Use JSON5.parse with type parameter to avoid unsafe any assignment
+            const parseQuery = Result.fromThrowable(
+              (raw: string) => JSON5.parse<GraphQLQuery>(raw),
+              (error) => error,
+            )
+            const parsedQuery = parseQuery(body)
+            if (parsedQuery.isErr()) {
+              res.writeHead(400)
+              res.end('Invalid request')
+              return
+            }
+            const query = parsedQuery.value
 
-              // Extract repo name from query variables
-              const owner = query.variables?.owner ?? ''
-              const name = query.variables?.name ?? ''
-              const repoName = `${owner}/${name}`
-              const repoData = this.mockGitHubData.get(repoName)
+            // Extract repo name from query variables
+            const owner = query.variables?.owner ?? ''
+            const name = query.variables?.name ?? ''
+            const repoName = `${owner}/${name}`
+            const repoData = this.mockGitHubData.get(repoName)
 
-              if (!repoData) {
-                res.writeHead(200, { 'Content-Type': 'application/json' })
-                res.end(
-                  JSON.stringify({
-                    data: { repository: null },
-                    errors: [{ message: 'Repository not found' }],
-                  }),
-                )
-                return
-              }
-
-              const releaseTimestamp = defaultMockReleaseTime()
-
-              // github-releases datasource (queryReleases) sends a `releases(...)`
-              // query, distinct from the `refs(...)` query used by the
-              // github-tags datasource (queryTags). Detect which one was sent
-              // and shape the response nodes to match, since the two use
-              // different field sets.
-              const isReleasesQuery =
-                query.query?.includes('releases(') ?? false
-
-              const nodes = isReleasesQuery
-                ? repoData.tags.map((tag, index) => ({
-                    version: tag,
-                    releaseTimestamp,
-                    isDraft: false,
-                    isPrerelease: false,
-                    url: `https://github.com/${repoName}/releases/tag/${tag}`,
-                    id: index,
-                    name: tag,
-                    description: null,
-                  }))
-                : repoData.tags.map((tag) => ({
-                    version: tag,
-                    target: {
-                      type: 'Commit',
-                      oid: '0'.repeat(40),
-                      releaseTimestamp,
-                    },
-                  }))
-
+            if (!repoData) {
               res.writeHead(200, { 'Content-Type': 'application/json' })
               res.end(
                 JSON.stringify({
-                  data: {
-                    repository: {
-                      isRepoPrivate: false,
-                      payload: {
-                        pageInfo: {
-                          hasNextPage: false,
-                          endCursor: null,
-                        },
-                        nodes,
-                      },
-                    },
-                  },
+                  data: { repository: null },
+                  errors: [{ message: 'Repository not found' }],
                 }),
               )
-            } catch {
-              res.writeHead(400)
-              res.end('Invalid request')
+              return
             }
+
+            const releaseTimestamp = defaultMockReleaseTime()
+
+            // github-releases datasource (queryReleases) sends a `releases(...)`
+            // query, distinct from the `refs(...)` query used by the
+            // github-tags datasource (queryTags). Detect which one was sent
+            // and shape the response nodes to match, since the two use
+            // different field sets.
+            const isReleasesQuery = query.query?.includes('releases(') ?? false
+
+            const nodes = isReleasesQuery
+              ? repoData.tags.map((tag, index) => ({
+                  version: tag,
+                  releaseTimestamp,
+                  isDraft: false,
+                  isPrerelease: false,
+                  url: `https://github.com/${repoName}/releases/tag/${tag}`,
+                  id: index,
+                  name: tag,
+                  description: null,
+                }))
+              : repoData.tags.map((tag) => ({
+                  version: tag,
+                  target: {
+                    type: 'Commit',
+                    oid: '0'.repeat(40),
+                    releaseTimestamp,
+                  },
+                }))
+
+            res.writeHead(200, { 'Content-Type': 'application/json' })
+            res.end(
+              JSON.stringify({
+                data: {
+                  repository: {
+                    isRepoPrivate: false,
+                    payload: {
+                      pageInfo: {
+                        hasNextPage: false,
+                        endCursor: null,
+                      },
+                      nodes,
+                    },
+                  },
+                },
+              }),
+            )
           })
           return
         }
@@ -532,22 +537,25 @@ export class RenovateTestContext {
    * Clean up the temporary directory and mock repos.
    */
   async cleanup(): Promise<void> {
+    const removeDir = Result.fromThrowable(rmSync, (error) => error)
+
     if (this.workDir !== null) {
-      // eslint-disable-next-line no-restricted-syntax -- best-effort cleanup; a failure here must not abort the rest of cleanup()
-      try {
-        rmSync(this.workDir, { recursive: true, force: true })
-      } catch (error) {
-        console.error(`Failed to clean up workDir at ${this.workDir}:`, error)
-      }
+      const workDir = this.workDir
+      removeDir(workDir, { recursive: true, force: true }).match(
+        () => {},
+        (error) => {
+          console.error(`Failed to clean up workDir at ${workDir}:`, error)
+        },
+      )
       this.workDir = null
     }
     for (const repoPath of this.mockRepoPaths.values()) {
-      // eslint-disable-next-line no-restricted-syntax -- best-effort cleanup; a failure here must not abort cleanup of the remaining repos
-      try {
-        rmSync(repoPath, { recursive: true, force: true })
-      } catch (error) {
-        console.error(`Failed to clean up mock repo at ${repoPath}:`, error)
-      }
+      removeDir(repoPath, { recursive: true, force: true }).match(
+        () => {},
+        (error) => {
+          console.error(`Failed to clean up mock repo at ${repoPath}:`, error)
+        },
+      )
     }
     this.mockRepoPaths.clear()
 
@@ -593,30 +601,41 @@ export class RenovateTestContext {
     this.report = null
   }
 
+  // Guards internal state, not an external throwing API — the throw is kept
+  // (instead of a Result) because getPackageFile/tryGetPackageFile/getBranches
+  // are called from every test file in tests/.
+  private requireReport(): Report {
+    if (!this.report) {
+      // eslint-disable-next-line no-restricted-syntax -- see comment above requireReport()
+      throw new Error('Report not available. Did you call setup()?')
+    }
+    return this.report
+  }
+
+  private requireRepoReport(): Report['repositories'][string] {
+    const repoReport = this.requireReport().repositories['local']
+    if (!repoReport) {
+      // eslint-disable-next-line no-restricted-syntax -- see comment above requireReport()
+      throw new Error('Repository report not found')
+    }
+    return repoReport
+  }
+
   /**
    * Get a package file from the report by manager name and file path.
    */
   getPackageFile(manager: string, filePath: string): PackageFile {
-    if (!this.report) {
-      // eslint-disable-next-line no-restricted-syntax -- test helper misuse guard; fail fast instead of threading a Result through every call site
-      throw new Error('Report not available. Did you call setup()?')
-    }
-
-    const repoReport = this.report.repositories['local']
-    if (!repoReport) {
-      // eslint-disable-next-line no-restricted-syntax -- test helper misuse guard; fail fast instead of threading a Result through every call site
-      throw new Error('Repository report not found')
-    }
+    const repoReport = this.requireRepoReport()
 
     const managerFiles = repoReport.packageFiles[manager]
     if (!managerFiles) {
-      // eslint-disable-next-line no-restricted-syntax -- test helper misuse guard; fail fast instead of threading a Result through every call site
+      // eslint-disable-next-line no-restricted-syntax -- see comment above requireReport()
       throw new Error(`No package files found for manager: ${manager}`)
     }
 
     const packageFile = managerFiles.find((f) => f.packageFile === filePath)
     if (!packageFile) {
-      // eslint-disable-next-line no-restricted-syntax -- test helper misuse guard; fail fast instead of threading a Result through every call site
+      // eslint-disable-next-line no-restricted-syntax -- see comment above requireReport()
       throw new Error(
         `${filePath} not found in ${manager} package files. ` +
           `Available: ${managerFiles.map((f) => f.packageFile).join(', ')}`,
@@ -633,11 +652,7 @@ export class RenovateTestContext {
     manager: string,
     filePath: string,
   ): PackageFile | undefined {
-    if (!this.report) {
-      // eslint-disable-next-line no-restricted-syntax -- test helper misuse guard; fail fast instead of threading a Result through every call site
-      throw new Error('Report not available. Did you call setup()?')
-    }
-    const repoReport = this.report.repositories['local']
+    const repoReport = this.requireReport().repositories['local']
     if (!repoReport) {
       return undefined
     }
@@ -652,28 +667,10 @@ export class RenovateTestContext {
    * and commit prefix behavior.
    */
   getBranches(): Partial<BranchCache>[] {
-    if (!this.report) {
-      // eslint-disable-next-line no-restricted-syntax -- test helper misuse guard; fail fast instead of threading a Result through every call site
-      throw new Error('Report not available. Did you call setup()?')
-    }
-
-    const repoReport = this.report.repositories['local']
-    if (!repoReport) {
-      // eslint-disable-next-line no-restricted-syntax -- test helper misuse guard; fail fast instead of threading a Result through every call site
-      throw new Error('Repository report not found')
-    }
-
-    return repoReport.branches
+    return this.requireRepoReport().branches
   }
 
-  private async dryRun(): Promise<Report> {
-    if (this.workDir === null) {
-      // eslint-disable-next-line no-restricted-syntax -- test helper misuse guard; fail fast instead of threading a Result through every call site
-      throw new Error('Work directory not set. Did you call setup()?')
-    }
-
-    // Capture in local variable so TypeScript can narrow the type in closures
-    const workDir = this.workDir
+  private async dryRun(workDir: string): Promise<Report> {
     const reportPath = join(workDir, 'report.json')
 
     // Parsed JSON5 config shape used for type-safe property access
