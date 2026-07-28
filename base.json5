@@ -273,6 +273,7 @@
         // `npm:` prefix) to the prettier/prettier GitHub repo via
         // github-releases, not the npm package.
         'prettier/prettier', // prettier
+        'ast-grep/ast-grep', // github:ast-grep/ast-grep
       ],
       matchUpdateTypes: ['minor', 'patch'],
       automerge: true,
