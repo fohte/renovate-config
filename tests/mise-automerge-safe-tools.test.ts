@@ -35,6 +35,7 @@ describeWithRenovate(
       { name: 'mvdan/sh', tags: ['v3.12.0', 'v3.12.1'] },
       { name: 'jqlang/jq', tags: ['v1.8.0', 'v1.8.1'] },
       { name: 'prettier/prettier', tags: ['3.0.0', '3.0.1'] },
+      { name: 'ast-grep/ast-grep', tags: ['0.44.0', '0.44.1'] },
     ],
   },
   (ctx) => {
@@ -96,6 +97,19 @@ describeWithRenovate(
       expect(branchAutomergeStatus(ctx, 'aqua:jqlang/jq', 'patch')).toEqual({
         found: true,
         automerge: false,
+      })
+    })
+
+    // github:ast-grep/ast-grep resolves through the github backend /
+    // github-releases datasource, distinct from the aqua/github-tags path
+    // exercised above, so this proves the packageName-based match also
+    // covers the github backend prefix.
+    it('should automerge a patch update for the github-prefixed name (github:ast-grep/ast-grep)', () => {
+      expect(
+        branchAutomergeStatus(ctx, 'github:ast-grep/ast-grep', 'patch'),
+      ).toEqual({
+        found: true,
+        automerge: true,
       })
     })
   },
