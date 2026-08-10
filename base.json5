@@ -133,11 +133,16 @@
     // `renovatebot/github-action` is third-party, but its minor releases can
     // still be automerged: a minor bump can change the default
     // `renovate-version` input (e.g. v46.2.0 moved it from '43' to '44'),
-    // which is really a Renovate major hidden inside an action minor. That's
-    // safe here because Renovate fails safe on breaking config: it raises a
-    // GitHub Issue and stops creating PRs rather than automerging with a
-    // broken config.
-    // https://github.com/renovatebot/renovate/discussions/44952
+    // which is really a Renovate major hidden inside an action minor. The
+    // v43->v44 jump specifically is confirmed non-breaking: Renovate's
+    // maintainers say 44.0.0 was released as a major only because of a stray
+    // `BREAKING CHANGE` trailer in a squashed commit, and they're treating it
+    // as a continuation of 43.x. https://github.com/renovatebot/renovate/discussions/44952
+    //
+    // Future Renovate majors aren't guaranteed to be this harmless, and not
+    // every breaking change surfaces as a config error Renovate would block
+    // on, so this rule accepts some residual risk in exchange for less
+    // manual-merge noise.
     {
       matchManagers: ['github-actions'],
       matchPackageNames: ['renovatebot/github-action'],
