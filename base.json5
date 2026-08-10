@@ -278,5 +278,17 @@
       matchUpdateTypes: ['minor', 'patch'],
       automerge: true,
     },
+    // Automerge patch updates for mise-managed `node`. mise-managed node is
+    // a dev-tool runtime (running local linters/formatters), never the
+    // production runtime -- that's pinned separately (Dockerfile, Lambda
+    // runtime, package.json engines). LTS patch releases preserve backward
+    // compatibility, and a broken patch surfaces via CI lint/format
+    // failures. Minor is excluded since it can add new features.
+    {
+      matchManagers: ['mise'],
+      matchPackageNames: ['node'],
+      matchUpdateTypes: ['patch'],
+      automerge: true,
+    },
   ],
 }
