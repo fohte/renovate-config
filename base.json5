@@ -251,9 +251,9 @@
       semanticCommitScope: null,
       automerge: true,
     },
-    // Automerge minor/patch for mise-managed formatter/linter/git-hook CLIs.
-    // Excludes tools with broad blast radius (language runtimes, package
-    // managers, infra/cluster CLIs).
+    // Automerge minor/patch for mise-managed formatter/linter/git-hook/
+    // security-scanner CLIs. Excludes tools with broad blast radius
+    // (language runtimes, package managers, infra/cluster CLIs).
     //
     // Matched by upstream packageName (not the mise.toml key) so both short
     // registry names (e.g. `lefthook`) and explicit backend-prefixed names
