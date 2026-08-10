@@ -1,36 +1,13 @@
 import { expect, it } from 'vitest'
 
-import type { RenovateTestContext } from './helpers/renovate-test-context'
+import { branchAutomergeStatus } from './helpers/branch-automerge-status'
 import { describeWithRenovate } from './helpers/with-renovate'
-
-// Looks up the branch for a specific (depName, updateType) pair and reports
-// whether it was found at all, alongside its automerge status. Asserting on
-// `found` too (instead of only `automerge`) keeps the check from passing
-// vacuously when the branch/upgrade never got created (e.g. a broken mock).
-function branchAutomergeStatus(
-  ctx: RenovateTestContext,
-  depName: string,
-  updateType: string,
-): { found: boolean; automerge: boolean } {
-  const branch = ctx
-    .getBranches()
-    .find(
-      (b) =>
-        b.upgrades?.some(
-          (u) => u.depName === depName && u.updateType === updateType,
-        ) ?? false,
-    )
-  return { found: branch !== undefined, automerge: branch?.automerge === true }
-}
 
 describeWithRenovate(
   'mise automerge for node patch updates',
   {
-    // Node 22 is in Maintenance LTS, so it only receives patch releases (no
-    // new minors), which makes its current tip a stable target for
-    // exercising a 'patch'-only update bucket.
     fixtures: ['mise-node-automerge-patch/.mise.toml'],
-    additionalConfigs: ['node.json5'],
+    mockNodeVersions: [{ version: '1.2.0' }, { version: '1.2.1' }],
   },
   (ctx) => {
     it('should automerge a patch update for node', () => {
@@ -45,10 +22,18 @@ describeWithRenovate(
 describeWithRenovate(
   'mise automerge exclusion for node minor updates',
   {
-    // Node 24 is in Active LTS and keeps receiving new minors, so its
-    // default (non-major) upgrade bucket resolves to a 'minor' update.
     fixtures: ['mise-node-automerge-minor/.mise.toml'],
-    additionalConfigs: ['node.json5'],
+    // Renovate's default separateMajorMinor behavior merges patch+minor
+    // into a single non-major bucket that jumps to the highest non-major
+    // version. With a higher minor available, that bucket resolves to
+    // 'minor' and the patch version is never surfaced as its own bucket --
+    // hence this needs a separate fixture/scenario from the patch-only case
+    // above rather than just adding a higher minor to the same mock list.
+    mockNodeVersions: [
+      { version: '1.2.0' },
+      { version: '1.2.1' },
+      { version: '1.3.0' },
+    ],
   },
   (ctx) => {
     it('should not automerge a minor update for node', () => {
