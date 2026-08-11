@@ -31,7 +31,7 @@
     "eslint": "10.6.0",
     "eslint-plugin-simple-import-sort": "13.0.0",
     "json5": "2.2.3",
-    "nock": "14.0.16",
+    "nock": "14.0.17",
     "prettier": "3.9.6",
     "renovate": "43.227.1",
     "tsx": "4.22.5",
