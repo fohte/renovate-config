@@ -72,6 +72,15 @@ export interface MockGitHubRepo {
   tags: string[]
 }
 
+export interface MockNodeVersion {
+  // e.g. "v24.18.1" -- matches nodejs.org's real index.json version format
+  version: string
+  // ISO 8601 timestamp. If not specified, defaults to a date old enough to
+  // pass minimumReleaseAge
+  date?: string
+  lts?: string | false
+}
+
 export interface SetupOptions {
   fixtures: string[]
   // `{{MOCK_REPO:name}}` placeholders are substituted, matching fixtures behavior.
@@ -80,6 +89,7 @@ export interface SetupOptions {
   mockCrates?: MockCrate[]
   mockNpmPackages?: MockNpmPackage[]
   mockGitHubRepos?: MockGitHubRepo[]
+  mockNodeVersions?: MockNodeVersion[]
   // Additional config files to merge with base.json5 (e.g., ['lefthook.json5'])
   additionalConfigs?: string[]
   // Presets from base.json5's `extends` to re-include in the test config.
@@ -102,6 +112,9 @@ export class RenovateTestContext {
   private mockGitHubServer: Server | null = null
   private mockGitHubPort: number | null = null
   private mockGitHubData: Map<string, MockGitHubRepo> = new Map()
+  private mockNodeVersionServer: Server | null = null
+  private mockNodeVersionPort: number | null = null
+  private mockNodeVersionData: MockNodeVersion[] = []
   private additionalConfigs: string[] = []
   private allowedExtends: string[] = []
 
@@ -120,6 +133,7 @@ export class RenovateTestContext {
       mockCrates = [],
       mockNpmPackages = [],
       mockGitHubRepos = [],
+      mockNodeVersions = [],
       additionalConfigs = [],
       allowedExtends = [],
     } = options
@@ -139,6 +153,11 @@ export class RenovateTestContext {
     // Set up mock GitHub API server if needed
     if (mockGitHubRepos.length > 0) {
       await this.startMockGitHubServer(mockGitHubRepos)
+    }
+
+    // Set up mock node-version registry server if needed
+    if (mockNodeVersions.length > 0) {
+      await this.startMockNodeVersionServer(mockNodeVersions)
     }
 
     // Create a temporary working directory
@@ -534,6 +553,55 @@ export class RenovateTestContext {
   }
 
   /**
+   * Start a mock node-version registry server (nodejs.org/dist/index.json).
+   */
+  private startMockNodeVersionServer(
+    versions: MockNodeVersion[],
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.mockNodeVersionData = versions
+
+      this.mockNodeVersionServer = createServer((req, res) => {
+        const url = req.url ?? ''
+        if (url !== '/index.json') {
+          res.writeHead(404)
+          res.end('Not Found')
+          return
+        }
+
+        // Default to 30 days ago if no release date specified
+        const defaultReleaseTime = defaultMockReleaseTime()
+
+        const body = this.mockNodeVersionData.map((v) => ({
+          version: v.version,
+          date: v.date ?? defaultReleaseTime,
+          lts: v.lts ?? false,
+        }))
+
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        res.end(JSON.stringify(body))
+      })
+
+      this.mockNodeVersionServer.listen(0, '127.0.0.1', () => {
+        const server = this.mockNodeVersionServer
+        if (server === null) {
+          reject(new Error('Server was closed before it started'))
+          return
+        }
+        const address = server.address()
+        if (typeof address === 'object' && address) {
+          this.mockNodeVersionPort = address.port
+          resolve()
+        } else {
+          reject(new Error('Failed to get server address'))
+        }
+      })
+
+      this.mockNodeVersionServer.on('error', reject)
+    })
+  }
+
+  /**
    * Clean up the temporary directory and mock repos.
    */
   async cleanup(): Promise<void> {
@@ -596,6 +664,19 @@ export class RenovateTestContext {
       this.mockGitHubServer = null
       this.mockGitHubPort = null
       this.mockGitHubData.clear()
+    }
+
+    // Stop mock node-version registry server
+    if (this.mockNodeVersionServer !== null) {
+      const server = this.mockNodeVersionServer
+      await new Promise<void>((resolve) => {
+        server.close(() => {
+          resolve()
+        })
+      })
+      this.mockNodeVersionServer = null
+      this.mockNodeVersionPort = null
+      this.mockNodeVersionData = []
     }
 
     this.report = null
@@ -743,6 +824,12 @@ export class RenovateTestContext {
       packageRules.unshift({
         matchDatasources: ['github-tags', 'github-releases'],
         registryUrls: [`http://127.0.0.1:${String(this.mockGitHubPort)}/`],
+      })
+    }
+    if (this.mockNodeVersionPort !== null) {
+      packageRules.unshift({
+        matchDatasources: ['node-version'],
+        registryUrls: [`http://127.0.0.1:${String(this.mockNodeVersionPort)}/`],
       })
     }
 
