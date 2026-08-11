@@ -36,6 +36,7 @@ describeWithRenovate(
       { name: 'jqlang/jq', tags: ['v1.8.0', 'v1.8.1'] },
       { name: 'prettier/prettier', tags: ['3.0.0', '3.0.1'] },
       { name: 'ast-grep/ast-grep', tags: ['0.44.0', '0.44.1'] },
+      { name: 'betterleaks/betterleaks', tags: ['1.6.1', '1.6.2'] },
     ],
   },
   (ctx) => {
@@ -107,6 +108,18 @@ describeWithRenovate(
     it('should automerge a patch update for the github-prefixed name (github:ast-grep/ast-grep)', () => {
       expect(
         branchAutomergeStatus(ctx, 'github:ast-grep/ast-grep', 'patch'),
+      ).toEqual({
+        found: true,
+        automerge: true,
+      })
+    })
+
+    // betterleaks (a secret scanner) is matched the same way as any other
+    // mise-managed CLI in this allowlist: by upstream packageName via the
+    // github backend, same as github:ast-grep/ast-grep above.
+    it('should automerge a patch update for the github-prefixed name (github:betterleaks/betterleaks)', () => {
+      expect(
+        branchAutomergeStatus(ctx, 'github:betterleaks/betterleaks', 'patch'),
       ).toEqual({
         found: true,
         automerge: true,
