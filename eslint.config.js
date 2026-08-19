@@ -8,7 +8,8 @@ export default config(
   {
     ignores: ['**/*.cjs'],
   },
-  // This repository doesn't use src/ directory, so relative imports are allowed
+  // tests/**/*.ts is not covered by the `#*` subpath import map (src/*.ts only),
+  // so relative imports are allowed here.
   {
     files: ['tests/**/*.ts'],
     rules: {
