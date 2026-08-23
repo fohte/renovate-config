@@ -91,6 +91,15 @@
       matchPackageNames: ['@langchain/**', 'langchain'],
       groupName: 'langchain monorepo',
     },
+    // Group @fohte/* package updates on their own instead of letting them fall
+    // into the "devDependencies (non-major)" group above: first-party packages
+    // can carry behavioral changes (e.g. a screenshot-testing addon) that need
+    // isolated review, not bundling with unrelated third-party patches.
+    {
+      matchManagers: ['npm', 'bun'],
+      matchPackageNames: ['@fohte/**'],
+      groupName: '@fohte/* packages',
+    },
 
     // ==========================================================================
     // release-please integration
