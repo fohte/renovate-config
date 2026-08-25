@@ -6,7 +6,7 @@ error_tracking: false
 is_public: true
 is_web_app: false
 project_name: renovate-config
-repo_id: ''
+repo_id: '694739672'
 repo_language: ja
 subpackages: []
 type: node
