@@ -2,11 +2,9 @@ import { expect, it } from 'vitest'
 
 import { describeWithRenovate } from './helpers/with-renovate'
 
-// Verify @fohte/* npm packages are excluded from the "devDependencies
-// (non-major)" group and from each other, so each first-party package gets
-// its own PR. First-party packages can carry behavioral changes that need
-// an isolated diff, so they must not be bundled with unrelated third-party
-// patches or with other @fohte/* packages.
+// Verify @fohte/* npm packages are excluded from grouping, including the
+// "devDependencies (non-major)" group and each other, so each first-party
+// package gets its own PR.
 
 describeWithRenovate(
   '@fohte/* package ungrouping',
@@ -28,32 +26,15 @@ describeWithRenovate(
       expect(branch?.upgrades?.map((u) => u.depName)).toEqual(['lodash'])
     })
 
-    it('puts @fohte/storybook-addon into its own branch, without lodash or @fohte/service-kit', () => {
-      const branch = ctx
-        .getBranches()
-        .find(
-          (b) =>
-            b.upgrades?.some((u) => u.depName === '@fohte/storybook-addon') ===
-            true,
-        )
+    it.each(['@fohte/storybook-addon', '@fohte/service-kit'])(
+      'puts %s into its own branch, without lodash or the other @fohte/* package',
+      (depName) => {
+        const branch = ctx
+          .getBranches()
+          .find((b) => b.upgrades?.some((u) => u.depName === depName) === true)
 
-      expect(branch?.upgrades?.map((u) => u.depName)).toEqual([
-        '@fohte/storybook-addon',
-      ])
-    })
-
-    it('puts @fohte/service-kit into its own branch, without lodash or @fohte/storybook-addon', () => {
-      const branch = ctx
-        .getBranches()
-        .find(
-          (b) =>
-            b.upgrades?.some((u) => u.depName === '@fohte/service-kit') ===
-            true,
-        )
-
-      expect(branch?.upgrades?.map((u) => u.depName)).toEqual([
-        '@fohte/service-kit',
-      ])
-    })
+        expect(branch?.upgrades?.map((u) => u.depName)).toEqual([depName])
+      },
+    )
   },
 )

@@ -91,12 +91,9 @@
       matchPackageNames: ['@langchain/**', 'langchain'],
       groupName: 'langchain monorepo',
     },
-    // Exempt @fohte/* packages from the "devDependencies (non-major)" group
-    // above (and from each other), so each first-party package gets its own
-    // PR instead of a diff scoped to one package (e.g. a screenshot-testing
-    // addon whose bump requires re-recording baselines) being buried inside
-    // unrelated patches. This only changes grouping; automerge behavior is
-    // intentionally left as inherited from the rules above.
+    // Exempt @fohte/* packages from grouping (including the "devDependencies
+    // (non-major)" group above and each other), so each first-party package
+    // gets its own PR.
     {
       matchManagers: ['npm', 'bun'],
       matchPackageNames: ['@fohte/**'],
