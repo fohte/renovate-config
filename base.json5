@@ -297,14 +297,7 @@
       matchUpdateTypes: ['minor', 'patch'],
       automerge: true,
     },
-    // Automerge patch and minor updates for mise-managed `node`. Node
-    // follows semver: patch and minor releases are backward-compatible
-    // (bug/security fixes or additive features only), so automerging them
-    // is safe regardless of whether this node build backs dev tooling or a
-    // production runtime. `minimumReleaseAge` above already lets a release
-    // sit for a week before it reaches a PR, mitigating the risk of a
-    // regression slipping through. Major is excluded since it may contain
-    // breaking changes.
+    // Node minor/patch releases follow semver and never break; major may.
     {
       matchManagers: ['mise'],
       matchPackageNames: ['node'],

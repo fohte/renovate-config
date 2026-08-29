@@ -69,6 +69,8 @@
     // Group Node.js and @types/node major/minor updates; patches are excluded as
     // DefinitelyTyped patch versions are independent revision counters.
     // https://github.com/DefinitelyTyped/DefinitelyTyped#how-do-definitely-typed-package-versions-relate-to-versions-of-the-corresponding-library
+    // Renovate only automerges a group once every member has automerge: true,
+    // so a grouped bump won't automerge unless @types/node's does too.
     {
       matchManagers: ['mise'],
       matchPackageNames: ['node'],
