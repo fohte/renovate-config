@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "devDependencies": {
     "lodash": "1.0.0",
-    "@fohte/storybook-addon": "1.0.0"
+    "@fohte/storybook-addon": "1.0.0",
+    "@fohte/service-kit": "1.0.0"
   }
 }
