@@ -20,7 +20,7 @@ describeWithRenovate(
 )
 
 describeWithRenovate(
-  'mise automerge exclusion for node minor updates',
+  'mise automerge for node minor updates',
   {
     fixtures: ['mise-node-automerge-minor/.mise.toml'],
     // Renovate's default separateMajorMinor behavior merges patch+minor
@@ -36,8 +36,30 @@ describeWithRenovate(
     ],
   },
   (ctx) => {
-    it('should not automerge a minor update for node', () => {
+    it('should automerge a minor update for node', () => {
       expect(branchAutomergeStatus(ctx, 'node', 'minor')).toEqual({
+        found: true,
+        automerge: true,
+      })
+    })
+  },
+)
+
+describeWithRenovate(
+  'mise automerge exclusion for node major updates',
+  {
+    fixtures: ['mise-node-automerge-major/.mise.toml'],
+    // Renovate drops cross-major upgrades to unstable releases entirely.
+    // A release only counts as stable with a real major past its LTS date
+    // (fake numbers like '1.2.0' above never qualify) and an `lts` value here.
+    mockNodeVersions: [
+      { version: '22.0.0', lts: '2024-10-29' },
+      { version: '24.0.0', lts: '2025-10-28' },
+    ],
+  },
+  (ctx) => {
+    it('should not automerge a major update for node', () => {
+      expect(branchAutomergeStatus(ctx, 'node', 'major')).toEqual({
         found: true,
         automerge: false,
       })

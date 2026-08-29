@@ -297,15 +297,11 @@
       matchUpdateTypes: ['minor', 'patch'],
       automerge: true,
     },
-    // Automerge patch updates for mise-managed `node`. Node patch releases
-    // are backward-compatible bug/security fixes only, never new features
-    // or breaking changes, so automerging them is safe regardless of
-    // whether this node build backs dev tooling or a production runtime.
-    // Minor is excluded since it can add new features.
+    // Node minor/patch releases follow semver and never break; major may.
     {
       matchManagers: ['mise'],
       matchPackageNames: ['node'],
-      matchUpdateTypes: ['patch'],
+      matchUpdateTypes: ['patch', 'minor'],
       automerge: true,
     },
   ],
