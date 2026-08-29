@@ -20,7 +20,7 @@ describeWithRenovate(
 )
 
 describeWithRenovate(
-  'mise automerge exclusion for node minor updates',
+  'mise automerge for node minor updates',
   {
     fixtures: ['mise-node-automerge-minor/.mise.toml'],
     // Renovate's default separateMajorMinor behavior merges patch+minor
@@ -36,10 +36,10 @@ describeWithRenovate(
     ],
   },
   (ctx) => {
-    it('should not automerge a minor update for node', () => {
+    it('should automerge a minor update for node', () => {
       expect(branchAutomergeStatus(ctx, 'node', 'minor')).toEqual({
         found: true,
-        automerge: false,
+        automerge: true,
       })
     })
   },
