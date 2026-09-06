@@ -14,6 +14,18 @@
     },
 
     // ==========================================================================
+    // grouping
+    // ==========================================================================
+    // Group rust-toolchain and Docker image updates together so a Rust
+    // version bump lands in a single PR; all three managers resolve
+    // `depName`/`packageName` to `rust`.
+    {
+      matchManagers: ['rust-toolchain', 'dockerfile', 'docker-compose'],
+      matchPackageNames: ['rust'],
+      groupName: 'rust toolchain',
+    },
+
+    // ==========================================================================
     // automerge
     // ==========================================================================
     {
@@ -26,6 +38,14 @@
     {
       matchManagers: ['cargo'],
       matchUpdateTypes: ['patch', 'pin', 'digest'],
+      automerge: true,
+    },
+    // Rust guarantees backward compatibility within an edition, so toolchain
+    // patch/minor bumps are safe to automerge.
+    {
+      matchManagers: ['rust-toolchain', 'dockerfile', 'docker-compose'],
+      matchPackageNames: ['rust'],
+      matchUpdateTypes: ['patch', 'minor'],
       automerge: true,
     },
   ],
