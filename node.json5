@@ -50,6 +50,13 @@
       matchUpdateTypes: ['minor', 'patch'],
       automerge: true,
     },
+    // Node minor/patch releases follow semver and never break; major may.
+    {
+      matchManagers: ['dockerfile', 'docker-compose'],
+      matchPackageNames: ['node'],
+      matchUpdateTypes: ['patch', 'minor'],
+      automerge: true,
+    },
 
     // ==========================================================================
     // grouping
@@ -72,7 +79,7 @@
     // Renovate only automerges a group once every member has automerge: true,
     // so a grouped bump won't automerge unless @types/node's does too.
     {
-      matchManagers: ['mise'],
+      matchManagers: ['mise', 'dockerfile', 'docker-compose'],
       matchPackageNames: ['node'],
       matchUpdateTypes: ['major', 'minor'],
       groupName: 'node',
