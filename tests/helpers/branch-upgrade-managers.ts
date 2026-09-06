@@ -1,9 +1,7 @@
 import type { RenovateTestContext } from './renovate-test-context'
 
-// Reduces the branch grouping depName's upgrades down to the sorted list of
-// managers plus automerge, mirroring the branchAutomergeStatus() helper's
-// approach of asserting a small derived object instead of Renovate's full
-// noisy branch object.
+// Reduces the branch to managers + automerge so the assertion doesn't churn
+// on Renovate's full branch object.
 export function branchUpgradeManagers(
   ctx: RenovateTestContext,
   depName: string,
