@@ -1,0 +1,82 @@
+import { expect, it } from 'vitest'
+
+import { branchAutomergeStatus } from './helpers/branch-automerge-status'
+import { describeWithRenovate } from './helpers/with-renovate'
+
+describeWithRenovate(
+  'dockerfile automerge for node patch updates',
+  {
+    fixtures: [],
+    inlineFiles: { Dockerfile: 'FROM node:1.2.0-slim AS base\n' },
+    mockDockerImages: [{ name: 'node', tags: ['1.2.0-slim', '1.2.1-slim'] }],
+    additionalConfigs: ['node.json5'],
+  },
+  (ctx) => {
+    it('should automerge a patch update for node in a Dockerfile', () => {
+      expect(branchAutomergeStatus(ctx, 'node', 'patch')).toEqual({
+        found: true,
+        automerge: true,
+      })
+    })
+  },
+)
+
+describeWithRenovate(
+  'dockerfile automerge for node minor updates',
+  {
+    fixtures: [],
+    inlineFiles: { Dockerfile: 'FROM node:1.2.0-slim AS base\n' },
+    // See mise-node-automerge.test.ts for why patch and minor need separate
+    // fixtures/scenarios rather than sharing one mock version list.
+    mockDockerImages: [
+      { name: 'node', tags: ['1.2.0-slim', '1.2.1-slim', '1.3.0-slim'] },
+    ],
+    additionalConfigs: ['node.json5'],
+  },
+  (ctx) => {
+    it('should automerge a minor update for node', () => {
+      expect(branchAutomergeStatus(ctx, 'node', 'minor')).toEqual({
+        found: true,
+        automerge: true,
+      })
+    })
+  },
+)
+
+describeWithRenovate(
+  'dockerfile automerge exclusion for node major updates',
+  {
+    fixtures: [],
+    inlineFiles: { Dockerfile: 'FROM node:22.0.0-slim AS base\n' },
+    mockDockerImages: [{ name: 'node', tags: ['22.0.0-slim', '24.0.0-slim'] }],
+    additionalConfigs: ['node.json5'],
+  },
+  (ctx) => {
+    it('should not automerge a major update for node', () => {
+      expect(branchAutomergeStatus(ctx, 'node', 'major')).toEqual({
+        found: true,
+        automerge: false,
+      })
+    })
+  },
+)
+
+describeWithRenovate(
+  'docker-compose automerge for node patch updates',
+  {
+    fixtures: [],
+    inlineFiles: {
+      'docker-compose.yml': 'services:\n  app:\n    image: node:1.2.0-slim\n',
+    },
+    mockDockerImages: [{ name: 'node', tags: ['1.2.0-slim', '1.2.1-slim'] }],
+    additionalConfigs: ['node.json5'],
+  },
+  (ctx) => {
+    it('should automerge a patch update for node in docker-compose.yml', () => {
+      expect(branchAutomergeStatus(ctx, 'node', 'patch')).toEqual({
+        found: true,
+        automerge: true,
+      })
+    })
+  },
+)

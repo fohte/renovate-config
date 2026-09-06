@@ -50,6 +50,15 @@
       matchUpdateTypes: ['minor', 'patch'],
       automerge: true,
     },
+    // Node minor/patch releases follow semver and never break; major may.
+    // Scoped to dockerfile/docker-compose; the mise-managed equivalent lives
+    // in base.json5 since mise is a cross-ecosystem manager.
+    {
+      matchManagers: ['dockerfile', 'docker-compose'],
+      matchPackageNames: ['node'],
+      matchUpdateTypes: ['patch', 'minor'],
+      automerge: true,
+    },
 
     // ==========================================================================
     // grouping
