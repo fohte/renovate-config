@@ -1,33 +1,12 @@
 import { expect, it } from 'vitest'
 
-import type { RenovateTestContext } from './helpers/renovate-test-context'
+import { branchUpgradeManagers } from './helpers/branch-upgrade-managers'
 import { describeWithRenovate } from './helpers/with-renovate'
 
 // No negative "major" test: Rust has stayed on major version 1 since 2015
 // and its edition system exists specifically so language changes never
 // require a major bump, so updateType: 'major' structurally never occurs
 // for real Rust version strings.
-
-// Reduces the branch grouping depName's upgrades down to the sorted list of
-// managers plus automerge, mirroring the branchAutomergeStatus() helper's
-// approach of asserting a small derived object instead of Renovate's full
-// noisy branch object.
-function branchUpgradeManagers(
-  ctx: RenovateTestContext,
-  depName: string,
-): { found: boolean; automerge: boolean; managers: string[] } {
-  const branch = ctx
-    .getBranches()
-    .find((b) => b.upgrades?.some((u) => u.depName === depName) ?? false)
-
-  const managers = (branch?.upgrades ?? []).map((u) => u.manager ?? '').sort()
-
-  return {
-    found: branch !== undefined,
-    automerge: branch?.automerge === true,
-    managers,
-  }
-}
 
 describeWithRenovate(
   'rust toolchain grouping and automerge',
