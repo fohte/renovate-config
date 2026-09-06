@@ -93,6 +93,17 @@
       matchPackageNames: ['@langchain/**', 'langchain'],
       groupName: 'langchain monorepo',
     },
+    // Re-declare the group:monorepos groupName for TanStack Router, since the
+    // "devDependencies (non-major)" rule above would otherwise override it
+    // and split dependencies-side packages (e.g. @tanstack/react-router) from
+    // devDependencies-side packages (e.g. @tanstack/router-plugin) into
+    // separate PRs, even though router-plugin's peerDependencies range on
+    // react-router can change between patch releases.
+    {
+      matchManagers: ['npm', 'bun'],
+      matchSourceUrls: ['https://github.com/TanStack/router'],
+      groupName: 'tanstack-router monorepo',
+    },
     // Exempt @fohte/* packages from grouping (including the "devDependencies
     // (non-major)" group above and each other), so each first-party package
     // gets its own PR.
