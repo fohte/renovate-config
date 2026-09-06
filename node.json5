@@ -93,6 +93,14 @@
       matchPackageNames: ['@langchain/**', 'langchain'],
       groupName: 'langchain monorepo',
     },
+    // Re-declare the group:monorepos groupName for TanStack Router so the
+    // "devDependencies (non-major)" rule above doesn't split it across
+    // dependency types into separate PRs.
+    {
+      matchManagers: ['npm', 'bun'],
+      matchSourceUrls: ['https://github.com/TanStack/router'],
+      groupName: 'tanstack-router monorepo',
+    },
     // Exempt @fohte/* packages from grouping (including the "devDependencies
     // (non-major)" group above and each other), so each first-party package
     // gets its own PR.
