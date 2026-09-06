@@ -81,6 +81,18 @@ export interface MockNodeVersion {
   lts?: string | false
 }
 
+export interface MockRustRelease {
+  version: string
+  // Manifest release date (YYYY-MM-DD). If not specified, defaults to a date
+  // old enough to pass minimumReleaseAge
+  date?: string
+}
+
+export interface MockDockerImage {
+  name: string
+  tags: string[]
+}
+
 export interface SetupOptions {
   fixtures: string[]
   // `{{MOCK_REPO:name}}` placeholders are substituted, matching fixtures behavior.
@@ -90,6 +102,8 @@ export interface SetupOptions {
   mockNpmPackages?: MockNpmPackage[]
   mockGitHubRepos?: MockGitHubRepo[]
   mockNodeVersions?: MockNodeVersion[]
+  mockRustReleases?: MockRustRelease[]
+  mockDockerImages?: MockDockerImage[]
   // Additional config files to merge with base.json5 (e.g., ['lefthook.json5'])
   additionalConfigs?: string[]
   // Presets from base.json5's `extends` to re-include in the test config.
@@ -115,6 +129,12 @@ export class RenovateTestContext {
   private mockNodeVersionServer: Server | null = null
   private mockNodeVersionPort: number | null = null
   private mockNodeVersionData: MockNodeVersion[] = []
+  private mockRustVersionServer: Server | null = null
+  private mockRustVersionPort: number | null = null
+  private mockRustVersionData: MockRustRelease[] = []
+  private mockDockerServer: Server | null = null
+  private mockDockerPort: number | null = null
+  private mockDockerData: Map<string, MockDockerImage> = new Map()
   private additionalConfigs: string[] = []
   private allowedExtends: string[] = []
 
@@ -134,6 +154,8 @@ export class RenovateTestContext {
       mockNpmPackages = [],
       mockGitHubRepos = [],
       mockNodeVersions = [],
+      mockRustReleases = [],
+      mockDockerImages = [],
       additionalConfigs = [],
       allowedExtends = [],
     } = options
@@ -158,6 +180,16 @@ export class RenovateTestContext {
     // Set up mock node-version registry server if needed
     if (mockNodeVersions.length > 0) {
       await this.startMockNodeVersionServer(mockNodeVersions)
+    }
+
+    // Set up mock rust-version registry server if needed
+    if (mockRustReleases.length > 0) {
+      await this.startMockRustVersionServer(mockRustReleases)
+    }
+
+    // Set up mock docker registry server if needed
+    if (mockDockerImages.length > 0) {
+      await this.startMockDockerServer(mockDockerImages)
     }
 
     // Create a temporary working directory
@@ -602,6 +634,118 @@ export class RenovateTestContext {
   }
 
   /**
+   * Start a mock rust-version registry server (static.rust-lang.org/manifests.txt).
+   */
+  private startMockRustVersionServer(
+    releases: MockRustRelease[],
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.mockRustVersionData = releases
+
+      this.mockRustVersionServer = createServer((req, res) => {
+        const url = req.url ?? ''
+        if (url !== '/manifests.txt') {
+          res.writeHead(404)
+          res.end('Not Found')
+          return
+        }
+
+        // Default to 30 days ago if no release date specified
+        const defaultReleaseDate = defaultMockReleaseTime().slice(0, 10)
+
+        const body = this.mockRustVersionData
+          .map(
+            (r) =>
+              `dist/${r.date ?? defaultReleaseDate}/channel-rust-${r.version}.toml`,
+          )
+          .join('\n')
+
+        res.writeHead(200, { 'Content-Type': 'text/plain' })
+        res.end(body)
+      })
+
+      this.mockRustVersionServer.listen(0, '127.0.0.1', () => {
+        const server = this.mockRustVersionServer
+        if (server === null) {
+          reject(new Error('Server was closed before it started'))
+          return
+        }
+        const address = server.address()
+        if (typeof address === 'object' && address) {
+          this.mockRustVersionPort = address.port
+          resolve()
+        } else {
+          reject(new Error('Failed to get server address'))
+        }
+      })
+
+      this.mockRustVersionServer.on('error', reject)
+    })
+  }
+
+  /**
+   * Start a mock docker registry server (generic OCI v2 registry protocol).
+   */
+  private startMockDockerServer(images: MockDockerImage[]): Promise<void> {
+    return new Promise((resolve, reject) => {
+      for (const image of images) {
+        this.mockDockerData.set(image.name, image)
+      }
+
+      this.mockDockerServer = createServer((req, res) => {
+        const url = req.url ?? ''
+
+        // Matches `/v2/<repository>/tags/list` regardless of leading slash
+        // count (our registryUrls always carry a trailing slash, which the
+        // docker datasource concatenates as-is).
+        const tagsMatch = /([^/]+)\/tags\/list/.exec(url)
+        if (tagsMatch) {
+          const repository = tagsMatch[1] ?? ''
+          const imageData = this.mockDockerData.get(repository)
+          if (!imageData) {
+            res.writeHead(404)
+            res.end('Not Found')
+            return
+          }
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(
+            JSON.stringify({ name: imageData.name, tags: imageData.tags }),
+          )
+          return
+        }
+
+        // A plain 200 with no `WWW-Authenticate` header on the `/v2/` ping
+        // tells Renovate's docker datasource no auth handshake is needed.
+        if (url.includes('/v2/')) {
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end('{}')
+          return
+        }
+
+        res.writeHead(404)
+        res.end('Not Found')
+      })
+
+      this.mockDockerServer.listen(0, '127.0.0.1', () => {
+        const server = this.mockDockerServer
+        if (server === null) {
+          reject(new Error('Server was closed before it started'))
+          return
+        }
+        const address = server.address()
+        if (typeof address === 'object' && address) {
+          this.mockDockerPort = address.port
+          resolve()
+        } else {
+          reject(new Error('Failed to get server address'))
+        }
+      })
+
+      this.mockDockerServer.on('error', reject)
+    })
+  }
+
+  /**
    * Clean up the temporary directory and mock repos.
    */
   async cleanup(): Promise<void> {
@@ -677,6 +821,32 @@ export class RenovateTestContext {
       this.mockNodeVersionServer = null
       this.mockNodeVersionPort = null
       this.mockNodeVersionData = []
+    }
+
+    // Stop mock rust-version registry server
+    if (this.mockRustVersionServer !== null) {
+      const server = this.mockRustVersionServer
+      await new Promise<void>((resolve) => {
+        server.close(() => {
+          resolve()
+        })
+      })
+      this.mockRustVersionServer = null
+      this.mockRustVersionPort = null
+      this.mockRustVersionData = []
+    }
+
+    // Stop mock docker registry server
+    if (this.mockDockerServer !== null) {
+      const server = this.mockDockerServer
+      await new Promise<void>((resolve) => {
+        server.close(() => {
+          resolve()
+        })
+      })
+      this.mockDockerServer = null
+      this.mockDockerPort = null
+      this.mockDockerData.clear()
     }
 
     this.report = null
@@ -832,6 +1002,19 @@ export class RenovateTestContext {
         registryUrls: [`http://127.0.0.1:${String(this.mockNodeVersionPort)}/`],
       })
     }
+    // rust-version has customRegistrySupport = false, so registryUrls-based
+    // redirection is ignored by renovate; renovate-loader.mjs redirects it
+    // via RENOVATE_TEST_RUST_VERSION_URL (set in the spawn() env below) instead.
+    if (this.mockDockerPort !== null) {
+      packageRules.unshift({
+        matchDatasources: ['docker'],
+        registryUrls: [`http://127.0.0.1:${String(this.mockDockerPort)}/`],
+      })
+      packageRules.unshift({
+        matchDatasources: ['docker'],
+        minimumReleaseAge: null, // test-only: mock registry has no tag_last_pushed like real Docker Hub does
+      })
+    }
 
     // Build hostRules for authentication
     const hostRules: object[] = []
@@ -897,6 +1080,15 @@ export class RenovateTestContext {
             GITHUB_COM_TOKEN:
               this.mockGitHubPort !== null
                 ? 'fake-token-for-testing'
+                : undefined,
+            // Force the generic OCI registry v2 code path instead of the
+            // hardcoded (unmockable) hub.docker.com REST API.
+            RENOVATE_X_DOCKER_HUB_TAGS_DISABLE:
+              this.mockDockerPort !== null ? '1' : undefined,
+            // Read by the renovate-loader.mjs patch to RustVersionDatasource.
+            RENOVATE_TEST_RUST_VERSION_URL:
+              this.mockRustVersionPort !== null
+                ? `http://127.0.0.1:${String(this.mockRustVersionPort)}/`
                 : undefined,
           },
           stdio: ['ignore', 'pipe', 'pipe'],

@@ -16,10 +16,9 @@
     // ==========================================================================
     // grouping
     // ==========================================================================
-    // Group the rust-toolchain pin and the Docker image tag together so a
-    // Rust version bump lands in a single PR; otherwise they can drift into
-    // separate PRs and let the build environment and CI diverge on Rust
-    // version. Both managers resolve `depName`/`packageName` to `rust`.
+    // Group rust-toolchain and Docker image updates together so a Rust
+    // version bump lands in a single PR; all three managers resolve
+    // `depName`/`packageName` to `rust`.
     {
       matchManagers: ['rust-toolchain', 'dockerfile', 'docker-compose'],
       matchPackageNames: ['rust'],
