@@ -26,8 +26,6 @@ describeWithRenovate(
   {
     fixtures: [],
     inlineFiles: { Dockerfile: 'FROM node:1.2.0-slim AS base\n' },
-    // See mise-node-automerge.test.ts for why patch and minor need separate
-    // fixtures/scenarios rather than sharing one mock version list.
     mockDockerImages: [
       { name: 'node', tags: ['1.2.0-slim', '1.2.1-slim', '1.3.0-slim'] },
     ],
