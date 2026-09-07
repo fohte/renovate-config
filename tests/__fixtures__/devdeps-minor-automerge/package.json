@@ -1,0 +1,8 @@
+{
+  "name": "test-devdeps-minor",
+  "version": "1.0.0",
+  "devDependencies": {
+    "test-pkg-devdeps-minor-stable": "1.0.0",
+    "test-pkg-devdeps-minor-0x": "0.1.0"
+  }
+}
