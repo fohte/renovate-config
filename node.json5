@@ -26,11 +26,6 @@
       groupName: 'devDependencies (non-major)',
       automerge: true,
     },
-    // devDependencies only affect the local dev/CI toolchain, so a minor
-    // update that breaks something surfaces immediately via the consuming
-    // repo's own lint/test/type-check run, before automerge can land it. 0.x
-    // versions are excluded because semver treats their minor bumps as
-    // potentially breaking (e.g. peerDependency changes), unlike >=1.0.0.
     {
       matchManagers: ['npm', 'bun'],
       matchDepTypes: ['devDependencies'],

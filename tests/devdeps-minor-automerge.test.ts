@@ -23,9 +23,6 @@ describeWithRenovate(
       })
     })
 
-    // 0.x minor bumps are semver-equivalent to a major bump and can carry
-    // breaking changes, so they must stay excluded even though the dep type
-    // and update type otherwise match the automerge rule.
     it('should not automerge a minor update for a 0.x devDependency', () => {
       expect(
         branchAutomergeStatus(ctx, 'test-pkg-devdeps-minor-0x', 'minor'),
