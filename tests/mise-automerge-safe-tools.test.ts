@@ -24,7 +24,7 @@ function branchAutomergeStatus(
 }
 
 describeWithRenovate(
-  'mise automerge for formatter/linter/git-hook tools',
+  'mise automerge for formatter/linter/git-hook/security-scanner/test-framework tools',
   {
     fixtures: ['mise-automerge-safe-tools/.mise.toml'],
     mockNpmPackages: [
