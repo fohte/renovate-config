@@ -28,6 +28,14 @@
     },
     {
       matchManagers: ['npm', 'bun'],
+      matchDepTypes: ['devDependencies'],
+      matchUpdateTypes: ['minor'],
+      matchCurrentVersion: '!/^0\\./',
+      groupName: 'devDependencies (non-major)',
+      automerge: true,
+    },
+    {
+      matchManagers: ['npm', 'bun'],
       matchUpdateTypes: ['patch', 'pin', 'digest'],
       automerge: true,
     },
