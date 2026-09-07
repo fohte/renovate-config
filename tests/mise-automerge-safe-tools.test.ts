@@ -37,6 +37,7 @@ describeWithRenovate(
       { name: 'prettier/prettier', tags: ['3.0.0', '3.0.1'] },
       { name: 'ast-grep/ast-grep', tags: ['0.44.0', '0.44.1'] },
       { name: 'betterleaks/betterleaks', tags: ['1.6.1', '1.6.2'] },
+      { name: 'bats-core/bats-core', tags: ['v1.13.0', 'v1.14.0'] },
     ],
   },
   (ctx) => {
@@ -121,6 +122,15 @@ describeWithRenovate(
       expect(
         branchAutomergeStatus(ctx, 'github:betterleaks/betterleaks', 'patch'),
       ).toEqual({
+        found: true,
+        automerge: true,
+      })
+    })
+
+    // bats resolves through mise's aqua backend to bats-core/bats-core, the
+    // same aqua/github-tags path exercised by shfmt above.
+    it('should automerge a minor update for the short name (bats)', () => {
+      expect(branchAutomergeStatus(ctx, 'bats', 'minor')).toEqual({
         found: true,
         automerge: true,
       })

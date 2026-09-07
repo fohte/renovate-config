@@ -293,6 +293,7 @@
         'prettier/prettier', // prettier
         'ast-grep/ast-grep', // github:ast-grep/ast-grep
         'betterleaks/betterleaks', // github:betterleaks/betterleaks
+        'bats-core/bats-core', // bats
       ],
       matchUpdateTypes: ['minor', 'patch'],
       automerge: true,
