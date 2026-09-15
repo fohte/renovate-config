@@ -45,7 +45,7 @@ function initGitRepo(dir: string): void {
   execSync('git config user.name "Test"', opts)
 }
 
-export interface MockRepo {
+interface MockRepo {
   name: string
   tags: string[]
 }
