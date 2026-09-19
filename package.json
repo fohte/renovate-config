@@ -33,7 +33,7 @@
     "nock": "14.0.17",
     "knip": "6.35.1",
     "prettier": "3.9.6",
-    "renovate": "43.288.0",
+    "renovate": "44.82.4",
     "typescript": "6.0.3",
     "vitest": "4.1.11"
   }
