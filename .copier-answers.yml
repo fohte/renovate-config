@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier
-_commit: v0.11.3
+_commit: v0.11.7
 _src_path: https://github.com/fohte/generic-boilerplate
 description: ''
 error_tracking: false
@@ -8,6 +8,8 @@ is_web_app: false
 project_name: renovate-config
 repo_id: '694739672'
 repo_language: ja
+storybook: false
 subpackages: []
 type: node
 use_release_please: false
+vrt: false
