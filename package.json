@@ -1,7 +1,7 @@
 {
   "name": "renovate-config",
   "private": true,
-  "packageManager": "pnpm@12.4.0",
+  "packageManager": "pnpm@12.7.0",
   "type": "module",
   "imports": {
     "#*": "./src/*.ts"
@@ -20,19 +20,19 @@
     "neverthrow": "8.2.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "21.2.2",
+    "@commitlint/cli": "21.2.3",
     "@fohte/eslint-config": "0.5.1",
-    "@ninoseki/eslint-plugin-neverthrow": "0.3.1",
+    "@ninoseki/eslint-plugin-neverthrow": "0.3.2",
     "@tsconfig/node-lts": "24.0.1",
     "@tsconfig/strictest": "2.0.8",
-    "@types/node": "24.13.6",
+    "@types/node": "24.19.0",
     "concurrently": "10.0.5",
     "eslint": "10.11.0",
     "eslint-plugin-simple-import-sort": "13.0.0",
     "json5": "2.2.3",
     "nock": "14.0.17",
-    "knip": "6.37.0",
-    "prettier": "3.9.8",
+    "knip": "6.38.0",
+    "prettier": "3.9.9",
     "renovate": "43.288.0",
     "typescript": "6.0.3",
     "vitest": "4.1.11"
