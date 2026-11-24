@@ -29,8 +29,10 @@ describeWithRenovate(
                 ),
               ) ?? false,
           )
-          .map((branch) =>
-            branch.upgrades?.map(
+          .map((branch) => ({
+            branchName: branch.branchName,
+            prTitle: branch.prTitle,
+            upgrades: branch.upgrades?.map(
               ({ depName, currentVersion, newVersion, updateType }) => ({
                 depName,
                 currentVersion,
@@ -38,22 +40,26 @@ describeWithRenovate(
                 updateType,
               }),
             ),
-          ),
+          })),
       ).toEqual([
-        [
-          {
-            depName: 'rusqlite',
-            currentVersion: '0.40.2',
-            newVersion: '1.0.0',
-            updateType: 'major',
-          },
-          {
-            depName: 'rusqlite_migration',
-            currentVersion: '2.6.0',
-            newVersion: '2.7.0',
-            updateType: 'minor',
-          },
-        ],
+        {
+          branchName: 'renovate/rusqlite-dependencies',
+          prTitle: 'deps: update rusqlite dependencies',
+          upgrades: [
+            {
+              depName: 'rusqlite',
+              currentVersion: '0.40.2',
+              newVersion: '1.0.0',
+              updateType: 'major',
+            },
+            {
+              depName: 'rusqlite_migration',
+              currentVersion: '2.6.0',
+              newVersion: '2.7.0',
+              updateType: 'minor',
+            },
+          ],
+        },
       ])
     })
   },

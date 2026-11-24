@@ -24,6 +24,18 @@
       matchPackageNames: ['rust'],
       groupName: 'rust toolchain',
     },
+    {
+      matchManagers: ['cargo'],
+      matchDepTypes: ['dev-dependencies'],
+      matchUpdateTypes: ['patch'],
+      groupName: 'dev-dependencies (non-major)',
+    },
+    {
+      matchManagers: ['cargo'],
+      matchPackageNames: ['rusqlite', 'rusqlite_migration'],
+      groupName: 'rusqlite dependencies',
+      separateMajorMinor: false,
+    },
 
     // ==========================================================================
     // automerge
@@ -32,14 +44,7 @@
       matchManagers: ['cargo'],
       matchDepTypes: ['dev-dependencies'],
       matchUpdateTypes: ['patch'],
-      groupName: 'dev-dependencies (non-major)',
       automerge: true,
-    },
-    {
-      matchManagers: ['cargo'],
-      matchPackageNames: ['rusqlite', 'rusqlite_migration'],
-      groupName: 'rusqlite dependencies',
-      separateMajorMinor: false,
     },
     {
       matchManagers: ['cargo'],
