@@ -180,13 +180,13 @@
     //   - !     -> major bump (breaking change)
     //
     // Resulting semantic commit types:
-    //   | Target          | major        | minor        | patch        | pin          |
-    //   |-----------------|--------------|--------------|--------------|--------------|
-    //   | dependencies    | deps:        | deps:        | deps:        | chore(deps): |
-    //   | devDependencies | chore:       | chore:       | chore:       | chore:       |
-    //   | github-actions  | ci:          | ci:          | ci:          | ci:          |
-    //   | mise            | chore:       | chore:       | chore:       | chore:       |
-    //   | jdx/mise        | ci:          | ci:          | ci:          | ci:          |
+    //   | Target                              | major        | minor        | patch        | pin          |
+    //   |-------------------------------------|--------------|--------------|--------------|--------------|
+    //   | dependencies                        | deps:        | deps:        | deps:        | chore(deps): |
+    //   | devDependencies / dev-dependencies  | chore:       | chore:       | chore:       | chore:       |
+    //   | github-actions                      | ci:          | ci:          | ci:          | ci:          |
+    //   | mise                                | chore:       | chore:       | chore:       | chore:       |
+    //   | jdx/mise                            | ci:          | ci:          | ci:          | ci:          |
     {
       matchUpdateTypes: ['major', 'minor', 'patch'],
       semanticCommitType: 'deps',
@@ -199,7 +199,7 @@
       semanticCommitScope: 'deps',
     },
     {
-      matchDepTypes: ['devDependencies'],
+      matchDepTypes: ['devDependencies', 'dev-dependencies'],
       commitMessagePrefix: 'chore:',
       semanticCommitScope: null,
     },

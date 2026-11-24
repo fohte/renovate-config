@@ -6,20 +6,20 @@ import {
 } from './helpers/with-renovate'
 
 // Test PR title format according to release-please configuration in base.json5:
-//   | Target          | major        | minor        | patch        | pin          |
-//   |-----------------|--------------|--------------|--------------|--------------|
-//   | dependencies    | deps:        | deps:        | deps:        | chore(deps): |
-//   | devDependencies | chore:       | chore:       | chore:       | chore:       |
-//   | github-actions  | ci:          | ci:          | ci:          | ci:          |
-//   | mise            | chore:       | chore:       | chore:       | chore:       |
-//   | packageManager  | chore:       | chore:       | chore:       | chore:       |
+//   | Target                              | major        | minor        | patch        | pin          |
+//   |-------------------------------------|--------------|--------------|--------------|--------------|
+//   | dependencies                        | deps:        | deps:        | deps:        | chore(deps): |
+//   | devDependencies / dev-dependencies  | chore:       | chore:       | chore:       | chore:       |
+//   | github-actions                      | ci:          | ci:          | ci:          | ci:          |
+//   | mise                                | chore:       | chore:       | chore:       | chore:       |
+//   | packageManager                      | chore:       | chore:       | chore:       | chore:       |
 
 interface TestCase {
   category: string
   description: string
   options: SetupOptions
   depName: string
-  expectedPrefix: RegExp
+  expectedPrefix: string
   updateType: string
 }
 
@@ -35,7 +35,7 @@ const testCases: TestCase[] = [
       ],
     },
     depName: 'test-pkg-major',
-    expectedPrefix: /^deps: /,
+    expectedPrefix: 'deps:',
     updateType: 'major',
   },
   {
@@ -48,7 +48,7 @@ const testCases: TestCase[] = [
       ],
     },
     depName: 'test-pkg-minor',
-    expectedPrefix: /^deps: /,
+    expectedPrefix: 'deps:',
     updateType: 'minor',
   },
   {
@@ -61,7 +61,7 @@ const testCases: TestCase[] = [
       ],
     },
     depName: 'test-pkg-patch',
-    expectedPrefix: /^deps: /,
+    expectedPrefix: 'deps:',
     updateType: 'patch',
   },
   {
@@ -72,7 +72,7 @@ const testCases: TestCase[] = [
       mockNpmPackages: [{ name: 'test-pkg-pin', versions: ['1.0.0'] }],
     },
     depName: 'test-pkg-pin',
-    expectedPrefix: /^chore\(deps\): /,
+    expectedPrefix: 'chore(deps):',
     updateType: 'pin',
   },
   // devDependencies
@@ -84,8 +84,73 @@ const testCases: TestCase[] = [
       mockNpmPackages: [{ name: 'test-pkg-dev', versions: ['1.0.0', '1.1.0'] }],
     },
     depName: 'test-pkg-dev',
-    expectedPrefix: /^chore: /,
+    expectedPrefix: 'chore:',
     updateType: 'minor',
+  },
+  // Cargo dev-dependencies
+  {
+    category: 'dev-dependencies',
+    description: 'major update',
+    options: {
+      fixtures: ['pr-title-cargo-dev-major/Cargo.toml'],
+      mockCrates: [
+        { name: 'test-crate-dev-major', versions: ['1.0.0', '2.0.0'] },
+      ],
+    },
+    depName: 'test-crate-dev-major',
+    expectedPrefix: 'chore:',
+    updateType: 'major',
+  },
+  {
+    category: 'dev-dependencies',
+    description: 'minor update',
+    options: {
+      fixtures: ['pr-title-cargo-dev-minor/Cargo.toml'],
+      mockCrates: [
+        { name: 'test-crate-dev-minor', versions: ['1.0.0', '1.1.0'] },
+      ],
+    },
+    depName: 'test-crate-dev-minor',
+    expectedPrefix: 'chore:',
+    updateType: 'minor',
+  },
+  {
+    category: 'dev-dependencies',
+    description: 'patch update',
+    options: {
+      fixtures: ['pr-title-cargo-dev-patch/Cargo.toml'],
+      mockCrates: [
+        { name: 'test-crate-dev-patch', versions: ['1.0.0', '1.0.1'] },
+      ],
+    },
+    depName: 'test-crate-dev-patch',
+    expectedPrefix: 'chore:',
+    updateType: 'patch',
+  },
+  {
+    category: 'dev-dependencies',
+    description: 'pin update',
+    options: {
+      fixtures: ['pr-title-cargo-dev-pin/Cargo.toml'],
+      mockCrates: [{ name: 'test-crate-dev-pin', versions: ['1.0.0'] }],
+    },
+    depName: 'test-crate-dev-pin',
+    expectedPrefix: 'chore:',
+    updateType: 'pin',
+  },
+  // Cargo dependencies
+  {
+    category: 'dependencies',
+    description: 'Cargo patch update',
+    options: {
+      fixtures: ['pr-title-cargo-dependencies/Cargo.toml'],
+      mockCrates: [
+        { name: 'test-crate-runtime', versions: ['1.0.0', '1.0.1'] },
+      ],
+    },
+    depName: 'test-crate-runtime',
+    expectedPrefix: 'deps:',
+    updateType: 'patch',
   },
   // packageManager (corepack)
   {
@@ -97,7 +162,7 @@ const testCases: TestCase[] = [
       additionalConfigs: ['node.json5'],
     },
     depName: 'pnpm',
-    expectedPrefix: /^chore: /,
+    expectedPrefix: 'chore:',
     updateType: 'minor',
   },
   // github-actions
@@ -111,7 +176,7 @@ const testCases: TestCase[] = [
       ],
     },
     depName: 'actions/checkout',
-    expectedPrefix: /^ci: /,
+    expectedPrefix: 'ci:',
     updateType: 'minor',
   },
   // mise
@@ -123,7 +188,7 @@ const testCases: TestCase[] = [
       mockCrates: [{ name: 'test-major', versions: ['1.0.0', '2.0.0'] }],
     },
     depName: 'cargo:test-major',
-    expectedPrefix: /^chore: /,
+    expectedPrefix: 'chore:',
     updateType: 'major',
   },
   {
@@ -134,7 +199,7 @@ const testCases: TestCase[] = [
       mockCrates: [{ name: 'example-crate', versions: ['1.0.0', '1.1.0'] }],
     },
     depName: 'cargo:example-crate',
-    expectedPrefix: /^chore: /,
+    expectedPrefix: 'chore:',
     updateType: 'minor',
   },
   {
@@ -145,7 +210,7 @@ const testCases: TestCase[] = [
       mockCrates: [{ name: 'test-patch', versions: ['1.0.0', '1.0.1'] }],
     },
     depName: 'cargo:test-patch',
-    expectedPrefix: /^chore: /,
+    expectedPrefix: 'chore:',
     updateType: 'patch',
   },
 ]
@@ -159,7 +224,7 @@ describe('PR title format for release-please', () => {
 
     for (const tc of cases) {
       describeWithRenovate(tc.description, tc.options, (ctx) => {
-        it(`should use ${tc.expectedPrefix.source} prefix`, () => {
+        it(`uses ${tc.expectedPrefix} prefix for ${tc.updateType} updates`, () => {
           const branch = ctx
             .getBranches()
             .find(
@@ -169,14 +234,20 @@ describe('PR title format for release-please', () => {
                 ) ?? false,
             )
 
-          expect(branch).toMatchObject({
-            prTitle: expect.stringMatching(tc.expectedPrefix) as unknown,
-            upgrades: expect.arrayContaining([
-              expect.objectContaining({
-                depName: expect.stringContaining(tc.depName) as unknown,
-                updateType: tc.updateType,
-              }),
-            ]) as unknown,
+          const upgrade = branch?.upgrades?.find(
+            (candidate) => candidate.depName?.includes(tc.depName) === true,
+          )
+          const actual =
+            branch === undefined || upgrade === undefined
+              ? undefined
+              : {
+                  prefix: branch.prTitle?.split(' ')[0],
+                  updateType: upgrade.updateType,
+                }
+
+          expect(actual).toEqual({
+            prefix: tc.expectedPrefix,
+            updateType: tc.updateType,
           })
         })
       })
