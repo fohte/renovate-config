@@ -25,12 +25,14 @@
       groupName: 'rust toolchain',
     },
     {
+      // 後ろの rule の groupName が優先されるため、rusqlite 用 group より前に置く。
       matchManagers: ['cargo'],
       matchDepTypes: ['dev-dependencies'],
       matchUpdateTypes: ['patch'],
       groupName: 'dev-dependencies (non-major)',
     },
     {
+      // 片方だけ major 更新でも、同じ依存更新を別 branch に分けないようにする。
       matchManagers: ['cargo'],
       matchPackageNames: ['rusqlite', 'rusqlite_migration'],
       groupName: 'rusqlite dependencies',
