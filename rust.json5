@@ -37,6 +37,12 @@
     },
     {
       matchManagers: ['cargo'],
+      matchPackageNames: ['rusqlite', 'rusqlite_migration'],
+      groupName: 'rusqlite dependencies',
+      separateMajorMinor: false,
+    },
+    {
+      matchManagers: ['cargo'],
       matchUpdateTypes: ['patch', 'pin', 'digest'],
       automerge: true,
     },
