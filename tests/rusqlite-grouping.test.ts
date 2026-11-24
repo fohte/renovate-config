@@ -1,6 +1,9 @@
 import { expect, it } from 'vitest'
 
-import { describeWithRenovate } from './helpers/with-renovate'
+import {
+  describeWithRenovate,
+  type RenovateTestContext,
+} from './helpers/with-renovate'
 
 const cargoFixture = {
   fixtures: [],
@@ -9,6 +12,29 @@ const cargoFixture = {
       '[package]\nname = "test-rusqlite-grouping"\nversion = "0.1.0"\nedition = "2021"\n\n[dependencies]\nrusqlite = "=0.40.2"\nrusqlite_migration = "=2.6.0"\n',
   },
   additionalConfigs: ['rust.json5'],
+}
+
+function rusqliteBranches(ctx: RenovateTestContext) {
+  return ctx
+    .getBranches()
+    .filter(
+      (branch) =>
+        branch.upgrades?.some((upgrade) =>
+          ['rusqlite', 'rusqlite_migration'].includes(upgrade.depName ?? ''),
+        ) ?? false,
+    )
+    .map((branch) => ({
+      branchName: branch.branchName,
+      prTitle: branch.prTitle,
+      upgrades: branch.upgrades?.map(
+        ({ depName, currentVersion, newVersion, updateType }) => ({
+          depName,
+          currentVersion,
+          newVersion,
+          updateType,
+        }),
+      ),
+    }))
 }
 
 describeWithRenovate(
@@ -22,30 +48,7 @@ describeWithRenovate(
   },
   (ctx) => {
     it('groups the Cargo 0.x update with rusqlite_migration', () => {
-      expect(
-        ctx
-          .getBranches()
-          .filter(
-            (branch) =>
-              branch.upgrades?.some((upgrade) =>
-                ['rusqlite', 'rusqlite_migration'].includes(
-                  upgrade.depName ?? '',
-                ),
-              ) ?? false,
-          )
-          .map((branch) => ({
-            branchName: branch.branchName,
-            prTitle: branch.prTitle,
-            upgrades: branch.upgrades?.map(
-              ({ depName, currentVersion, newVersion, updateType }) => ({
-                depName,
-                currentVersion,
-                newVersion,
-                updateType,
-              }),
-            ),
-          })),
-      ).toEqual([
+      expect(rusqliteBranches(ctx)).toEqual([
         {
           branchName: 'renovate/rusqlite-dependencies',
           prTitle: 'deps: update rusqlite dependencies',
@@ -80,30 +83,7 @@ describeWithRenovate(
   },
   (ctx) => {
     it('groups major and minor updates into one branch', () => {
-      expect(
-        ctx
-          .getBranches()
-          .filter(
-            (branch) =>
-              branch.upgrades?.some((upgrade) =>
-                ['rusqlite', 'rusqlite_migration'].includes(
-                  upgrade.depName ?? '',
-                ),
-              ) ?? false,
-          )
-          .map((branch) => ({
-            branchName: branch.branchName,
-            prTitle: branch.prTitle,
-            upgrades: branch.upgrades?.map(
-              ({ depName, currentVersion, newVersion, updateType }) => ({
-                depName,
-                currentVersion,
-                newVersion,
-                updateType,
-              }),
-            ),
-          })),
-      ).toEqual([
+      expect(rusqliteBranches(ctx)).toEqual([
         {
           branchName: 'renovate/rusqlite-dependencies',
           prTitle: 'deps: update rusqlite dependencies',
