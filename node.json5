@@ -121,6 +121,8 @@
       matchManagers: ['npm', 'bun'],
       matchSourceUrls: ['https://github.com/TanStack/query'],
       groupName: 'tanstack-query monorepo',
+      // 混在するグループでは runtime の release bump を保ち、dev-only 更新は chore 扱いにする。
+      commitMessagePrefix: "{{#if (includes depTypes 'dependencies')}}deps:{{else}}chore:{{/if}}",
     },
     // Exempt @fohte/* packages from grouping (including the "devDependencies
     // (non-major)" group above and each other), so each first-party package
