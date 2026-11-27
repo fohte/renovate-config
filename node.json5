@@ -116,6 +116,12 @@
       matchSourceUrls: ['https://github.com/TanStack/router'],
       groupName: 'tanstack-router monorepo',
     },
+    {
+      // devDependencies のルールで TanStack Query の monorepo が分割されないよう再宣言する。
+      matchManagers: ['npm', 'bun'],
+      matchSourceUrls: ['https://github.com/TanStack/query'],
+      groupName: 'tanstack-query monorepo',
+    },
     // Exempt @fohte/* packages from grouping (including the "devDependencies
     // (non-major)" group above and each other), so each first-party package
     // gets its own PR.

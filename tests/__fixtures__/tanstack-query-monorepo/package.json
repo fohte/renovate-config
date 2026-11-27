@@ -1,0 +1,10 @@
+{
+  "name": "test-tanstack-query-monorepo",
+  "version": "1.0.0",
+  "dependencies": {
+    "@tanstack/react-query": "5.0.0"
+  },
+  "devDependencies": {
+    "@tanstack/react-query-devtools": "5.0.0"
+  }
+}
